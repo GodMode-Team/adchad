@@ -1,0 +1,35 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+/build
+/dist
+
+# env / secrets — never commit
+.env
+.env*.local
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# testing
+/coverage
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# misc
+.DS_Store
+*.pem
+.vercel
+/pipeline-runs
+
+/public/fixes/
+.codegraph
