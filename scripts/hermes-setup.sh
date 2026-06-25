@@ -19,7 +19,9 @@ echo "✓ hermes: $(command -v hermes)"
 # 2. Pull our key + operator model out of .env.local (sed returns 0 even on no match)
 get() { sed -n -E "s/^$1=//p" "$ENV" 2>/dev/null | head -1 | sed 's/^"//;s/"$//'; }
 KEY="$(get OPENROUTER_API_KEY)"
-MODEL="$(get MODEL_ROAST)"; MODEL="${MODEL:-nousresearch/hermes-4-405b}"
+# Brain must support tool-calling (the harness drives everything via tools). Hermes-4 on OpenRouter does NOT,
+# so we use NVIDIA Nemotron (tool-capable, on-theme, what NemoClaw runs). Override with MODEL_BRAIN.
+MODEL="$(get MODEL_BRAIN)"; MODEL="${MODEL:-nvidia/nemotron-3-super-120b-a12b}"
 [ -n "$KEY" ] || { echo "✗ OPENROUTER_API_KEY missing from $ENV"; exit 1; }
 
 # 3. Point Hermes at OpenRouter + Nous's own model (CLI routes the key to ~/.hermes/.env, values to config.yaml)
@@ -32,24 +34,31 @@ echo "✓ model: openrouter / $MODEL"
 # 4. Install our skills into the harness (adchad operator + the pipeline skills it relies on)
 DEST="$HERMES_HOME/skills/adchad"
 mkdir -p "$DEST"
-for s in adchad roast synthcheck copy; do
+for s in adchad prospect roast engage fulfill report evolve synthcheck copy; do
   [ -d "$DIR/skills/$s" ] && rm -rf "$DEST/$s" && cp -R "$DIR/skills/$s" "$DEST/$s"
 done
-echo "✓ skills installed → $DEST  (adchad, roast, synthcheck, copy)"
+echo "✓ skills installed → $DEST  (adchad + prospect/roast/engage/fulfill/report/evolve + synthcheck/copy)"
 # ponytail: copy, not symlink — re-run after editing skills/. For zero-drift, set skills.external_dirs to the repo instead.
+
+# 5. Start SAFE — kill-switch ON until the operator resumes (the agent drafts but publishes nothing)
+( cd "$DIR" && pnpm -s tool db pause >/dev/null 2>&1 ) && echo "✓ kill-switch ON — publishes nothing until: pnpm -s tool db resume"
 
 cat <<EOF
 
-Done. AdChad is wired onto Hermes (operator model: $MODEL via OpenRouter).
+Done. AdChad is wired onto Hermes (brain: $MODEL via OpenRouter).
 
-Preview now (safe — publishes nothing):
-    hermes -z "/adchad preview a cycle for med spas"
+Meet it (safe — nothing publishes):
+    hermes -z "who are you and what's your mission?"
+    hermes -z "/prospect find a target in med spas"     # scans + audits; won't post
 
-Go autonomous (you decide go-live):
-    # dry-run hourly — safe default:
-    hermes cron create "every 1h" "Run an AdChad cycle for med spas (dry-run) and report the counts." --skill adchad
-    # …or LIVE hourly (real public roasts + cold emails) — only when you're ready:
-    hermes cron create "every 1h" "Run a LIVE AdChad cycle for med spas (append --live). Report who got roasted." --skill adchad
+Register the heartbeat (the autonomous business). Kill-switch starts ON-safe — it publishes
+only once you resume it, so these are safe to register now:
+    hermes cron create "every 1h"  "/prospect a fresh niche, then /roast the best target. Respect the kill-switch."
+    hermes cron create "every 15m" "/engage — answer new mentions, DMs, inbox; push threads toward the \$5 close."
+    hermes cron create "0 9 * * 1" "/report the weekly P&L to the operator and flag anything you need to grow."
+    hermes cron create "0 3 * * *" "/evolve — review yesterday and improve one skill."
     hermes gateway start     # daemon ticks cron every 60s
     hermes cron list
+
+Go / stop:  pnpm -s tool db resume   (let it publish)   ·   pnpm -s tool db pause   (halt all publish + spend)
 EOF

@@ -6,7 +6,7 @@
     "build": "next build",
     "start": "next start",
     "migrate": "tsx scripts/migrate.ts",
-    "run-once": "tsx scripts/run-once.ts",
+    "tool": "tsx scripts/tool.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

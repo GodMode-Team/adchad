@@ -9,11 +9,12 @@ Put real values into `.env.local` (gitignored). Only the 🔴 items need you.
 | Postgres (Neon) | you | ✅ verified — schema migrated |
 | npm deps + scaffold | me | ✅ done |
 | OpenRouter (models) | you | ✅ verified — Hermes-4-405b responding |
-| X API | you | 🔴 invalid creds — repaste once @adchad exists |
-| Resend (email) | you | 🔴 not set yet (Spec 04) |
-| Stripe (payments) | you | 🔴 not set yet (Spec 05) |
-| Brave Search (booster) | you | ⚪ optional (link-less ads) |
-| **Hermes Agent (harness)** | you | 🔴 **install + `scripts/hermes-setup.sh`** (§6 — runs AdChad on Nous's harness) |
+| X API | you | ✅ live — posts as @adchadofficial (funded) |
+| Resend (email) | you | ✅ verified — `send.adchad.ai` domain |
+| Brave Search (booster) | you | ✅ key in |
+| **Stripe (payments)** | you | 🔴 **test keys needed** — the $5 money loop (§4) |
+| MAILING_ADDRESS (CAN-SPAM) | you | 🔴 one line — a valid postal address for the cold-email footer |
+| **Hermes Agent (harness)** | you | 🔴 **install + `bash scripts/hermes-setup.sh`** (§6 — AdChad runs ON Nous's harness) |
 | Nous Portal | you | ⚪ optional (OpenRouter covers the model; Portal only adds Tool Gateway) |
 
 ---
@@ -43,7 +44,7 @@ One key gives us Hermes-4-405B + Nemotron + Grok — no separate xAI/NVIDIA acco
 3. Copy (`re_…`) → `.env.local`: `RESEND_API_KEY=re_…`
 4. (Can wait) To email real owners from `@adchad.ai`: **https://resend.com/domains** → Add domain → add the DNS records shown. Until then we test from `onboarding@resend.dev` to your own inbox — leave `RESEND_FROM` as is.
 
-## 4. Stripe — `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`  (≈5 min · needed later, Spec 05)
+## 4. Stripe — `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`  (≈5 min · 🔴 NOW — gates the $5 money loop)
 1. **https://dashboard.stripe.com/register** → create account (skip business details for test mode).
 2. Confirm **Test mode** (top-right toggle).
 3. **https://dashboard.stripe.com/test/apikeys** → copy **Secret key** (`sk_test_…`) → `STRIPE_SECRET_KEY=…`; copy **Publishable key** (`pk_test_…`) → `STRIPE_PUBLISHABLE_KEY=…`
@@ -61,18 +62,17 @@ post from **his** handle, not AdChad. Once the AdChad account exists: in the X d
 **Access Token + Secret while authorized as @adchad**, and repaste `X_ACCESS_TOKEN` / `X_ACCESS_SECRET`. The validator prints
 the current handle so we can confirm.
 
-## 6. Hermes Agent — run AdChad ON the harness  (≈5 min · this is the on-theme part)
-The hackathon is named after Nous's **Hermes Agent** harness. AdChad runs on it: an `adchad` **skill** + a **cron** job make
-Hermes the autonomous operator that drives our pipeline (model = Hermes-4-405B via OpenRouter — no extra account).
+## 6. Hermes Agent — AdChad runs ON the harness  (≈5 min · THE on-theme part)
+AdChad *is* a Hermes Agent: a charter + 7 skills + a cron heartbeat. `scripts/hermes-setup.sh` does all the wiring — you just install Hermes and run it. (Model = Hermes-4-405B via OpenRouter, already set; no extra account.)
 1. **Install Hermes** (macOS/Linux): `curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash`
-   - Optional: `hermes setup --portal` (one OAuth adds web-search/image/TTS Tool Gateway). Skip it — OpenRouter is enough.
-2. **Wire it up** (from the repo): `bash scripts/hermes-setup.sh`
-   - Points Hermes at OpenRouter + `MODEL_ROAST`, installs `skills/{adchad,roast,synthcheck,copy}` into `~/.hermes/skills/`, prints the cron commands. Idempotent — re-run after editing a skill.
-3. **Preview** (publishes nothing): `hermes -z "/adchad preview a cycle for med spas"`
-4. **Go autonomous** (your call on go-live — the script prints both the dry-run and `--live` cron lines):
-   `hermes cron create "every 1h" "..." --skill adchad` then `hermes gateway start` (ticks every 60s).
+   - Skip `hermes setup --portal` — OpenRouter is the brain. Portal only adds optional Tool-Gateway extras.
+2. **Wire it** (from the repo): `bash scripts/hermes-setup.sh`
+   - Points Hermes at OpenRouter (brain = Hermes-4-405B), installs every skill (adchad · prospect · roast · engage · fulfill · report · evolve + synthcheck · copy) into `~/.hermes/skills/`, and **starts the kill-switch ON** (it drafts but publishes nothing). Idempotent.
+3. **Meet it** (safe): `hermes -z "who are you and what's your mission?"` → then `hermes -z "/prospect find a target in med spas"`.
+4. **Register the heartbeat** (the script prints these): acquire `every 1h` · engage `every 15m` · report `Mon 9am` · evolve `3am` → `hermes gateway start` (ticks every 60s).
+5. **Go live** when you're ready: `pnpm -s tool db resume` (kill-switch off → it publishes for real). Stop anytime: `pnpm -s tool db pause`.
 
-> Config lands in `~/.hermes/config.yaml` (model) + `~/.hermes/.env` (key). Nothing posts publicly until a `--live` cron + an off kill-switch.
+> Config lands in `~/.hermes/config.yaml` (model) + `~/.hermes/.env` (key). Nothing posts publicly until you `db resume`.
 
 ---
-Paste keys as you get them and tell me which landed — I don't need them all at once. **OpenRouter unblocks the most.**
+**What I still need from you:** ① install Hermes + `bash scripts/hermes-setup.sh` (§6) · ② Stripe **test keys** (§4) · ③ one `MAILING_ADDRESS` line. Everything else is in. ✅

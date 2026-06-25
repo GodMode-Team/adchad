@@ -1,63 +1,51 @@
 # AdChad — Architecture
 
-Translates `prd.md` into a buildable system. **All TypeScript + markdown skills — no Python** (§3). Kept ≤73 lines on purpose.
+Translates `prd.md` into a buildable system. **AdChad is a Hermes Agent**: an identity + skills + cron heartbeat + memory + guardrails, running on Nous's harness. Our job is to author those, plus thin **tools** (live integrations) the skills call. No orchestration code — **Hermes is the loop.**
 
-## 1. Shape
-The public roast lives on **X**. The web app is the conversion + control layer. One agent loop · one Next.js app · one Postgres.
-`Hermes Agent harness (loop + skills)  ⇄  Postgres/Neon  ⇄  Next.js app on Vercel` — externals: Foreplay · model endpoint (Nemotron/Grok/Hermes-4) · Stripe · X · Resend.
+## 1. Substrate
+Nous **Hermes Agent** (`install.sh` → `~/.hermes`). Model provider = **OpenRouter**; brain = `nousresearch/hermes-4-405b`, roast voice = `x-ai/grok-4.3` (per-skill). Built-in **Tool Gateway** (web search · image gen · browser · email) + our custom tools. `scripts/hermes-setup.sh` wires the key/model and installs our skills.
 
-## 2. The loop (two outreach channels: viral X roast + owner email)
-`foreplay.scan → enrich(site→email+X) → synthcheck/score+gate(≥85) → roast(model) → POST TO X (@-tag if A) + email the OWNER (value-first offer) → owner clicks /?p=id → $5 Stripe → copy(fix) + creative(image) → email the BUYER`
-Fully autonomous. The **safety score** (not a human) is the publish/skip guard; `/audit` = live feed + kill-switch.
-**X roast = virality; owner email = conversion** (most local SMBs have no active X). A 2nd email delivers the paid fix to buyers.
+## 2. Anatomy
+- **Charter** (`skills/adchad` + Hermes personality): mission ($1M ARR micro-agency), voice, offer ladder, guardrails. Loaded every session.
+- **Skills** (`~/.hermes/skills/*/SKILL.md`): `prospect · roast · engage · fulfill · intel · report · evolve`.
+- **Cron heartbeat** (`hermes cron`): the agent's pulse (§4).
+- **Memory** (Hermes memory + Postgres): CRM (contacted/replied/bought) + P&L (spend/revenue/margin) + playbook (what converts).
+- **Tools** (`tools/`, thin CLI over live APIs): `foreplay · xpost · xread · email · stripe · creative · db`.
+- **Guardrails**: spend-approval + plan-upgrade asks, brand-safety vote, kill-switch.
 
-## 3. Why all TypeScript, no Python
-(1) Inference is a hosted OpenAI-compatible HTTP API (build.nvidia / OpenRouter / Nous Portal / xAI) — we orchestrate, we don't serve a model.
-(2) Hermes Agent skills are **markdown** (`SKILL.md` in `~/.hermes/skills`), not code. Python is only for self-hosting models / Python-only SDKs — neither applies.
+## 3. Skills (each a ≤30-line spec; the agent loads on demand)
+- `prospect` — scan Foreplay, audit with `synthcheck`, enrich contact, **pick** who's worth roasting.
+- `roast` — the AdChad voice: savage X post + cold email (Grok). Names the real flaw.
+- `engage` — watch X replies/DMs + inbox; respond in-voice; move toward the $5/$49 close.
+- `fulfill` — deliver $5 (copy + creative) and $49/mo (weekly creatives + competitor intel).
+- `intel` — competitor / ad intelligence (the membership value-add; reuses `synthcheck`).
+- `report` — weekly business report: roasted/contacted/sold, ROI, margin, cost, what's working.
+- `evolve` — daily: review outcomes, refine its own skills (`/learn`), propose improvements.
 
-## 4. Reuse Iain's Paid Ads Suite  (GodMode-Team/patientautopilot · format hermes-skill-bundle-portable)
-- `synthcheck` → badness / creative score (simulated buyer cohorts). **= our scorer, already built.**
-- `copy` → the $5 fix, $12 variants, 3-min VSL. **already built.**
-- `paid-ads-account-watchdogs` → the $49/mo competitor monitoring. `meta-ad-ops` → Meta context.
-- We add ONE new skill: **`roast`** — the AdChad mean-but-useful voice (Caleb tunes the voice).
-- **How a TS fn "uses" a skill:** load the skill's `SKILL.md` as the model's instruction prompt + pass the ad/order as input. Vendor `synthcheck`/`copy`/`roast` into `skills/`.
+## 4. Cron heartbeat (the autonomous pulse)
+- **Acquire** — `every 1h`: prospect a niche → roast + outreach (live, guardrailed).
+- **Engage** — `every 15m`: check mentions/DMs/inbox → respond → close.
+- **Report** — `0 9 * * 1`: post the weekly P&L to the operators.
+- **Evolve** — `0 3 * * *`: self-improvement pass.
+Each job is pinned to its model; the kill-switch (`paused`) short-circuits any action that publishes or spends.
 
-## 5. Our new code (lib/, plain TS — runs in the harness OR a thin loop, so §12-PRD's choice never forces a rewrite)
-`foreplay.ts` import · `enrich.ts` (site→email+X+segment) · `score.ts` (synthcheck + economic + reach/safety → gate) ·
-`roast.ts` (model) · `xpost.ts` (X, @-tag if A) · `email.ts` (Resend: outreach + fulfillment) · `fulfill.ts` (copy) · `creative.ts` (image gen) ·
-`loop.ts` orchestrate · `model.ts` (endpoint client) · `db.ts`.
+## 5. Tools (live integrations — what survives from the old `lib/`)
+Single-purpose CLIs, each emits JSON, each independently tested live. They hold **no business logic** — just I/O:
+`foreplay scan` · `xpost` (media + @-tag) · `xread` (mentions/replies) · `email send|read` (Resend + inbox) · `stripe` (checkout + webhook + spend) · `creative` (Nano Banana image) · `db` (Postgres CRM/P&L). The agent composes them.
 
-## 6. Data model (Postgres/Neon) — flat tables
-- `ads` foreplay_id, advertiser, handle, creative_url, copy, format, first_seen, raw_json
-- `prospects` name, website, email, x_handle, x_followers, segment(A/B/unreachable), vertical, est_spend, ltv_est, status
-- `scores` ad_id, badness, economic, reach_safety, total, gate, votes_json
-- `roasts` prospect_id, ad_id, text, hook, model, status, post_url, sent_at
-- `orders` prospect_id, tier(5/12/49), stripe_id, buyer_email, amount, status, created_at
-- `fixes` order_id, headline, body, cta, creative_dir, image_url, variants_json, delivered_at
-- `runs` started_at, scanned, enriched, qualified, posted, emailed, revenue, errors_json · `control` paused(bool) — kill-switch
+## 6. Memory / data (Postgres) — the CRM + ledger
+`prospects` (contact, segment, stage: new→roasted→contacted→replied→customer) · `interactions` (every post/email/reply, in+out) · `orders` (tier, stripe_id, amount, status) · `fixes` (deliverables) · `ledger` (spend & revenue → P&L) · `control` (kill-switch). Hermes memory holds the qualitative playbook; Postgres holds the hard numbers.
 
-## 7. Web app (Next.js/Vercel) — kept minimal: purchase + VSL + audit
-`/` sales + VSL + $5/$12/$49 checkout (prospect arrives via `?p=<id>` from the X roast link — **no per-prospect page**) ·
-`/audit` operator log: each X post + its scores + the reasoning that led to it · kill-switch · metrics ·
-`/api/{run, checkout, stripe/webhook}`.
+## 7. Web app (Next.js/Vercel) — the funnel + delivery
+The roast links to a per-prospect **sales page** that re-sells, then hands to Stripe-hosted checkout (never a raw Stripe link — sessions expire + you lose the re-sell):
+`tweet/email → /p/<id> (their ad + critique + "UNFUCK IT — $5") → /api/checkout (FRESH Stripe session) → pay → /api/stripe/webhook → agent /fulfill → fixed-ad email`
+- `/` homepage (brand). **`/p/<id>`** sales page — renders the stored ad `creative_url` + the roast + one CTA; mobile-first.
+- `/api/checkout?p=<id>&tier=5` mints a fresh session. `/api/stripe/webhook` → order paid → ledger → queue fulfill.
+- `?paid=1` → "fix generating — inbox in ~2 min" (gen takes time). Delivery = the fix **email** (Stripe collected the address); optional `/fix/<order>` view. `/report` = live numbers.
+No run button, no dashboard — the agent runs itself.
 
-## 8. Models — Hermes Agent is the HARNESS (model-agnostic); the model is our free, per-skill choice
-The harness (on-theme foundation) points at any OpenAI-compatible endpoint, swappable per skill. Plan: **Nemotron 3 Super**
-(NemoClaw default, cheap, NVIDIA-friendly) for high-volume scoring; **roaster = Day-1 bake-off** among **Grok · Hermes-4-405B ·
-Nemotron** on 5 real bad ads. Grok is fully on-theme here (the harness is Hermes, not the model). See `hermes-briefing.md`.
+## 8. Guardrails (it has money + a public account)
+Spend OUT and plan upgrades are **human-approved** (the agent asks via `report`/escalation). Brand-safety = an N≥3 model vote before any roast. The kill-switch halts all publish/spend mid-beat. Cold email is CAN-SPAM compliant. Sanctioned X API → no ToS/automation risk.
 
-## 9. X posting (official X API — Caleb provided a key)
-Post via the **official X API v2** using the `twitter-api-v2` Node SDK: media upload + create tweet, @-tag if Segment A.
-Write needs **user-context** auth (OAuth 1.0a: `X_API_KEY`/`X_API_SECRET`/`X_ACCESS_TOKEN`/`X_ACCESS_SECRET`, or an OAuth2
-user token). Sanctioned access → no automation-flag/ToS/ban risk. (The old cookie-session approach is dropped.)
-
-## 10. Keys to provision Thursday AM
-Foreplay ✅ · Postgres (Neon) ✅ · **OpenRouter** (Hermes-4 + Nemotron + Grok bake-off **+ Nano Banana images**) · **X API** (Caleb ✅ — needs credits) · Stripe (test) · **Resend + verified sending domain (SPF/DKIM — DNS lags)**.
-
-## 11. Build order → specs (each a ≤30-line TDD contract; live, no mocks)
-P1: `01-foreplay` · `02-enrich` · `03-score` (synthcheck) · `04-roast-post` (X + owner email) · `05-checkout-fulfill` · `06-audit` · `07-loop`.
-P2 `08-creative` (image fix) · `09-orderbump` · P3 `10-subscription` (watchdogs) · P4 `11-spend-loop` + feedback loop (+ Nemotron / NemoClaw / VSL).
-
-## 12. Tests
-Live only. Foreplay + real site fetches (enrich); the model asserts real non-empty on-voice output; X-post asserts a real
-tweet id; Resend asserts a real message id; Stripe test-mode E2E through the webhook + one **live** $5 for the demo. Red→green per spec.
+## 9. Tests
+Live only, red→green. Each **tool** asserts a real effect (real Foreplay ad, real tweet id, real Resend id, real Stripe test session, real image bytes). The **agent** is validated by Manual QA: drive the real harness through a cycle and read `/report`.
