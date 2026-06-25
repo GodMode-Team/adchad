@@ -2,7 +2,7 @@ import { config } from 'dotenv'
 config({ path: '.env.local' })
 
 // One CLI for every tool the agent calls: `pnpm -s tool <name> [sub] [--flag value]` → one JSON line on stdout.
-function flags(argv: string[]): Record<string, string | boolean> {
+export function flags(argv: string[]): Record<string, string | boolean> {
   const o: Record<string, string | boolean> = {}
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]
@@ -57,8 +57,11 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
   }
 }
 
-const [name, ...rest] = process.argv.slice(2)
-const sub = rest[0] && !rest[0].startsWith('--') ? rest[0] : undefined
-dispatch(name, sub, flags(rest))
-  .then((out) => { console.log(JSON.stringify(out)); process.exit(0) })
-  .catch((e) => { console.error(e); console.log(JSON.stringify({ error: String(e?.message).slice(0, 200) })); process.exit(1) })
+// Run the CLI only when invoked directly (`tsx scripts/tool.ts`), not when imported (e.g. by tests).
+if (process.argv[1]?.endsWith('tool.ts')) {
+  const [name, ...rest] = process.argv.slice(2)
+  const sub = rest[0] && !rest[0].startsWith('--') ? rest[0] : undefined
+  dispatch(name, sub, flags(rest))
+    .then((out) => { console.log(JSON.stringify(out)); process.exit(0) })
+    .catch((e) => { console.error(e); console.log(JSON.stringify({ error: String(e?.message).slice(0, 200) })); process.exit(1) })
+}

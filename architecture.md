@@ -3,7 +3,7 @@
 Translates `prd.md` into a buildable system. **AdChad is a Hermes Agent**: an identity + skills + cron heartbeat + memory + guardrails, running on Nous's harness. Our job is to author those, plus thin **tools** (live integrations) the skills call. No orchestration code — **Hermes is the loop.**
 
 ## 1. Substrate
-Nous **Hermes Agent** (`install.sh` → `~/.hermes`). Model provider = **OpenRouter**; brain = `nousresearch/hermes-4-405b`, roast voice = `x-ai/grok-4.3` (per-skill). Built-in **Tool Gateway** (web search · image gen · browser · email) + our custom tools. `scripts/hermes-setup.sh` wires the key/model and installs our skills.
+Nous **Hermes Agent** (`install.sh` → `~/.hermes`). Model provider = **OpenRouter**; brain = **`nvidia/nemotron-3-super-120b-a12b`** — Hermes-4 on OpenRouter exposes no tool-calling, which the harness requires; Nemotron does, and it's the on-theme NVIDIA integration NemoClaw runs (per-skill pinning still possible, e.g. Grok for the roast voice once funded). Built-in **Tool Gateway** (web search · image gen · browser · email) + our custom tools. `scripts/hermes-setup.sh` wires the key/model and installs our skills.
 
 ## 2. Anatomy
 - **Charter** (`skills/adchad` + Hermes personality): mission ($1M ARR micro-agency), voice, offer ladder, guardrails. Loaded every session.
