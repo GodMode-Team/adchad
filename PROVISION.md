@@ -8,7 +8,7 @@ Put real values into `.env.local` (gitignored). Only the 🔴 items need you.
 | Foreplay API | you | ✅ verified live |
 | Postgres (Neon) | you | ✅ verified — schema migrated |
 | npm deps + scaffold | me | ✅ done |
-| OpenRouter (models) | you | ✅ verified — Hermes-4-405b responding |
+| OpenRouter (models) | you | ⚠️ key in (brain = NVIDIA Nemotron) — but **$0 credits**; top up ~$10–20 to run the agent |
 | X API | you | ✅ live — posts as @adchadofficial (funded) |
 | Resend (email) | you | ✅ verified — `send.adchad.ai` domain |
 | Brave Search (booster) | you | ✅ key in |
@@ -63,11 +63,11 @@ post from **his** handle, not AdChad. Once the AdChad account exists: in the X d
 the current handle so we can confirm.
 
 ## 6. Hermes Agent — AdChad runs ON the harness  (≈5 min · THE on-theme part)
-AdChad *is* a Hermes Agent: a charter + 7 skills + a cron heartbeat. `scripts/hermes-setup.sh` does all the wiring — you just install Hermes and run it. (Model = Hermes-4-405B via OpenRouter, already set; no extra account.)
+AdChad *is* a Hermes Agent: a charter + 7 skills + a cron heartbeat. `scripts/hermes-setup.sh` does all the wiring — you just install Hermes and run it. (Brain = **NVIDIA Nemotron** via OpenRouter — tool-capable, on-theme; already set, no extra account.)
 1. **Install Hermes** (macOS/Linux): `curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash`
    - Skip `hermes setup --portal` — OpenRouter is the brain. Portal only adds optional Tool-Gateway extras.
 2. **Wire it** (from the repo): `bash scripts/hermes-setup.sh`
-   - Points Hermes at OpenRouter (brain = Hermes-4-405B), installs every skill (adchad · prospect · roast · engage · fulfill · report · evolve + synthcheck · copy) into `~/.hermes/skills/`, and **starts the kill-switch ON** (it drafts but publishes nothing). Idempotent.
+   - Points Hermes at OpenRouter (brain = **NVIDIA Nemotron** — tool-capable; Hermes-4 on OpenRouter can't drive tools), installs every skill (adchad · prospect · roast · engage · fulfill · report · evolve + synthcheck · copy) into `~/.hermes/skills/`, and **starts the kill-switch ON** (it drafts but publishes nothing). Idempotent.
 3. **Meet it** (safe): `hermes -z "who are you and what's your mission?"` → then `hermes -z "/prospect find a target in med spas"`.
 4. **Register the heartbeat** (the script prints these): acquire `every 1h` · engage `every 15m` · report `Mon 9am` · evolve `3am` → `hermes gateway start` (ticks every 60s).
 5. **Go live** when you're ready: `pnpm -s tool db resume` (kill-switch off → it publishes for real). Stop anytime: `pnpm -s tool db pause`.

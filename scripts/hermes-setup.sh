@@ -55,6 +55,7 @@ Register the heartbeat (the autonomous business). Kill-switch starts ON-safe —
 only once you resume it, so these are safe to register now:
     hermes cron create "every 1h"  "/prospect a fresh niche, then /roast the best target. Respect the kill-switch."
     hermes cron create "every 15m" "/engage — answer new mentions, DMs, inbox; push threads toward the \$5 close."
+    hermes cron create "every 10m" "/fulfill any paid-but-undelivered orders (check: pnpm -s tool db orders)."
     hermes cron create "0 9 * * 1" "/report the weekly P&L to the operator and flag anything you need to grow."
     hermes cron create "0 3 * * *" "/evolve — review yesterday and improve one skill."
     hermes gateway start     # daemon ticks cron every 60s

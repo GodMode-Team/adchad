@@ -1,48 +1,58 @@
 # AdChad
 
-An autonomous AI ad agency: scans live Meta ads, scores + **roasts** the weak ones on X, and sells a **$5 AI fix** (rewritten copy + a generated ad image). Built for the **Hermes Agent Accelerated Business Hackathon** (NVIDIA × Stripe × Nous) — submission due **Tue Jun 30** (internal target Fri Jun 26).
+AdChad is an autonomous AI micro-agency — and it **is a real Hermes Agent**, not a pipeline with an agent bolted on. We hand the agent a mission, a voice, skills, money, and guardrails, then let it run a ZHC-style ad agency end to end: find weak Meta ads, **publicly roast** them, close the owner on a **$5 fix**, deliver it, report the P&L, and improve itself toward **$1M ARR**.
 
-**Planning docs:** `prd.md` · `architecture.md` · `specs/` · `hermes-briefing.md` · `bookmarks-intel.md` · `PROVISION.md`
+Built for the **Hermes Agent Accelerated Business Hackathon** (NVIDIA × Stripe × Nous).
 
----
+**Depth lives elsewhere:** `prd.md` (what/why) · `architecture.md` (how it's built) · `PROVISION.md` (keys + go-live) · `specs/` (per-skill specs).
 
-## ✅ Done — all live, no mocks (`pnpm test` runs the real suite)
-- [x] **Scaffold** — Next.js + TS + Vitest + Neon Postgres (schema migrated)
-- [x] **01 scan** — Foreplay → `ads` / `prospects`
-- [x] **02 enrich** — site → email + site-linked X handle + segment (~67% reach; Brave name→website search)
-- [x] **03 score** — Hermes-4 badness + economic + 3-vote safety gate (≥85 qualifies)
-- [x] **04 roast** — real public post from **@adchadofficial** + real **outreach email** (Resend, `send.adchad.ai` verified)
-- [x] **05 fulfill (core)** — `copy` rewrite **+ generated ad image** (Nano Banana). *Checkout not wired yet — see below.*
-- [x] **06 audit** — operator dashboard + kill-switch (`/audit`)
-- [x] **07 loop** — autonomous scan→enrich→score→roast→post→email (`runBatch`, with `dryRun` + kill-switch). The deterministic engine.
-- [x] **08 creative** — AI ad image via OpenRouter
-- [x] ⭐ **Hermes Agent harness** — runs ON Nous's harness: `skills/adchad/SKILL.md` (operator) + `scripts/run-once.ts` (headless entry) + `scripts/hermes-setup.sh` (wires OpenRouter + installs skills + prints cron). Hermes-4-405B is the operator; cron makes it autonomous. *You still run `install.sh` + `hermes-setup.sh` once — see PROVISION §6.*
-- [x] **Provisioned** — Foreplay · Neon · OpenRouter · X API (funded) · Resend (domain verified) · Brave
+## What AdChad is
 
-## ⏳ Left to finish (in priority order)
-- [ ] **Install + wire Hermes** *(one-time, ~5 min)* — `curl install.sh` then `bash scripts/hermes-setup.sh`, then `hermes -z "/adchad preview a cycle for med spas"`. Build is done (above); this is the run step. **PROVISION §6.**
-- [ ] **Stripe $5 checkout** *(finishes 05)* — needs Stripe **test keys** → `/api/checkout` → webhook → `fulfill()` → email. **Judged criterion (revenue).**
-- [ ] **Swap roast engine to Grok** — paste Caleb's extracted prompt into `skills/roast/SKILL.md`, set `MODEL_ROAST=x-ai/grok-4.3`, re-run `scripts/roast-bakeoff.ts`
-- [ ] **One real demo run** — flip the loop to `dryRun:false` (real public roasts + real emails) — **needs Jeremy's explicit go**
-- [ ] **Roast card** — the bold `/?p=` mockup wired to real data (currently a placeholder landing) — *build when you're ready*
-- [ ] **Deploy** — Vercel (a free `*.vercel.app` is fine; `adchad.ai` domain optional/last)
-- [ ] **Submit** — 1–3 min demo video tagging **@NousResearch** + writeup → Discord + Typeform
-- [ ] **Security** — rotate the Foreplay key + scrub `.env.local` from the **Initial commit** (it's in GitHub history)
+A Hermes Agent = identity + skills + a heartbeat + memory + guardrails. There is no orchestration code — **Hermes is the loop.**
 
-## Optional / stretch
-- [ ] $12 + $49/mo tiers · spend-loop (agent buys its own credits) · feedback loop · competitor monitoring · NemoClaw harness wrap
+- **Charter** (`skills/adchad/SKILL.md`) — mission, voice, offer ladder, operating rules. Loaded every session, so a fresh Hermes session *is* AdChad.
+- **7 skills** (`skills/`) — `prospect` (find + audit + pick a target) · `roast` (savage X post + cold email) · `engage` (work replies/DMs/inbox toward the close) · `fulfill` (deliver paid work) · `report` (weekly P&L) · `evolve` (improve its own skills). Plus shared `synthcheck` + `copy`.
+- **Cron heartbeat** — the autonomous pulse: **acquire** `every 1h` · **engage** `every 15m` · **report** `Mon 9am` · **evolve** `3am`.
+- **Memory** — Hermes memory holds the qualitative playbook; Postgres holds the hard numbers (CRM + P&L ledger).
+- **Guardrails** — a global **kill-switch**, **spend-approval** (it asks before buying or upgrading a plan), and a **brand-safety vote** before any public roast.
 
----
+**Brain:** NVIDIA **Nemotron** via OpenRouter. The harness is named for *Hermes the harness*, not the model — Hermes-4 on OpenRouter lacks the tool-calling the harness requires, so the agent runs on Nemotron (tool-capable, and the on-theme NVIDIA integration).
 
-## Critical path to "done"
-1. **Stripe keys** → finish the $5 money loop
-2. **Caleb's Grok prompt** → swap the roast engine
-3. **One real run** → capture real roasts + email + a $5 payment
-4. **Deploy + record the video** → submit
+## The tools (its hands)
+
+Thin single-purpose CLIs over live APIs — no business logic, just I/O. The agent composes them:
+
+```
+pnpm -s tool <foreplay|enrich|xpost|xread|email|creative|stripe|db> [sub] [--flag value]
+```
+
+`foreplay` scan Meta ads · `enrich` ad → owner contact · `xpost`/`xread` the AdChad X account · `email` send/read (Resend) · `creative` generate an ad image · `stripe` checkout · `db` the Postgres CRM + ledger. Each emits one JSON line; each is tested live (`tests/tools/`).
+
+## The funnel (the money loop)
+
+```
+tweet / cold email  →  /p/<id> sales page ("UNFUCK IT — $5")  →  /api/checkout (fresh Stripe session)
+   →  pay  →  /api/stripe/webhook (records the order + revenue, queues a fulfill)  →  agent /fulfill  →  fixed-ad email
+```
+
+Every click mints a fresh Stripe Checkout session (never a raw payment link — those expire and you lose the re-sell). `/report` shows the live funnel + P&L. The web app (`app/`) is deliberately thin — sales page, checkout, webhook, report — because the agent runs itself; there's no dashboard.
+
+## Runtime
+
+Local now (Hermes CLI + `pnpm dev` for the web app). Target: **NemoClaw** (NVIDIA's OpenShell sandbox) later.
 
 ## Run it
-- `pnpm test` — full live suite (hits real Foreplay / model / X / Resend)
-- `pnpm dev` — app (`/`, `/audit`)
-- `pnpm migrate` — apply `db/schema.sql` to Neon
-- Keys live in `.env.local` (template: `.env.example`; how-to: `PROVISION.md`)
-- `lib/` = the agent (scan · enrich · score · roast · fulfill · creative · xpost · email · loop) · `skills/` = `SKILL.md` files (synthcheck · copy · roast)
+
+1. **Keys** — copy `.env.example` → `.env.local` and fill it in (`PROVISION.md` is the step-by-step), then `pnpm tsx scripts/validate-keys.ts` to see what's SET vs MISSING.
+2. **Migrate** — `pnpm migrate` (applies `db/schema.sql` to Postgres).
+3. **Install Hermes** — `curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash`
+4. **Wire AdChad onto it** — `bash scripts/hermes-setup.sh` (points Hermes at OpenRouter/Nemotron, installs the skills, prints the cron heartbeat, and starts the kill-switch **ON**). Then `hermes -z "who are you?"`.
+5. **Web app** — `pnpm dev` (`/` brand · `/p/<id>` sales page · `/report` live numbers).
+6. **Test** — `pnpm test` (live suite, **zero mocks** — hits real Foreplay / model / X / Resend / Stripe-test).
+7. **Go live / stop** — `pnpm -s tool db resume` (publish for real) · `pnpm -s tool db pause` (halt all publish + spend).
+
+## Status
+
+**Done** — the charter + 7 skills + cron wiring (`hermes-setup.sh`); all 8 tools live and tested; the full funnel (`/p/<id>` → checkout → webhook → fulfill → `/report`); Postgres schema migrated; providers provisioned (Foreplay · Neon · OpenRouter · X · Resend · Brave).
+
+**Left to finish** — install + wire Hermes once (`PROVISION.md §6`) · add Stripe **test keys** to close the $5 loop (`§4`) · one real unattended demo cycle (needs an explicit go) · deploy (Vercel) · record + submit the demo video.
