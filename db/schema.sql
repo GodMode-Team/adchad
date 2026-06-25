@@ -72,6 +72,26 @@ create table if not exists control (
   paused boolean default false
 );
 alter table prospects add column if not exists email_source text;  -- scraped | guessed
-alter table fixes add column if not exists image_url text;          -- generated ad creative (Spec 08)
+alter table prospects add column if not exists stage text default 'new';  -- new→roasted→contacted→replied→customer
+alter table fixes add column if not exists image_url text;          -- generated ad creative
+
+-- every inbound/outbound touch (X post, reply, DM, email) — the agent's CRM history
+create table if not exists interactions (
+  id bigserial primary key,
+  prospect_id text references prospects(id),
+  channel text,                        -- x | email | note
+  direction text,                      -- in | out
+  ref text,                            -- tweet id / message id
+  from_addr text, subject text, text text,
+  handled boolean default false,
+  created_at timestamptz default now()
+);
+-- P&L ledger — revenue in, tool cost out → the agent's margins
+create table if not exists ledger (
+  id bigserial primary key,
+  kind text,                           -- revenue | cost
+  amount_cents int, note text,
+  created_at timestamptz default now()
+);
 
 insert into control (id, paused) values (1, false) on conflict (id) do nothing;

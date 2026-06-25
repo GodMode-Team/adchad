@@ -12,14 +12,19 @@ async function getProspect(id?: string): Promise<{ name: string | null } | null>
   }
 }
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ p?: string }> }) {
-  const { p } = await searchParams
+export default async function Home({ searchParams }: { searchParams: Promise<{ p?: string; paid?: string }> }) {
+  const { p, paid } = await searchParams
   const prospect = await getProspect(p)
   const who = prospect?.name?.trim()
   const checkout = `/api/checkout?tier=5${p ? `&p=${encodeURIComponent(p)}` : ''}`
 
   return (
     <main>
+      {paid === '1' && (
+        <div style={{ background: '#0a7d28', color: '#fff', textAlign: 'center', padding: '12px 16px', fontWeight: 700, fontSize: 15 }}>
+          Payment received — your fix is generating. Check your inbox in ~2 minutes. 🎯
+        </div>
+      )}
       <section className="hero">
         <div className="wrap">
           <div className="kicker">{who ? `We roasted ${who}` : 'The AI ad agency'}</div>
