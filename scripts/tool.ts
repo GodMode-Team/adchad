@@ -44,6 +44,10 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
       const { generate } = await import('../tools/creative')
       return generate({ headline: S('headline'), body: f.body ? S('body') : null, cta: f.cta ? S('cta') : null, creativeDirection: f.direction ? S('direction') : null })
     }
+    case 'vision': {
+      const { describe } = await import('../tools/vision')
+      return describe(S('image'))
+    }
     case 'stripe': {
       const { checkout } = await import('../tools/stripe')
       return checkout({ prospect: S('prospect'), tier: N('tier', 5) })
