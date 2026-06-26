@@ -20,7 +20,7 @@ describe('gated tools — only run with explicit opt-in', () => {
   it.skipIf(!process.env.ALLOW_LIVE_CREATIVE)(
     'creative generate → real ad image (skipped: needs ALLOW_LIVE_CREATIVE + OpenRouter credits)',
     async () => {
-      const out = await generate({ headline: 'Your ad is mid. We fixed it.' })
+      const out = await generate({ headline: 'Your ad is mid. We fixed it.', cta: 'Fix mine' }, 'https://r2.foreplay.co/sample.png', 'Test Brand')
       expect(out.imageUrl).toMatch(/^\/fixes\/.+\.png$/)
     },
     120_000,
