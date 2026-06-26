@@ -1,0 +1,5 @@
+# pnpm 10+ reads build-script approvals here (not package.json). esbuild's binary backs tsx;
+# sharp is a transitive Next dep. Without this, fresh installs (e.g. the VPS) fail the build-approval gate.
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
