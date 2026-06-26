@@ -24,7 +24,7 @@ The acquire heartbeat, or "find someone to roast in <niche>."
    `pnpm -s tool db record --json '{"prospect_id":"<id>","channel":"note","text":"candidate — <flaws + why this one>"}'`
 
 ## Output
-Hand `/roast`: the prospect id, its segment + handle/email, the ad's `creative_url`, and the named flaws.
+Hand `/roast`: the **specific ad's id** (foreplay_id — you roast one *ad*, not the brand), the prospect id, its segment + handle/email, the ad's `creative_url`, and the named flaws.
 
 ## Pitfalls
 - Don't re-pick a brand already at stage `roasted`+ (read `db prospects`).
