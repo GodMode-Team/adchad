@@ -16,7 +16,7 @@ A paid Stripe order (the webhook records it), or "fulfill order <id>."
 
 ## Procedure — $5 single fix
 1. Get the ad + prospect from `db` (confirm the order is paid first).
-2. **Fix it** — `pnpm -s tool fix --image "<creative_url>" --brand "<business name>"` → `{imageUrl, headline, body, cta, fixed}`. One deterministic call: it SEES the ad (vision), writes copy that repairs each real flaw, and generates the finished, ready-to-run gpt-image-2 ad.
+2. **Fix it** — `pnpm -s tool fix --image "<creative_url>" --brand "<business name>" --roast "<the published roast text>"` → `{imageUrl, headline, body, cta, fixed}`. One deterministic call: it SEES the ad, repairs exactly what the **roast** called out (never reintroducing what it mocked), and generates the finished gpt-image-2 ad. Always pass the roast so the fix matches the public takedown.
 3. Deliver: `pnpm -s tool email send --to "<buyer>" --subject "Your fixed ad is ready" --body "<the new copy + the imageUrl>"`.
 4. Ledger + stage:
    `pnpm -s tool db revenue --cents 500 --note "fix <id>"` · `pnpm -s tool db spend --cents <gen cost> --note "creative"` · `pnpm -s tool db stage --id <id> --stage customer`.
