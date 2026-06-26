@@ -40,7 +40,17 @@ done
 echo "✓ skills installed → $DEST  (adchad + prospect/roast/engage/fulfill/report/evolve + synthcheck/copy)"
 # ponytail: copy, not symlink — re-run after editing skills/. For zero-drift, set skills.external_dirs to the repo instead.
 
-# 5. Start SAFE — kill-switch ON until the operator resumes (the agent drafts but publishes nothing)
+# 5. Identity — SOUL.md is slot #1 of Hermes' system prompt (who the agent IS). Without this it answers as
+#    vanilla "Hermes Agent by Nous Research". Templated so PROJECT DIR matches wherever the repo lives.
+SOUL_SRC="$DIR/skills/adchad/SOUL.md"
+DEST_SOUL="$HERMES_HOME/SOUL.md"
+if [ -f "$SOUL_SRC" ]; then
+  [ -f "$DEST_SOUL" ] && [ ! -f "$DEST_SOUL.bak" ] && cp "$DEST_SOUL" "$DEST_SOUL.bak"  # keep the stock default once
+  sed "s|\${PROJECT_DIR}|$DIR|g" "$SOUL_SRC" > "$DEST_SOUL"  # ponytail: assumes $DIR has no '|'
+  echo "✓ identity → $DEST_SOUL  (agent now IS AdChad). Running gateway? 'hermes restart' to reload."
+fi
+
+# 6. Start SAFE — kill-switch ON until the operator resumes (the agent drafts but publishes nothing)
 ( cd "$DIR" && pnpm -s tool db pause >/dev/null 2>&1 ) && echo "✓ kill-switch ON — publishes nothing until: pnpm -s tool db resume"
 
 cat <<EOF
