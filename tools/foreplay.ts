@@ -40,8 +40,8 @@ function normalize(ad: any): Ad {
     brand_id: str(ad.brand_id),
     advertiser: str(ad.name),
     link_url: str(ad.link_url),
-    // DCO/carousel ads have null top-level image/copy — the creative + text live in cards[0]
-    creative_url: firstStr(ad.image, ad.video, ad.thumbnail, ad.cards?.[0]?.image, ad.cards?.[0]?.video),
+    // Image ads ONLY — we critique + deliver a STATIC image fix, never video. Skip ad.video / thumbnail / card.video.
+    creative_url: firstStr(ad.image, ad.cards?.[0]?.image),
     copy: firstStr(ad.description, ad.headline, ad.cards?.[0]?.description, ad.cards?.[0]?.headline),
     niches: Array.isArray(ad.niches) ? ad.niches.filter((n: unknown) => typeof n === 'string') : null,
     running_duration: num(ad.running_duration),
@@ -65,14 +65,17 @@ async function fetchPage(query: string, limit: number, cursor?: string) {
 export async function scan(query: string, limit: number): Promise<{ ads: Ad[]; prospects: Prospect[] }> {
   const collected: any[] = []
   let cursor: string | undefined
-  while (collected.length < limit) {
-    const page = await fetchPage(query, limit - collected.length, cursor)
+  const isImg = (a: any) => !!(a?.image || a?.cards?.[0]?.image) // image ad?
+  // keep paging until we have `limit` IMAGE ads (cap pages so a video-heavy niche can't run away)
+  while (collected.filter(isImg).length < limit && collected.length < limit * 6) {
+    const page = await fetchPage(query, limit, cursor)
     if (page.ads.length === 0) break
     collected.push(...page.ads)
     cursor = page.cursor
     if (!cursor) break
   }
-  const ads = collected.slice(0, limit).map(normalize).filter((a) => a.foreplay_id)
+  // image ads only — drop video / creative-less ads before slicing to the requested count
+  const ads = collected.map(normalize).filter((a) => a.foreplay_id && a.creative_url).slice(0, limit)
 
   // persist ads (sequential is fine at these volumes; batch later if needed). ponytail: simple loop.
   for (const a of ads) {
