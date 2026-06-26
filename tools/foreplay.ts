@@ -40,8 +40,9 @@ function normalize(ad: any): Ad {
     brand_id: str(ad.brand_id),
     advertiser: str(ad.name),
     link_url: str(ad.link_url),
-    creative_url: firstStr(ad.image, ad.video, ad.thumbnail),
-    copy: firstStr(ad.description, ad.headline),
+    // DCO/carousel ads have null top-level image/copy — the creative + text live in cards[0]
+    creative_url: firstStr(ad.image, ad.video, ad.thumbnail, ad.cards?.[0]?.image, ad.cards?.[0]?.video),
+    copy: firstStr(ad.description, ad.headline, ad.cards?.[0]?.description, ad.cards?.[0]?.headline),
     niches: Array.isArray(ad.niches) ? ad.niches.filter((n: unknown) => typeof n === 'string') : null,
     running_duration: num(ad.running_duration),
     first_seen: toTs(ad.started_running),

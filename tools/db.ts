@@ -42,6 +42,18 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
         order by o.created_at asc limit 25`
       return { items: [...rows] }
     }
+    case 'gallery': { // the case-study feed: original ad → roast → fixed ad, per roasted prospect
+      const rows = await sql<any[]>`
+        select p.id, p.name,
+          (select creative_url from ads where brand_id=p.id and creative_url is not null order by created_at desc limit 1) as original,
+          (select text from interactions where prospect_id=p.id and channel='x'   and direction='out' order by created_at desc limit 1) as roast,
+          (select ref  from interactions where prospect_id=p.id and channel='fix' order by created_at desc limit 1) as fix_image,
+          (select text from interactions where prospect_id=p.id and channel='fix' order by created_at desc limit 1) as fix_copy
+        from prospects p
+        where exists (select 1 from interactions i where i.prospect_id=p.id and i.channel='x' and i.direction='out')
+        order by p.created_at desc limit 24`
+      return { items: [...rows] }
+    }
     case 'record': {
       const j = JSON.parse(String(f.json || '{}'))
       const [r] = await sql`insert into interactions (prospect_id, channel, direction, ref, from_addr, subject, text)

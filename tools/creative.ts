@@ -9,13 +9,15 @@ type Fix = { headline: string; body?: string | null; cta?: string | null; creati
 
 /** Generate a real static ad image from the fix copy; save under public/fixes; return its served path. */
 export async function generate(fix: Fix, brand?: string | null): Promise<{ imageUrl: string }> {
+  // Generate a clean VISUAL only — image models garble baked-in text, so the rewritten copy
+  // is delivered as text alongside (the fulfillment email + the sales page carry the words).
   const prompt =
-    `Design ONE scroll-stopping static Meta ad image.\n` +
-    `Headline (large, bold, legible): "${fix.headline}"\n` +
-    (fix.cta ? `Clear CTA button: "${fix.cta}"\n` : '') +
-    (brand ? `Brand: ${brand}.\n` : '') +
-    `Style: ${fix.creativeDirection || 'clean, modern, high-contrast, professional'}.\n` +
-    `A real finished ad — not a mockup, template, or watermark.`
+    `Create ONE scroll-stopping, premium advertising VISUAL for this product.\n` +
+    `Concept/mood to evoke (do NOT render this as text): "${fix.headline}"\n` +
+    (brand ? `Brand vibe: ${brand}.\n` : '') +
+    `Style: ${fix.creativeDirection || 'clean, modern, high-contrast, professional, photographic'}.\n` +
+    `CRITICAL: NO text, NO words, NO letters, NO logos, NO watermark anywhere in the image. ` +
+    `Compose with clean negative space near the top so a headline can be added later. A finished, premium photograph — not a mockup or template.`
 
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
