@@ -52,6 +52,10 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
       const { roast } = await import('../tools/roast')
       return roast({ image: S('image'), handle: f.handle ? S('handle') : null, brand: f.brand ? S('brand') : null })
     }
+    case 'fix': {
+      const { fix } = await import('../tools/fix')
+      return fix({ image: S('image'), brand: f.brand ? S('brand') : null })
+    }
     case 'stripe': {
       const { checkout } = await import('../tools/stripe')
       return checkout({ prospect: S('prospect'), tier: N('tier', 5) })
