@@ -27,12 +27,14 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
         : await sql`select id,name,segment,stage,email,x_handle from prospects order by created_at desc limit 25`
       return { items: [...rows] }
     }
-    case 'page': { // the /p/<id> sales-page payload: their ad + the roast we posted
+    case 'page': { // the /p/<id> sales-page payload: the SPECIFIC roasted ad + the roast
       const id = String(f.id)
       const [p] = await sql<any[]>`select id, name, segment, x_handle from prospects where id=${id} limit 1`
       if (!p) return { found: false }
-      const [ad] = await sql<any[]>`select advertiser, creative_url, copy, link_url from ads where brand_id=${id} order by created_at desc limit 1`
-      const [r] = await sql<any[]>`select text from interactions where prospect_id=${id} and channel='x' and direction='out' order by created_at desc limit 1`
+      const [r] = await sql<any[]>`select ad_id, text from interactions where prospect_id=${id} and channel='x' and direction='out' order by created_at desc limit 1`
+      const [ad] = r?.ad_id
+        ? await sql<any[]>`select advertiser, creative_url, copy, link_url from ads where id=${r.ad_id}`
+        : await sql<any[]>`select advertiser, creative_url, copy, link_url from ads where brand_id=${id} and creative_url is not null order by created_at desc limit 1`
       return { found: true, name: p.name, segment: p.segment, ad: ad ?? null, roast_text: r?.text ?? null }
     }
     case 'orders': { // unfulfilled paid orders, for the fulfill heartbeat
@@ -42,22 +44,25 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
         order by o.created_at asc limit 25`
       return { items: [...rows] }
     }
-    case 'gallery': { // the case-study feed: original ad → roast → fixed ad, per roasted prospect
+    case 'gallery': { // case-study feed: the SPECIFIC roasted ad → roast → fixed ad
       const rows = await sql<any[]>`
-        select p.id, p.name,
-          (select creative_url from ads where brand_id=p.id and creative_url is not null order by created_at desc limit 1) as original,
-          (select text from interactions where prospect_id=p.id and channel='x'   and direction='out' order by created_at desc limit 1) as roast,
+        select p.id, p.name, r.ad_id, r.text as roast,
+          (select creative_url from ads where id = r.ad_id) as original,
           (select ref  from interactions where prospect_id=p.id and channel='fix' order by created_at desc limit 1) as fix_image,
           (select text from interactions where prospect_id=p.id and channel='fix' order by created_at desc limit 1) as fix_copy
         from prospects p
-        where exists (select 1 from interactions i where i.prospect_id=p.id and i.channel='x' and i.direction='out')
+        join lateral (
+          select ad_id, text from interactions
+          where prospect_id=p.id and channel='x' and direction='out'
+          order by created_at desc limit 1
+        ) r on true
         order by p.created_at desc limit 24`
       return { items: [...rows] }
     }
     case 'record': {
       const j = JSON.parse(String(f.json || '{}'))
-      const [r] = await sql`insert into interactions (prospect_id, channel, direction, ref, from_addr, subject, text)
-        values (${j.prospect_id ?? null}, ${j.channel ?? 'note'}, ${j.direction ?? 'out'}, ${j.ref ?? null},
+      const [r] = await sql`insert into interactions (prospect_id, ad_id, channel, direction, ref, from_addr, subject, text)
+        values (${j.prospect_id ?? null}, ${j.ad_id ?? null}, ${j.channel ?? 'note'}, ${j.direction ?? 'out'}, ${j.ref ?? null},
                 ${j.from_addr ?? null}, ${j.subject ?? null}, ${j.text ?? null}) returning id`
       return { id: r.id }
     }

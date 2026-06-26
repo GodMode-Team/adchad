@@ -94,4 +94,6 @@ create table if not exists ledger (
   created_at timestamptz default now()
 );
 
+alter table interactions add column if not exists ad_id text;  -- the SPECIFIC ad a roast/fix targets (not just the brand)
+
 insert into control (id, paused) values (1, false) on conflict (id) do nothing;
