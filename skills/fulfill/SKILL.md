@@ -17,8 +17,8 @@ A paid Stripe order (the webhook records it), or "fulfill order <id>."
 ## Procedure — $5 single fix
 1. Get the ad + prospect from `db` (confirm the order is paid first).
 2. Rewrite the ad with the `copy` skill → new headline / body / CTA + a creative direction.
-3. Generate the creative by **editing their original ad** (keeps their logo + brand — the model renders the new copy in-style):
-   `pnpm -s tool creative --original "<the roasted ad's creative_url>" --brand "<business name>" --headline "<h>" --body "<b>" --cta "<c>"` → `{imageUrl}`.
+3. Generate the fixed ad (gpt-image-2 renders the text in-image, drop-in-ready):
+   `pnpm -s tool creative --headline "<h>" --body "<b>" --cta "<c>" --direction "<style>"` → `{imageUrl}`.
 4. Deliver: `pnpm -s tool email send --to "<buyer>" --subject "Your fixed ad is ready" --body "<the new copy + the image URL>"`.
 5. Ledger + stage:
    `pnpm -s tool db revenue --cents 500 --note "fix <id>"` · `pnpm -s tool db spend --cents <gen cost> --note "creative"` · `pnpm -s tool db stage --id <id> --stage customer`.

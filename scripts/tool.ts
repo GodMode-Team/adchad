@@ -42,11 +42,7 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
     }
     case 'creative': {
       const { generate } = await import('../tools/creative')
-      return generate(
-        { headline: S('headline'), body: f.body ? S('body') : null, cta: f.cta ? S('cta') : null, creativeDirection: f.direction ? S('direction') : null },
-        S('original'), // the original ad image to edit (keeps logo + brand)
-        f.brand ? S('brand') : null,
-      )
+      return generate({ headline: S('headline'), body: f.body ? S('body') : null, cta: f.cta ? S('cta') : null, creativeDirection: f.direction ? S('direction') : null })
     }
     case 'stripe': {
       const { checkout } = await import('../tools/stripe')
