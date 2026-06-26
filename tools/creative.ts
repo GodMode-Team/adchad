@@ -35,6 +35,13 @@ export async function generate(fix: Fix, _brand?: string | null): Promise<{ imag
   else throw new Error('no image returned from ' + MODEL + ': ' + JSON.stringify(j).slice(0, 200))
 
   const name = `${randomUUID()}.png`
+  // Host on Vercel Blob so the deployed funnel can serve it (the agent and the web app don't share a disk).
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const { put } = await import('@vercel/blob')
+    const { url } = await put(`fixes/${name}`, buf, { access: 'public', contentType: 'image/png', token: process.env.BLOB_READ_WRITE_TOKEN })
+    return { imageUrl: url }
+  }
+  // local fallback (no blob token)
   const dir = join(process.cwd(), 'public', 'fixes')
   mkdirSync(dir, { recursive: true })
   writeFileSync(join(dir, name), buf)
