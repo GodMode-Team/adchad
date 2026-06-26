@@ -85,7 +85,43 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
       const [c] = await sql`select paused from control where id=1`
       return { paused: !!c?.paused }
     }
+    case 'feed': { // public activity timeline for /live — read-only; PII stripped at the SQL layer (never selects from_addr/subject/buyer_email)
+      const [pros, inter, led, metrics, ledger] = await Promise.all([
+        sql<any[]>`select name, created_at from prospects order by created_at desc limit 50`,
+        // text is projected to NULL unless it's a public X roast — privacy enforced in SQL, not just in the JS branch below
+        sql<any[]>`select i.created_at, i.channel, i.direction, i.ref,
+            case when i.channel = 'x' and i.direction = 'out' then i.text else null end as text,
+            p.name as prospect_name
+          from interactions i left join prospects p on p.id = i.prospect_id
+          order by i.created_at desc limit 50`,
+        sql<any[]>`select created_at, kind, amount_cents, note from ledger order by created_at desc limit 50`,
+        run('metrics', {}),
+        run('ledger', {}),
+      ])
+      const events: any[] = []
+      for (const p of pros) events.push({ ts: p.created_at, kind: 'prospect', icon: '🔍', title: `New target: ${p.name ?? 'unknown'}` })
+      for (const i of inter) {
+        const who = i.prospect_name ?? 'a brand'
+        if (i.channel === 'x' && i.direction === 'out') // public roast — text is already public on X
+          events.push({ ts: i.created_at, kind: 'roast', icon: '🔥', title: `Roasted ${who}`, detail: i.text ? String(i.text).slice(0, 240) : undefined, link: i.ref ? `https://x.com/i/status/${i.ref}` : undefined })
+        else if (i.direction === 'in') // reply/DM — show that it happened, never the private body
+          events.push({ ts: i.created_at, kind: 'reply', icon: '💬', title: `${who} replied` })
+        else if (i.channel === 'email' && i.direction === 'out')
+          events.push({ ts: i.created_at, kind: 'email', icon: '📧', title: `Emailed ${who}` })
+        else if (i.channel === 'fix') // image is viewer-fetched — require https to block http tracking / mixed content
+          events.push({ ts: i.created_at, kind: 'fix', icon: '✅', title: `Delivered fix to ${who}`, image: i.ref && String(i.ref).startsWith('https://') ? i.ref : undefined })
+        // channel='note' (internal reasoning) and anything else: not shown
+      }
+      for (const l of led) {
+        const amt = `$${(Math.abs(l.amount_cents ?? 0) / 100).toFixed(2)}`
+        const note = String(l.note || l.kind).split(/\s+/).filter((w) => w.length <= 20).join(' ').trim() || l.kind // drop ID-like tokens (e.g. Stripe ids) from the public feed
+        events.push({ ts: l.created_at, kind: 'money', icon: '💸', title: `${l.kind === 'revenue' ? '+' : '−'}${amt} — ${note}` })
+      }
+      events.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime())
+      const m = metrics as any, lg = ledger as any // revenue_cents from metrics (orders); cost/margin from ledger — no silent key collision
+      return { events: events.slice(0, 50), stats: { ...m, cost_cents: lg.cost_cents, margin_cents: lg.margin_cents } }
+    }
     default:
-      throw new Error(`db: unknown op '${sub}'. try: metrics ledger prospects record stage spend revenue pause resume status`)
+      throw new Error(`db: unknown op '${sub}'. try: metrics ledger prospects page orders gallery feed record stage spend revenue pause resume status`)
   }
 }

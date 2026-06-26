@@ -37,6 +37,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
           </p>
           <a className="cta" href={checkout}>Fix my ad — $5 →</a>
           <div className="cta-note">Headline, body, CTA + creative direction. Delivered to your inbox in minutes.</div>
+          <a href="/live" style={{ display: 'inline-block', marginTop: 16, color: '#bbb', fontSize: 14, textDecoration: 'underline' }}>● Watch AdChad work, live →</a>
         </div>
       </section>
 
