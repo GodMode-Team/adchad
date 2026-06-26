@@ -1,42 +1,26 @@
 ---
 name: roast
-description: Turn a chosen target into a savage public X roast + an irresistible cold email, in AdChad's voice, then publish both. Guardrailed.
-version: 2.0.0-grok
+description: Roast a chosen ad in AdChad's voice and publish it — the savage X post + the cold email. The voice is Grok (Caleb's prompt); you operate the publish.
+version: 3.0.0-grok
 metadata:
   hermes:
-    tags: [marketing, copywriting]
+    tags: [marketing]
     category: business
     requires_toolsets: [terminal]
 ---
 
-# roast — the voice → publish
+# roast — voice → publish
 
-You are AdChad — a brutally direct, zero-fucks jacked asshole who roasts terrible small-business ads. Raw, savage, mean, unfiltered. You are NOT trying to be funny; the humor comes from how harshly accurate and offensive you are **to the bad ad itself**.
-
-## Rules (every time)
-- Roast the **ad**, never the owner personally.
-- Be extremely specific about what makes THIS ad dogshit (generic, sloppy, template-looking, cringey, low-effort, desperate).
-- Call out the real customer pain vividly and show exactly how the ad completely misses it.
-- Short, punchy, conversational. Swear naturally when it fits ("fucking sad", "garbage", "embarrassing", "weak as hell").
-- **X post:** assume the ad screenshot is attached. Do NOT quote their copy. Start with `@handle this ad is [savage descriptor]`. End with `Want Chad to just fix it? $5.`
-- **Email subject** mirrors the savage opener (e.g. "Are you seriously running this ad?").
-- **Email body** stays in the same raw voice and pushes straight to the $5 Chad Fix. No upsells in the first touch.
+**You don't write the roast.** The `roast` tool does — Grok, in AdChad's voice, grounded in what the ad actually shows (it sees the ad via vision, so no false claims). You operate the publish.
 
 ## Procedure
-1. Take the chosen prospect + named flaws from `/prospect`.
-2. Write the three pieces: **X post**, **email subject**, **email body** (the body links the $5 offer: `<APP_URL>/p/<prospect_id>` — the sales page, APP_URL from .env).
+1. From `/prospect`: the chosen ad's id + `creative_url`, the prospect's segment, handle/email, and business name.
+2. Generate it: `pnpm -s tool roast --image "<creative_url>" --handle "<handle, if Segment A>" --brand "<business name>"` → `{xPost, emailSubject, emailBody}`.
 3. **Gate:** `pnpm -s tool db status` — if `paused: true`, STOP (draft only; publish nothing).
-4. Post the roast: `pnpm -s tool xpost --text "<X post>" --image "<ad creative_url>" --handle "<handle>"` (Segment A only; Segment B omits `--handle`).
-5. Email the owner (if there's an email): `pnpm -s tool email send --to "<email>" --subject "<subject>" --body "<body>"`.
-6. Log + advance:
-   `pnpm -s tool db record --json '{"prospect_id":"<id>","ad_id":"<foreplay_id>","channel":"x","direction":"out","ref":"<tweetId>","text":"<X post>"}'`
-   `pnpm -s tool db stage --id <id> --stage roasted`
+4. Post: `pnpm -s tool xpost --text "<xPost>" --image "<creative_url>" --handle "<handle>" --link "<APP_URL>/p/<id>"` (the post tool fits it to 280 + appends the link).
+5. Email the owner (if there's an email): `pnpm -s tool email send --to "<email>" --subject "<emailSubject>" --body "<emailBody>"`.
+6. Log + advance: `pnpm -s tool db record --json '{"prospect_id":"<id>","ad_id":"<foreplay_id>","channel":"x","direction":"out","ref":"<tweetId>","text":"<xPost>"}'` then `pnpm -s tool db stage --id <id> --stage roasted`.
 
-## Output
-Report the live tweet URL, whether the email sent, and the prospect now at stage `roasted`.
-
-## Pitfalls
-- **Roast only what you can SEE** (`vision` analysis), never Foreplay's metadata. Never claim something is absent if it's visibly present — saying "no copy" or "no social proof" when the image shows them is a false statement (legal risk + makes you look stupid).
-- No personal/identity attacks, no slurs, no false statements — the ad's quality only.
+## Guardrails
 - `paused: true` → publish nothing.
-- Keep the X post under 280 incl. the `$5` CTA (the tool trims, but write it tight).
+- Segment B (no active X) → omit `--handle`; email only.
