@@ -1,0 +1,11 @@
+.codegraph
+.git
+node_modules
+.next
+tests
+specs
+skills
+scripts
+public/fixes
+public/originals
+*.md
