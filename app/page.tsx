@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 const INK = 'var(--ink)', GREEN = 'var(--green)', PINK = 'var(--pink)', YELLOW = 'var(--yellow)', BG = 'var(--bg)'
 const F_DISPLAY = 'var(--f-display)', F_HEAVY = 'var(--f-heavy)', F_BUNGEE = 'var(--f-bungee)', F_MARKER = 'var(--f-marker)', F_MONO = 'var(--f-mono)', F_SANS = 'var(--f-sans)'
 
-const tick = ' YOUR ADS ARE DOGSHIT ● I CAN PROVE IT IN 4K ● YOUR CTR IS A CRY FOR HELP ● YOUR AGENCY ROBBED YOU BLIND ●'
+const tick = ' YOUR ADS ARE DOGSHIT ● I\'M JACKED AND I\'M RIGHT ● YOUR CTR IS A CRY FOR HELP ● YOUR AGENCY ROBBED YOU BLIND ●'
 const wrap = { maxWidth: 1200, margin: '0 auto' } as const
 
 export default async function Home() {
@@ -52,7 +52,6 @@ export default async function Home() {
           <div style={{ fontFamily: F_HEAVY, fontSize: 24, letterSpacing: -1, color: '#fff' }}>ADCHAD</div>
           <div style={{ display: 'flex', gap: 22, marginLeft: 14 }}>
             <a className="ac-link" href="#how" style={{ fontFamily: F_MONO, fontSize: 13, color: '#9fb0a0' }}>how it works</a>
-            <a className="ac-link" href="#pricing" style={{ fontFamily: F_MONO, fontSize: 13, color: '#9fb0a0' }}>pricing</a>
             <a className="ac-link" href="/live" style={{ fontFamily: F_MONO, fontSize: 13, color: '#9fb0a0' }}>live feed</a>
           </div>
           <a className="ac-nav-cta" href="#hero" style={{ marginLeft: 'auto', fontFamily: F_BUNGEE, fontSize: 14, color: INK, background: GREEN, border: '3px solid #fff', boxShadow: `3px 3px 0 ${INK}`, padding: '8px 16px' }}>GET ROASTED</a>
@@ -136,50 +135,6 @@ export default async function Home() {
         </div>
       </div>
 
-      {/* ===== PRICING ===== */}
-      <div id="pricing" style={{ background: BG, borderBottom: `4px solid ${INK}` }}>
-        <div style={{ ...wrap, padding: '62px 22px' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: F_DISPLAY, fontSize: 52, color: '#fff', lineHeight: 0.9 }}>PICK YOUR <span style={{ color: PINK }}>PAIN LEVEL.</span></div>
-          </div>
-          <div style={{ display: 'flex', gap: 14, marginTop: 34, flexWrap: 'wrap', alignItems: 'stretch' }}>
-            {/* FREE */}
-            <div style={{ flex: 1, minWidth: 230, background: 'var(--card)', border: '3px solid var(--line)', borderRadius: 18, padding: 22 }}>
-              <div style={{ fontFamily: F_MONO, fontSize: 12, color: '#9fb0a0', letterSpacing: 1 }}>FREE</div>
-              <div style={{ fontFamily: F_DISPLAY, fontSize: 44, color: '#fff', lineHeight: 1 }}>$0</div>
-              <div style={{ fontFamily: F_SANS, fontSize: 13, color: 'var(--muted)', marginTop: 6 }}>The public roast. What&apos;s broken, plus one better hook.</div>
-              <div style={{ height: 1.5, background: 'var(--line)', margin: '16px 0' }} />
-              <div style={{ fontFamily: F_SANS, fontSize: 13, color: '#cfd6cf', lineHeight: 1.9 }}>✓ Creative score 0 to 100<br />✓ What&apos;s broken &amp; why<br />✓ One better hook</div>
-            </div>
-            {/* SINGLE FIX - $5 → #hero (roast first, we need a prospect id before checkout) */}
-            <div style={{ flex: 1.15, minWidth: 240, background: GREEN, border: '4px solid #fff', boxShadow: `8px 8px 0 ${INK}`, borderRadius: 18, padding: 22, position: 'relative' }}>
-              <div style={{ fontFamily: F_MONO, fontSize: 12, color: '#04210d', letterSpacing: 1, fontWeight: 700 }}>SINGLE FIX</div>
-              <div style={{ fontFamily: F_DISPLAY, fontSize: 44, color: INK, lineHeight: 1 }}>$5</div>
-              <div style={{ fontFamily: F_SANS, fontSize: 13, color: '#0a3d16', marginTop: 6 }}>A rewrite + one real HD ad image to run.</div>
-              <div style={{ height: 2, background: '#0a3d1633', margin: '16px 0' }} />
-              <div style={{ fontFamily: F_SANS, fontSize: 13, color: '#0a3d16', lineHeight: 1.9, fontWeight: 500 }}>✓ New headline, body &amp; CTA<br />✓ A generated static ad<br />✓ In your inbox in 60s</div>
-              <a className="ac-price-cta" href="#hero" style={{ display: 'block', textAlign: 'center', marginTop: 18, fontFamily: F_BUNGEE, fontSize: 15, color: '#fff', background: INK, padding: 11, borderRadius: 10 }}>UNFUCK ONE AD →</a>
-            </div>
-            {/* 3-VARIANT PACK */}
-            <div style={{ flex: 1, minWidth: 230, background: 'var(--card)', border: '3px solid var(--line)', borderRadius: 18, padding: 22 }}>
-              <div style={{ fontFamily: F_MONO, fontSize: 12, color: YELLOW, letterSpacing: 1 }}>3-VARIANT PACK</div>
-              <div style={{ fontFamily: F_DISPLAY, fontSize: 44, color: '#fff', lineHeight: 1 }}>$12</div>
-              <div style={{ fontFamily: F_SANS, fontSize: 13, color: 'var(--muted)', marginTop: 6 }}>Three generated ads to A/B test.</div>
-              <div style={{ height: 1.5, background: 'var(--line)', margin: '16px 0' }} />
-              <div style={{ fontFamily: F_SANS, fontSize: 13, color: '#cfd6cf', lineHeight: 1.9 }}>✓ Everything in $5<br />✓ 3 images total<br />✓ Find your winner faster</div>
-            </div>
-            {/* SUBSCRIPTION */}
-            <div style={{ flex: 1, minWidth: 230, background: '#1a0f14', border: '3px solid #4a1f29', borderRadius: 18, padding: 22 }}>
-              <div style={{ fontFamily: F_MONO, fontSize: 12, color: '#ff79a6', letterSpacing: 1 }}>SUBSCRIPTION</div>
-              <div style={{ fontFamily: F_DISPLAY, fontSize: 44, color: '#fff', lineHeight: 1 }}>$49<span style={{ fontSize: 16, color: '#ff79a6' }}>/mo</span></div>
-              <div style={{ fontFamily: F_SANS, fontSize: 13, color: '#c79aa8', marginTop: 6 }}>Fresh creative weekly + I watch your competitors.</div>
-              <div style={{ height: 1.5, background: '#4a1f29', margin: '16px 0' }} />
-              <div style={{ fontFamily: F_SANS, fontSize: 13, color: '#e7cdd6', lineHeight: 1.9 }}>✓ Weekly new ads<br />✓ Competitor monitoring<br />✓ Never go stale again</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* ===== WATCH ME RUN THE BUSINESS ===== */}
       <div style={{ background: GREEN, borderBottom: `4px solid ${INK}` }}>
         <div style={{ ...wrap, padding: '54px 22px', display: 'flex', alignItems: 'center', gap: 30, flexWrap: 'wrap' }}>
@@ -221,20 +176,14 @@ export default async function Home() {
               <div>
                 <div style={{ fontFamily: F_MONO, fontSize: 11, color: '#39443a', letterSpacing: 1, marginBottom: 9 }}>PRODUCT</div>
                 <a className="ac-foot-link" href="#how" style={{ display: 'block', fontFamily: F_SANS, fontSize: 13, color: '#9fb0a0', marginBottom: 6 }}>How it works</a>
-                <a className="ac-foot-link" href="#pricing" style={{ display: 'block', fontFamily: F_SANS, fontSize: 13, color: '#9fb0a0', marginBottom: 6 }}>Pricing</a>
                 <a className="ac-foot-link" href="/live" style={{ display: 'block', fontFamily: F_SANS, fontSize: 13, color: '#9fb0a0' }}>Live feed</a>
               </div>
               <div>
                 <div style={{ fontFamily: F_MONO, fontSize: 11, color: '#39443a', letterSpacing: 1, marginBottom: 9 }}>FOLLOW</div>
                 <a className="ac-foot-link" href="https://x.com/adchadofficial" target="_blank" rel="noreferrer" style={{ display: 'block', fontFamily: F_SANS, fontSize: 13, color: '#9fb0a0', marginBottom: 6 }}>@adchadofficial</a>
-                <a className="ac-foot-link" href="#pricing" style={{ display: 'block', fontFamily: F_SANS, fontSize: 13, color: '#9fb0a0' }}>Get the $5 fix</a>
+                <a className="ac-foot-link" href="#hero" style={{ display: 'block', fontFamily: F_SANS, fontSize: 13, color: '#9fb0a0' }}>Get the $5 fix</a>
               </div>
             </div>
-          </div>
-          <div style={{ height: 1.5, background: 'var(--line)', margin: '26px 0 16px' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-            <div style={{ fontFamily: F_MONO, fontSize: 10, color: '#39443a' }}>© 2026 AdChad</div>
-            <div style={{ fontFamily: F_MONO, fontSize: 10, color: '#39443a' }}>built by an agent, not a vibe</div>
           </div>
         </div>
       </div>
