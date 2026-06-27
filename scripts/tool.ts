@@ -22,7 +22,10 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
     case 'foreplay': {
       const { scan } = await import('../tools/foreplay')
       const { ads, prospects } = await scan(S('query', 'med spa'), N('n', 10))
-      return { ads, prospects }
+      // ponytail: drop `raw` + truncate `copy` before printing — the full blob (~39k chars) rode every
+      // subsequent LLM prefill. Full data is still persisted to the DB by scan(); the agent only needs these fields.
+      const slim = ads.map(({ raw, copy, ...a }) => ({ ...a, copy: copy ? copy.slice(0, 280) : null }))
+      return { ads: slim, prospects }
     }
     case 'enrich': {
       const { enrich } = await import('../tools/enrich')
@@ -64,8 +67,14 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
       const { run } = await import('../tools/db')
       return run(sub, f)
     }
-    default:
-      throw new Error(`unknown tool '${name}'. tools: foreplay enrich xpost xread email creative stripe db`)
+    default: {
+      // ponytail: skill names share no namespace with this CLI, but the model sees `pnpm -s tool <x>` all over the
+      // skills and pattern-completes `tool prospect`. Redirect instead of dead-ending — a wasted round-trip is ~10-140s here.
+      const SKILLS = ['prospect', 'roast', 'engage', 'fulfill', 'report', 'evolve', 'copy', 'synthcheck', 'adchad']
+      if (SKILLS.includes(name))
+        throw new Error(`'${name}' is a SKILL you're already running, not a tool — don't call \`tool ${name}\`. Follow the skill's steps using the real tools: foreplay enrich vision roast fix xpost xread email creative stripe db`)
+      throw new Error(`unknown tool '${name}'. tools: foreplay enrich vision roast fix xpost xread email creative stripe db`)
+    }
   }
 }
 
