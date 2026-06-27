@@ -10,6 +10,8 @@ license: MIT
 
 Use this for any paid-ads copy, landing-page copy, client-facing report, email, or marketing asset that leaves the team.
 
+> **This is the lean operational version.** The full canonical pipeline (voice bible, 24-pattern humanizer, adversarial quality gate, AdChad references + ad swipe file) lives in **`../../brand/standards/copy/`**. Chad's voice + visual non-negotiables: **`../../brand/CHARACTER.md`**. Ship-check: **`../../brand/taste/ADCHAD-TASTE-PACK.md`**.
+
 ## Pipeline
 
 1. Write in the team's voice first. Direct, specific, action-first, low fluff.
