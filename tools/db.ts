@@ -31,7 +31,7 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
       const id = String(f.id)
       const [p] = await sql<any[]>`select id, name, segment, x_handle from prospects where id=${id} limit 1`
       if (!p) return { found: false }
-      const [r] = await sql<any[]>`select ad_id, text from interactions where prospect_id=${id} and channel='x' and direction='out' order by created_at desc limit 1`
+      const [r] = await sql<any[]>`select ad_id, text from interactions where prospect_id=${id} and channel in ('x','roast') and direction='out' order by created_at desc limit 1`
       const [ad] = r?.ad_id
         ? await sql<any[]>`select advertiser, creative_url, copy, link_url from ads where id=${r.ad_id}`
         : await sql<any[]>`select advertiser, creative_url, copy, link_url from ads where brand_id=${id} and creative_url is not null order by created_at desc limit 1`
@@ -71,6 +71,15 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
       await sql`insert into scores (ad_id, prospect_id, total)
         values (${f.ad_id ? String(f.ad_id) : null}, ${f.prospect_id ? String(f.prospect_id) : null}, ${Number(f.total ?? 0)})`
       return { ok: true }
+    case 'intake': { // one on-demand web roast: ad + prospect + PRIVATE roast (channel='roast', not posted to X) + score
+      const j = JSON.parse(String(f.json || '{}'))
+      const pid = String(j.prospect_id), adId = String(j.ad_id)
+      await sql`insert into ads (id, brand_id, advertiser, creative_url) values (${adId}, ${pid}, ${j.name ?? null}, ${j.creative_url ?? null}) on conflict (id) do nothing`
+      await sql`insert into prospects (id, name, email, email_source, stage) values (${pid}, ${j.name ?? null}, ${j.email ?? null}, 'inbound', 'roasted') on conflict (id) do nothing`
+      await sql`insert into interactions (prospect_id, ad_id, channel, direction, text) values (${pid}, ${adId}, 'roast', 'out', ${j.roast ?? null})`
+      await sql`insert into scores (ad_id, prospect_id, total) values (${adId}, ${pid}, ${Number(j.score ?? 0)})`
+      return { ok: true, prospect_id: pid }
+    }
     case 'stage':
       await sql`update prospects set stage=${String(f.stage)} where id=${String(f.id)}`
       return { ok: true }
