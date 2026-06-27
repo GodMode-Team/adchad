@@ -1,6 +1,6 @@
 # Spec 02 — `prospect` skill (find + pick targets)
 
-**Goal:** Teach the agent to hunt: find weak Meta ads, audit them, enrich the owner's contact, and **decide** who's worth roasting — judgment, not a fixed threshold.
+**Goal:** Teach the agent to hunt across **two modes, ~50/50** (battle plan): **traction** — roast recognizable X brands publicly (punch up, distribution, no sale) — and **revenue** — find weak SMB Meta ads, audit, enrich the owner's contact, and sell the $5 fix. **Decide** who's worth roasting — judgment, not a fixed threshold.
 
 **Deliverable** (`skills/prospect/SKILL.md`)
 - **When:** the acquire cron, or "go find someone to roast in <niche>."
