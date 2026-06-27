@@ -7,8 +7,8 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
   switch (sub) {
     case 'metrics': {
       const [m] = await sql`select
-        (select count(*) from prospects)::int                          as prospects,
-        (select count(*) from prospects where stage='roasted')::int    as roasted,
+        (select count(*) from prospects where coalesce(email_source,'')<>'inbound')::int                       as prospects,
+        (select count(*) from prospects where stage='roasted' and coalesce(email_source,'')<>'inbound')::int    as roasted,
         (select count(*) from prospects where stage='contacted')::int  as contacted,
         (select count(*) from prospects where stage='replied')::int    as replied,
         (select count(*) from prospects where stage='customer')::int   as customers,
@@ -75,10 +75,14 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
       const j = JSON.parse(String(f.json || '{}'))
       const pid = String(j.prospect_id), adId = String(j.ad_id)
       await sql`insert into ads (id, brand_id, advertiser, creative_url) values (${adId}, ${pid}, ${j.name ?? null}, ${j.creative_url ?? null}) on conflict (id) do nothing`
-      await sql`insert into prospects (id, name, email, email_source, stage) values (${pid}, ${j.name ?? null}, ${j.email ?? null}, 'inbound', 'roasted') on conflict (id) do nothing`
+      await sql`insert into prospects (id, name, email, email_source, stage) values (${pid}, ${j.name ?? null}, ${j.email ?? null}, 'inbound', 'web') on conflict (id) do nothing`
       await sql`insert into interactions (prospect_id, ad_id, channel, direction, text) values (${pid}, ${adId}, 'roast', 'out', ${j.roast ?? null})`
       await sql`insert into scores (ad_id, prospect_id, total) values (${adId}, ${pid}, ${Number(j.score ?? 0)})`
       return { ok: true, prospect_id: pid }
+    }
+    case 'roastquota': { // today's on-demand web roasts — a DURABLE daily cap bounds spend on the public /api/roast endpoint
+      const [c] = await sql`select count(*)::int n from interactions where channel='roast' and direction='out' and created_at >= date_trunc('day', now())`
+      return { today: c.n }
     }
     case 'stage':
       await sql`update prospects set stage=${String(f.stage)} where id=${String(f.id)}`
@@ -101,9 +105,10 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
     }
     case 'feed': { // public activity timeline for /live — read-only; PII stripped at the SQL layer (never selects from_addr/subject/buyer_email)
       const [pros, inter, led, metrics, ledger] = await Promise.all([
+        // public feed = the agent's OWN prospecting only — never web/email uploaders (email_source='inbound'), who roasted privately
         sql<any[]>`select name, created_at,
             (select total from scores s where s.prospect_id = prospects.id order by s.created_at desc limit 1) as score
-          from prospects order by created_at desc limit 50`,
+          from prospects where coalesce(email_source, '') <> 'inbound' order by created_at desc limit 50`,
         // text is projected to NULL unless it's a public X roast — privacy enforced in SQL, not just in the JS branch below
         sql<any[]>`select i.created_at, i.channel, i.direction, i.ref,
             case when i.channel = 'x' and i.direction = 'out' then i.text else null end as text,

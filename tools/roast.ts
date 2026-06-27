@@ -1,6 +1,6 @@
 // The roast voice = Caleb's prompt, VERBATIM. Nothing added. Grok isn't multimodal on OpenRouter, so we SEE the
 // ad with the vision model and hand Grok the screenshot's contents — savage AND truthful, no extra rules.
-import { describe } from './vision'
+import { describe, type AdLook } from './vision'
 
 const MODEL = process.env.MODEL_ROAST || 'x-ai/grok-4.3'
 
@@ -40,9 +40,11 @@ function section(txt: string, start: RegExp, end: RegExp | null): string {
 }
 
 /** Roast an ad in AdChad's voice (Grok, sees the image). Returns the X post + email, per Caleb's format. */
-export async function roast(opts: { image: string; handle?: string | null; brand?: string | null }): Promise<Roast> {
+export async function roast(opts: { image: string; handle?: string | null; brand?: string | null; look?: AdLook }): Promise<Roast> {
   if (!opts.image) throw new Error('roast: --image (the ad to roast) is required')
-  const look = await describe(opts.image) // SEE the ad (vision), then hand Grok the screenshot's contents
+  const t0 = Date.now()
+  const look = opts.look ?? await describe(opts.image) // SEE the ad (vision) unless the caller already did — avoids paying for vision twice
+  if (!opts.look) console.error(`roast: vision (${process.env.MODEL_VISION || 'google/gemini-2.5-flash'}) ${Date.now() - t0}ms`)
   const ad =
     `What the ad's screenshot shows:\n` +
     `- Headline: ${look.headline ?? '—'}\n` +
@@ -57,6 +59,7 @@ export async function roast(opts: { image: string; handle?: string | null; brand
     (opts.handle ? ` Their X handle is @${opts.handle}.` : ` They have no public X handle — open with a savage descriptor instead of an @handle.`) +
     `\n\n${ad}\n\nRoast this ad.`
 
+  const t1 = Date.now()
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' },
@@ -71,6 +74,7 @@ export async function roast(opts: { image: string; handle?: string | null; brand
   })
   if (!res.ok) throw new Error(`roast ${res.status}: ${(await res.text()).slice(0, 200)}`)
   const j: any = await res.json()
+  console.error(`roast: grok (${MODEL}) ${Date.now() - t1}ms`)
   const raw: string = (j.choices?.[0]?.message?.content ?? '').replace(/<think>[\s\S]*?<\/think>/g, '').trim()
 
   return {
