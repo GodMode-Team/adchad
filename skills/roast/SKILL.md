@@ -1,6 +1,6 @@
 ---
 name: roast
-description: Roast an ad in AdChad's voice. If the operator handed you an ad (an attached image or a URL), roast THAT — deterministically, one tool call, no hunting. The voice is Grok (Caleb's prompt); the `roast` tool sees the ad via vision so it never lies about it.
+description: Roast an ad in AdChad's voice. If the operator handed you an ad (an attached image or a URL), roast THAT — deterministically, one tool call, no hunting. The voice runs on Nous Hermes-4 (MODEL_ROAST); the `roast` tool sees the ad via vision so it never lies about it.
 version: 4.0.0
 metadata:
   hermes:
@@ -11,7 +11,10 @@ metadata:
 
 # roast — one ad in, one roast out
 
-**You don't write the roast.** The `roast` tool does — Grok, in AdChad's voice, grounded in what the ad actually shows (vision reads the image, so no false claims). Your only job is to give it the ad and hand back the result.
+**You don't write the roast.** The `roast` tool does — Nous Hermes-4, in AdChad's voice, grounded in what the ad actually shows (vision reads the image, so no false claims). Your only job is to give it the ad and hand back the result.
+
+> **The roast contract (battle plan §2 — every public roast).** The output must hit all 5 beats: **1) Shock** (one data-backed almost-unbelievable fact) · **2) Teardown** (brutal, funny, specific to THEIR ad — punch the ad, never the person) · **3) Expertise** (the real fix + *why*, proving Chad is a media buyer, not a meme) · **4) Feel-good** (the conversion-gated $1 donation, tied to a detail in the ad) · **5) CTA** ("Unfuck it → $5. The good one's already written.") + the autonomy flex (`— Chad · roast #N/100 · an AI wrote this`).
+> **Viral gate before any public post** — passes ALL or regenerate: ☐ Shocking ☐ Useful ☐ Funny ☐ Autonomous-flex ☐ Feel-good ☐ Safe (punches the ad, not the human). Run `../../brand/taste/ADCHAD-TASTE-PACK.md`. Voice + look non-negotiables: `../../brand/CHARACTER.md`.
 
 ## Route FIRST (don't skip this)
 
