@@ -1,6 +1,6 @@
 import { sql } from '../lib/db'
 
-type F = Record<string, string | boolean>
+type F = Record<string, string | number | boolean> // CLI passes string|boolean; programmatic callers (routes, tests) may pass numbers
 
 /** The agent's CRM + ledger. Named ops only — no raw SQL from the model. */
 export async function run(sub: string | undefined, f: F): Promise<unknown> {
@@ -35,7 +35,8 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
       const [ad] = r?.ad_id
         ? await sql<any[]>`select advertiser, creative_url, copy, link_url from ads where id=${r.ad_id}`
         : await sql<any[]>`select advertiser, creative_url, copy, link_url from ads where brand_id=${id} and creative_url is not null order by created_at desc limit 1`
-      return { found: true, name: p.name, segment: p.segment, ad: ad ?? null, roast_text: r?.text ?? null }
+      const [sc] = await sql<any[]>`select total from scores where ad_id=${r?.ad_id ?? null} or prospect_id=${id} order by created_at desc limit 1`
+      return { found: true, name: p.name, segment: p.segment, ad: ad ?? null, roast_text: r?.text ?? null, score: sc ? Number(sc.total) : null }
     }
     case 'orders': { // unfulfilled paid orders, for the fulfill heartbeat
       const rows = await sql<any[]>`select o.id, o.prospect_id, o.tier, o.amount, o.buyer_email, o.status
@@ -66,6 +67,10 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
                 ${j.from_addr ?? null}, ${j.subject ?? null}, ${j.text ?? null}) returning id`
       return { id: r.id }
     }
+    case 'score': // record a creative score (0–100) for an ad/prospect
+      await sql`insert into scores (ad_id, prospect_id, total)
+        values (${f.ad_id ? String(f.ad_id) : null}, ${f.prospect_id ? String(f.prospect_id) : null}, ${Number(f.total ?? 0)})`
+      return { ok: true }
     case 'stage':
       await sql`update prospects set stage=${String(f.stage)} where id=${String(f.id)}`
       return { ok: true }
@@ -87,11 +92,14 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
     }
     case 'feed': { // public activity timeline for /live — read-only; PII stripped at the SQL layer (never selects from_addr/subject/buyer_email)
       const [pros, inter, led, metrics, ledger] = await Promise.all([
-        sql<any[]>`select name, created_at from prospects order by created_at desc limit 50`,
+        sql<any[]>`select name, created_at,
+            (select total from scores s where s.prospect_id = prospects.id order by s.created_at desc limit 1) as score
+          from prospects order by created_at desc limit 50`,
         // text is projected to NULL unless it's a public X roast — privacy enforced in SQL, not just in the JS branch below
         sql<any[]>`select i.created_at, i.channel, i.direction, i.ref,
             case when i.channel = 'x' and i.direction = 'out' then i.text else null end as text,
-            p.name as prospect_name
+            p.name as prospect_name,
+            (select total from scores s where s.ad_id = i.ad_id order by s.created_at desc limit 1) as score
           from interactions i left join prospects p on p.id = i.prospect_id
           order by i.created_at desc limit 50`,
         sql<any[]>`select created_at, kind, amount_cents, note from ledger order by created_at desc limit 50`,
@@ -99,11 +107,11 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
         run('ledger', {}),
       ])
       const events: any[] = []
-      for (const p of pros) events.push({ ts: p.created_at, kind: 'prospect', icon: '🔍', title: `New target: ${p.name ?? 'unknown'}` })
+      for (const p of pros) events.push({ ts: p.created_at, kind: 'prospect', icon: '🔍', title: `New target: ${p.name ?? 'unknown'}`, score: p.score != null ? Number(p.score) : undefined })
       for (const i of inter) {
         const who = i.prospect_name ?? 'a brand'
         if (i.channel === 'x' && i.direction === 'out') // public roast — text is already public on X
-          events.push({ ts: i.created_at, kind: 'roast', icon: '🔥', title: `Roasted ${who}`, detail: i.text ? String(i.text).slice(0, 240) : undefined, link: i.ref ? `https://x.com/i/status/${i.ref}` : undefined })
+          events.push({ ts: i.created_at, kind: 'roast', icon: '🔥', title: `Roasted ${who}`, detail: i.text ? String(i.text).slice(0, 240) : undefined, link: i.ref ? `https://x.com/i/status/${i.ref}` : undefined, score: i.score != null ? Number(i.score) : undefined })
         else if (i.direction === 'in') // reply/DM — show that it happened, never the private body
           events.push({ ts: i.created_at, kind: 'reply', icon: '💬', title: `${who} replied` })
         else if (i.channel === 'email' && i.direction === 'out')

@@ -40,6 +40,8 @@ export type AdLook = {
   social_proof: string | null
   visual: string | null
   real_flaws: string[]
+  score: number   // 0–100 creative quality, lower = worse
+  verdict: string // one brutal line
 }
 
 /** Look at an ad image and report ONLY what's actually visible (text, social proof, real flaws). */
@@ -48,9 +50,11 @@ export async function describe(imageUrl: string): Promise<AdLook> {
   const prompt =
     `You are auditing a Meta ad IMAGE. Report ONLY what is actually visible — never invent or assume. ` +
     `Read ALL on-image text. Return ONLY minified JSON: ` +
-    `{"headline","body","offer","cta","social_proof","visual","real_flaws"}. ` +
+    `{"headline","body","offer","cta","social_proof","visual","real_flaws","score","verdict"}. ` +
     `social_proof = any visible star ratings, reviews, testimonials, or credibility claims (else null). ` +
-    `real_flaws = an array of the 2-3 biggest GENUINE weaknesses of THIS specific ad (only true ones).`
+    `real_flaws = an array of the 2-3 biggest GENUINE weaknesses of THIS specific ad (only true ones). ` +
+    `score = an INTEGER 0-100 rating THIS ad's creative quality (lower = worse; generic/sloppy/low-effort/stale ads land 10-35, a genuinely strong ad 70+). ` +
+    `verdict = one short brutal line (≤12 words) on why it scored that.`
 
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -64,5 +68,11 @@ export async function describe(imageUrl: string): Promise<AdLook> {
   if (!res.ok) throw new Error(`vision ${res.status}: ${(await res.text()).slice(0, 200)}`)
   const j: any = await res.json()
   const txt: string = j.choices?.[0]?.message?.content ?? '{}'
-  return parseJsonObject(txt)
+  const look = parseJsonObject(txt) as AdLook
+  // normalize the two scored fields so callers can rely on them
+  const n = Number((look as any).score)
+  look.score = Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : 30
+  look.verdict = String(look.verdict || look.real_flaws?.[0] || 'weak, generic ad').slice(0, 120)
+  if (!Array.isArray(look.real_flaws)) look.real_flaws = []
+  return look
 }
