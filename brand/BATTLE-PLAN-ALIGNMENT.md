@@ -6,13 +6,13 @@ Line-by-line check of the repo against the **Master Battle Plan** (battle-plan-p
 
 | Battle-plan guideline | Repo today | |
 |---|---|---|
-| **Scan active X brand ads** — "on X = they see + reply (traction); where judges live." Meta scraping is explicitly **❌ CUT**. | `prospect` skill scans the **Meta ad library via Foreplay** only. | ⚠️ |
-| **Roast 20-30 recognizable X brands publicly** for live traction ("the roast IS distribution"). | Targets rotate **SMB niches** (med spa, dentist, HVAC, gym). No recognizable-brand traction path. | ⚠️ |
+| **Scan active X brand ads** — "on X = they see + reply (traction); where judges live." Meta scraping is explicitly **❌ CUT**. | `prospect` now runs **~50/50**: traction = recognizable X brands (via `xread`/URL → vision); revenue = Foreplay SMB. | ✅ |
+| **Roast 20-30 recognizable X brands publicly** for live traction ("the roast IS distribution"). | Traction mode added — punch UP at big brands, public-only, no email. | ✅ |
 | Punch the **ad, never the person**; brand-safety gate. | N≥3 fairness vote; drops clean ads; opt-out via email tool. | ✅ |
 | Don't re-hit the same target; judgment not threshold. | Reads `db prospects`, rotates, picks one prime suspect. | ✅ |
 | **5-beat roast contract** (Shock→Teardown→Expertise→Feel-good→CTA) + **6-box viral gate** (Shocking/Useful/Funny/Autonomous-flex/Feel-good/Safe → `/taste`). | The `roast` tool prompt does **not** encode the 5 beats or the viral gate. | ⚠️ |
 
-**The split the plan intends:** *recognizable X brands → traction roasts* (punch up, they reply, the Hall-of-Shame feed judges watch) **+** *reachable SMBs → the $5/$49 revenue* (dogfood the first sub). The repo only builds the revenue half. The traction half is the plan's #1 uncopyable edge — add it.
+**The split the plan intends:** *recognizable X brands → traction roasts* (punch up, they reply, the Hall-of-Shame feed judges watch) **+** *reachable SMBs → the $5/$49 revenue* (dogfood the first sub). **Now wired as a ~50/50 dual mode in `skills/prospect`** (Step 0 picks the lagging mode). Tooling note: traction mode reads a brand's ad via `xread`/pasted URL → `vision`; if `xread` can't surface ad creatives, the agent roasts from a pasted creative URL.
 
 ## The autonomous money loop (battle plan §5, §6, §7)
 
@@ -42,7 +42,7 @@ Line-by-line check of the repo against the **Master Battle Plan** (battle-plan-p
 
 1. **❌ Ship the Every.org $1 donation + receipt.** It's a whole battle-plan section, an MVP-core item, and one of the three rails in the money-shot. Right now the "gives back" beat doesn't exist. *(Verify Every.org API key Day 1; Stripe-Climate or one manual lump + real receipt is the fallback — never be without a receipt.)*
 2. **⚠️ Move the fix image to an NVIDIA NIM** (build.nvidia.com SDXL/FLUX) + surface GPU-seconds / cost-per-Unfuck. The image is the single biggest NVIDIA vote and it's currently on Gemini.
-3. **⚠️ Add the recognizable-X-brand traction-roast path** to prospecting (keep Foreplay/SMB for revenue). The public roast of brands the judges follow IS the distribution edge.
+3. **✅ DONE — recognizable-X-brand traction-roast path** added to `skills/prospect` as a ~50/50 dual mode (keeps Foreplay/SMB for revenue). The public roast of brands the judges follow IS the distribution edge.
 4. **⚠️ Encode the 5-beat contract + 6-box viral gate** in the roast tool (gate every public post; run `taste/ADCHAD-TASTE-PACK.md`).
 5. **⚠️ Drop the $12 pack** to one price and re-lead the $49 with spend-protection, not weekly-creative.
 6. **⚠️ Fix the stale "Grok" line** in `roast/SKILL.md` (config already uses Hermes-4 — good).
