@@ -1,6 +1,19 @@
 // See the ad. Foreplay's `copy` field is the caption (often null for DCO ads) — the real copy is IN the image,
 // so we audit the creative with a vision model. Roasts MUST be grounded in what's actually visible.
+import { readFileSync, existsSync } from 'node:fs'
+
 const MODEL = process.env.MODEL_VISION || 'google/gemini-2.5-flash'
+
+const MIME: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', gif: 'image/gif' }
+
+/** A URL passes through; a LOCAL file (e.g. a Slack attachment in the image cache) becomes a data: URL
+ *  the vision API can read — so the agent never has to base64/ls/file-fumble an attachment again. */
+export function toImageUrl(image: string): string {
+  if (/^(https?:|data:)/i.test(image)) return image
+  if (!existsSync(image)) throw new Error(`vision: image not found: ${image}`)
+  const ext = image.split('.').pop()?.toLowerCase() ?? ''
+  return `data:${MIME[ext] ?? 'image/png'};base64,${readFileSync(image).toString('base64')}`
+}
 
 export type AdLook = {
   headline: string | null
@@ -27,7 +40,7 @@ export async function describe(imageUrl: string): Promise<AdLook> {
     headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: MODEL,
-      messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: imageUrl } }] }],
+      messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: toImageUrl(imageUrl) } }] }],
       response_format: { type: 'json_object' },
     }),
   })
