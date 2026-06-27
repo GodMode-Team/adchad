@@ -15,6 +15,23 @@ export function toImageUrl(image: string): string {
   return `data:${MIME[ext] ?? 'image/png'};base64,${readFileSync(image).toString('base64')}`
 }
 
+/** Pull the FIRST complete JSON object out of a model reply that may wrap it in ```fences``` or trailing
+ *  prose. Scans brace depth (ignoring braces inside strings) so it never over-grabs like a greedy regex. */
+export function parseJsonObject(txt: string): any {
+  try { return JSON.parse(txt) } catch {} // clean case (response_format: json_object)
+  const start = txt.indexOf('{')
+  if (start < 0) return {}
+  let depth = 0, inStr = false, esc = false
+  for (let i = start; i < txt.length; i++) {
+    const c = txt[i]
+    if (inStr) { if (esc) esc = false; else if (c === '\\') esc = true; else if (c === '"') inStr = false }
+    else if (c === '"') inStr = true
+    else if (c === '{') depth++
+    else if (c === '}' && --depth === 0) return JSON.parse(txt.slice(start, i + 1))
+  }
+  return {}
+}
+
 export type AdLook = {
   headline: string | null
   body: string | null
@@ -47,6 +64,5 @@ export async function describe(imageUrl: string): Promise<AdLook> {
   if (!res.ok) throw new Error(`vision ${res.status}: ${(await res.text()).slice(0, 200)}`)
   const j: any = await res.json()
   const txt: string = j.choices?.[0]?.message?.content ?? '{}'
-  const m = txt.match(/\{[\s\S]*\}/)
-  return JSON.parse(m ? m[0] : '{}')
+  return parseJsonObject(txt)
 }
