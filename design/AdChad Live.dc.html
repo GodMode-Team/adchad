@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bungee&family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'DM Sans', sans-serif; background:#0a0c0a; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+  @keyframes mq { to { transform: translateX(-50%) } }
+  @keyframes livedot { 0%,100%{opacity:1; transform:scale(1)} 50%{opacity:.35; transform:scale(.8)} }
+  @keyframes work { 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-6px) rotate(5deg)} }
+  @keyframes rowin { from{opacity:0; transform:translateY(-10px)} to{opacity:1; transform:translateY(0)} }
+  @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:.2} }
+  @keyframes glowpulse { 0%,100%{box-shadow:0 0 0 0 rgba(60,232,74,.0)} 50%{box-shadow:0 0 18px 1px rgba(60,232,74,.25)} }
+</style>
+</helmet>
+
+<div style="min-height:100vh; width:100%; background:radial-gradient(circle at 50% -8%, #16271b, #0a0c0a 68%); display:flex; justify-content:center; padding:14px 12px 60px; font-family:'DM Sans',sans-serif;">
+  <div style="width:100%; max-width:474px; display:flex; flex-direction:column; gap:14px;">
+
+    <!-- ===== HEADER ===== -->
+    <div style="border:2px solid #1f2a1f; border-radius:20px; overflow:hidden; background:#0f140f;">
+      <div style="display:flex; align-items:center; gap:10px; padding:14px 16px 10px;">
+        <div style="font-family:'Archivo Black',sans-serif; font-size:24px; letter-spacing:-1px; color:#fff;">ADCHAD</div>
+        <sc-if value="{{ showChad }}" hint-placeholder-val="{{ true }}">
+        <img src="uploads/chad-cutout.png" style="margin-left:auto; width:42px; transform-origin:bottom center; animation:work 1s ease-in-out infinite;">
+        </sc-if>
+      </div>
+      <div style="font-family:'Space Mono',monospace; font-size:11px; color:#5f6b5f; padding:0 16px;">watching <span style="color:#9fb0a0;">@adchadofficial</span> run the business — unattended.</div>
+
+      <!-- P&L tiles -->
+      <div style="display:flex; gap:8px; padding:14px 16px 12px;">
+        <div style="flex:1; background:#0a1f10; border:1.5px solid #1c3f25; border-radius:13px; padding:10px 11px;">
+          <div style="font-family:'Space Mono',monospace; font-size:9px; color:#4f9a63; letter-spacing:1px;">REVENUE</div>
+          <div style="font-family:'Anton',sans-serif; font-size:27px; color:#3ce84a; line-height:1.05;">{{ revenueStr }}</div>
+        </div>
+        <div style="flex:1; background:#220f14; border:1.5px solid #4a1f29; border-radius:13px; padding:10px 11px;">
+          <div style="font-family:'Space Mono',monospace; font-size:9px; color:#c4607a; letter-spacing:1px;">SPEND</div>
+          <div style="font-family:'Anton',sans-serif; font-size:27px; color:#ff5a7a; line-height:1.05;">{{ costStr }}</div>
+        </div>
+        <div style="flex:1.15; background:#211d05; border:1.5px solid #4a4313; border-radius:13px; padding:10px 11px;">
+          <div style="font-family:'Space Mono',monospace; font-size:9px; color:#b8a23a; letter-spacing:1px;">MARGIN</div>
+          <div style="font-family:'Anton',sans-serif; font-size:27px; color:#ffe600; line-height:1.05;">{{ marginStr }}</div>
+        </div>
+      </div>
+
+      <!-- counters -->
+      <div style="display:flex; gap:8px; padding:0 16px 14px;">
+        <div style="flex:1; text-align:center; background:#0c110c; border:1.5px solid #1f2a1f; border-radius:11px; padding:8px 4px;">
+          <div style="font-family:'Bungee',sans-serif; font-size:18px; color:#fff; line-height:1;">{{ scannedStr }}</div>
+          <div style="font-family:'Space Mono',monospace; font-size:9px; color:#5f6b5f; letter-spacing:.5px; margin-top:3px;">SCANNED</div>
+        </div>
+        <div style="flex:1; text-align:center; background:#0c110c; border:1.5px solid #1f2a1f; border-radius:11px; padding:8px 4px;">
+          <div style="font-family:'Bungee',sans-serif; font-size:18px; color:#ff2d6f; line-height:1;">{{ roastsStr }}</div>
+          <div style="font-family:'Space Mono',monospace; font-size:9px; color:#5f6b5f; letter-spacing:.5px; margin-top:3px;">ROASTS</div>
+        </div>
+        <div style="flex:1; text-align:center; background:#0c110c; border:1.5px solid #1f2a1f; border-radius:11px; padding:8px 4px;">
+          <div style="font-family:'Bungee',sans-serif; font-size:18px; color:#3ce84a; line-height:1;">{{ salesStr }}</div>
+          <div style="font-family:'Space Mono',monospace; font-size:9px; color:#5f6b5f; letter-spacing:.5px; margin-top:3px;">SALES</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== FEED LABEL ===== -->
+    <div style="display:flex; align-items:center; gap:8px; padding:2px 4px;">
+      <span style="font-family:'Space Mono',monospace; font-size:12px; font-weight:700; color:#9fb0a0; letter-spacing:1px;">LIVE FEED</span>
+    </div>
+
+    <!-- ===== EMPTY ===== -->
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center; padding:50px 20px; color:#5f6b5f; font-family:'Space Mono',monospace; font-size:13px;">AdChad is warming up…</div>
+    </sc-if>
+
+    <!-- ===== TIMELINE ===== -->
+    <div style="display:flex; flex-direction:column; gap:9px;">
+      <sc-for list="{{ events }}" as="ev" hint-placeholder-count="6">
+        <div style="display:flex; gap:11px; padding:12px 13px; border:1.5px solid #1c241c; border-left:5px solid {{ ev.accent }}; border-radius:14px; background:#10130f; box-shadow:{{ ev.glow }};">
+          <div style="width:40px; height:40px; flex:none; border-radius:11px; border:2px solid #000; background:{{ ev.accent }}; display:flex; align-items:center; justify-content:center; font-size:19px;">{{ ev.icon }}</div>
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; align-items:center; gap:7px;">
+              <div style="font-family:'DM Sans',sans-serif; font-weight:700; font-size:14px; color:#f1f5f0; line-height:1.15;">{{ ev.title }}</div>
+              <sc-if value="{{ ev.isLatest }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Space Mono',monospace; font-size:8px; font-weight:700; color:#0a0c0a; background:#3ce84a; padding:2px 5px; border-radius:20px; letter-spacing:.5px; animation:blink 1.2s steps(1) infinite;">NEW</span></sc-if>
+            </div>
+            <div style="font-family:'DM Sans',sans-serif; font-size:12.5px; color:#8a9088; line-height:1.35; margin-top:3px;">{{ ev.detail }}</div>
+            <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+              <span style="font-family:'Space Mono',monospace; font-size:10px; color:#56624f;">{{ ev.ago }}</span>
+              <sc-if value="{{ ev.hasLink }}" hint-placeholder-val="{{ false }}"><a href="{{ ev.link }}" target="_blank" style="font-family:'Space Mono',monospace; font-size:10px; font-weight:700; color:#ff2d6f; text-decoration:none;">view on X ↗</a></sc-if>
+            </div>
+          </div>
+          <sc-if value="{{ ev.hasImage }}" hint-placeholder-val="{{ false }}">
+            <div style="width:54px; height:54px; flex:none; border-radius:9px; border:2px solid #000; background:{{ ev.imgBg }}; position:relative; overflow:hidden;">
+              <div style="position:absolute; left:4px; bottom:3px; font-family:'Anton',sans-serif; font-size:10px; color:#fff; line-height:.85;">NEW<br>AD</div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;feedSpeedMs&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2600,&quot;min&quot;:800,&quot;max&quot;:6000,&quot;step&quot;:100,&quot;unit&quot;:&quot;ms&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Stream&quot;},&quot;startPaused&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Stream&quot;},&quot;showChad&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Stream&quot;}}">
+class Component extends DCLogic {
+  state = { events: [], stats: null, now: Date.now(), paused: false };
+
+  // ---- static-ish data ----
+  biz() {
+    return [
+      { name: 'Bella Vista Med Spa', vert: 'med spa', city: 'Scottsdale, AZ' },
+      { name: 'Apex Comfort HVAC', vert: 'HVAC', city: 'Mesa, AZ' },
+      { name: 'Bright Smile Dental', vert: 'dental', city: 'Tempe, AZ' },
+      { name: 'Iron Forge Fitness', vert: 'fitness', city: 'Gilbert, AZ' },
+      { name: 'Glow Aesthetics Co', vert: 'med spa', city: 'Chandler, AZ' },
+      { name: 'Summit Roofing Pros', vert: 'roofing', city: 'Phoenix, AZ' },
+      { name: 'Lux Lash Lounge', vert: 'beauty', city: 'Scottsdale, AZ' },
+      { name: 'Desert Dental Group', vert: 'dental', city: 'Glendale, AZ' },
+      { name: 'Peak Performance PT', vert: 'physical therapy', city: 'Tempe, AZ' },
+      { name: 'Cactus Cool Air', vert: 'HVAC', city: 'Surprise, AZ' },
+      { name: 'Pure Barre Tempe', vert: 'fitness', city: 'Tempe, AZ' },
+      { name: 'Radiance Skin Bar', vert: 'med spa', city: 'Phoenix, AZ' },
+    ];
+  }
+  roastLines() {
+    return [
+      '"We Do Botox & More!" — bro, so does Dale at the strip mall.',
+      '247 days, same ad, zero new creative. That\u2019s a hostage situation.',
+      'Your CTA is "Learn More." Learn more about what \u2014 disappointment?',
+      'Comic Sans on a $4k campaign is a choice. A bad one.',
+      'Stock photo #4837 again. Everyone\u2019s seen her. She\u2019s tired.',
+      'Three exclamation marks won\u2019t resuscitate a dead offer!!!',
+      '"Quality Service You Can Trust" is not a hook, it\u2019s a yawn.',
+      'You boosted a post from 2022. We need to talk.',
+      'The whole funnel is one link to a homepage. Bold. Wrong.',
+    ];
+  }
+  replyLines() {
+    return ['"ok how much"', '"wait this is actually good"', '"who is this lol"', '"send it"', '"my nephew does our ads \ud83d\ude2d"', '"how did you find me"'];
+  }
+  imgBgs() {
+    return [
+      'radial-gradient(circle at 70% 25%, #ffd36e, transparent 55%), linear-gradient(150deg,#13131a,#3a0f24 55%,#ff2d6f)',
+      'linear-gradient(140deg,#06203f,#2a6fdb 130%)',
+      'linear-gradient(140deg,#0c2410,#3ce84a 140%)',
+      'radial-gradient(circle at 30% 20%, #ff9ec4, transparent 60%), linear-gradient(160deg,#1a1020,#7d1038)',
+    ];
+  }
+  rnd(a) { return a[Math.floor(Math.random() * a.length)]; }
+  rint(min, max) { return Math.floor(min + Math.random() * (max - min + 1)); }
+  tweetId() { let s = '1'; for (let i = 0; i < 18; i++) s += Math.floor(Math.random() * 10); return s; }
+
+  // ---- event creation (returns RAW; display computed at render) ----
+  makeRaw(kind, ts) {
+    const b = this.rnd(this.biz());
+    const e = { id: Math.random().toString(36).slice(2), ts, kind, name: b.name };
+    if (kind === 'target') { e.vert = b.vert; e.city = b.city; e.score = this.rint(11, 34); }
+    else if (kind === 'roast') { e.text = this.rnd(this.roastLines()); e.score = this.rint(14, 31); }
+    else if (kind === 'reply') { e.text = this.rnd(this.replyLines()); }
+    else if (kind === 'email') { e.no = this.rint(100, 999); }
+    else if (kind === 'fix') { e.img = this.rnd(this.imgBgs()); }
+    else if (kind === 'sale') { e.amt = Math.random() < 0.28 ? 1200 : 500; }
+    else if (kind === 'spend') {
+      const c = this.rnd([{ a: 4, n: 'Foreplay API call' }, { a: 2, n: 'image gen \u00b7 Nano Banana' }, { a: 1, n: 'Nemotron scoring' }, { a: 2, n: 'Hermes roast gen' }]);
+      e.amt = c.a; e.note = c.n;
+    }
+    return e;
+  }
+  weightedKind() {
+    const pool = ['target','target','target','target','roast','roast','roast','email','email','reply','reply','fix','fix','sale','sale','sale','spend','spend'];
+    return this.rnd(pool);
+  }
+
+  applyStats(st, e) {
+    if (e.kind === 'target') st.scanned += 1;
+    else if (e.kind === 'roast') st.roasts += 1;
+    else if (e.kind === 'sale') { st.sales += 1; st.rev += e.amt; }
+    else if (e.kind === 'spend') st.cost += e.amt;
+  }
+
+  componentDidMount() {
+    const now = Date.now();
+    const st = { scanned: 1182, roasts: 26, sales: 11, rev: 7800, cost: 412 };
+    // seed timeline (newest first), backdated
+    const seedKinds = ['sale','roast','target','email','fix','reply','target','roast'];
+    const events = [];
+    seedKinds.forEach((k, i) => {
+      const e = this.makeRaw(k, now - (i * this.rint(7000, 26000) + 4000));
+      events.push(e);
+    });
+    this.setState({ events, stats: st, now, paused: !!this.props.startPaused });
+    this.clock = setInterval(() => this.setState({ now: Date.now() }), 1000);
+    this.startFeed();
+  }
+  componentDidUpdate(prev) {
+    if (prev.feedSpeedMs !== this.props.feedSpeedMs) this.startFeed();
+  }
+  componentWillUnmount() { clearInterval(this.clock); clearInterval(this.feed); }
+
+  startFeed() {
+    clearInterval(this.feed);
+    const ms = this.props.feedSpeedMs ?? 2600;
+    this.feed = setInterval(() => this.tick(), ms);
+  }
+  tick() {
+    if (this.state.paused) return;
+    this.setState(s => {
+      const st = Object.assign({}, s.stats);
+      const e = this.makeRaw(this.weightedKind(), Date.now());
+      this.applyStats(st, e);
+      st.scanned += this.rint(2, 9); // background scanning volume
+      const events = [e].concat(s.events).slice(0, 40);
+      return { events, stats: st };
+    });
+  }
+  togglePause() { this.setState(s => ({ paused: !s.paused })); }
+
+  ago(ms) {
+    const s = Math.floor(ms / 1000);
+    if (s < 5) return 'just now';
+    if (s < 60) return s + 's ago';
+    const m = Math.floor(s / 60);
+    if (m < 60) return m + 'm ago';
+    return Math.floor(m / 60) + 'h ago';
+  }
+  money(c) { return '$' + (c / 100).toFixed(2); }
+
+  display(e, isLatest, now) {
+    const ACC = { target: '#ffe600', roast: '#ff2d6f', reply: '#ffe600', email: '#3ce84a', fix: '#3ce84a', sale: '#3ce84a', spend: '#ff5a7a' };
+    const ICON = { target: '\ud83d\udd0d', roast: '\ud83d\udd25', reply: '\ud83d\udcac', email: '\ud83d\udce7', fix: '\u2705', sale: '\ud83d\udcb0', spend: '\ud83d\udcb8' };
+    const o = { id: e.id, accent: ACC[e.kind], icon: ICON[e.kind], isLatest, ago: this.ago(now - e.ts), hasLink: false, hasImage: false, link: '', imgBg: '' };
+    o.glow = isLatest ? '0 0 0 1.5px ' + ACC[e.kind] + '66, 0 8px 26px rgba(0,0,0,.45)' : '0 2px 8px rgba(0,0,0,.3)';
+    if (e.kind === 'target') { o.title = 'New target: ' + e.name; o.detail = e.vert + ' \u00b7 ' + e.city + ' \u00b7 creative score ' + e.score + '/100'; }
+    else if (e.kind === 'roast') { o.title = 'Roasted ' + e.name; o.detail = e.text; o.hasLink = true; o.link = 'https://x.com/adchadofficial'; }
+    else if (e.kind === 'reply') { o.title = e.name + ' replied \ud83d\udc40'; o.detail = e.text; }
+    else if (e.kind === 'email') { o.title = 'Emailed ' + e.name; o.detail = 'the $5 fix offer \u00b7 roast \u2116' + e.no; }
+    else if (e.kind === 'fix') { o.title = 'Delivered fix to ' + e.name; o.detail = 'rewrite + HD creative \u00b7 score 23\u219297'; o.hasImage = true; o.imgBg = e.img; }
+    else if (e.kind === 'sale') { o.title = '+' + this.money(e.amt) + (e.amt === 1200 ? ' \u2014 3-variant pack' : ' \u2014 ad fix'); o.detail = e.name + ' \u00b7 payment captured \u2713'; }
+    else if (e.kind === 'spend') { o.title = '\u2212' + this.money(e.amt) + ' \u2014 ' + e.note; o.detail = 'agent spend \u00b7 auto-approved'; }
+    return o;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const st = s.stats || { scanned: 0, roasts: 0, sales: 0, rev: 0, cost: 0 };
+    const events = s.events.map((e, i) => this.display(e, i === 0, s.now));
+    return {
+      events,
+      isEmpty: events.length === 0,
+      showChad: this.props.showChad ?? true,
+      pauseIcon: s.paused ? '\u25b6' : '\u2389',
+      revenueStr: this.money(st.rev),
+      costStr: '\u2212' + this.money(st.cost),
+      marginStr: this.money(st.rev - st.cost),
+      scannedStr: st.scanned.toLocaleString(),
+      roastsStr: String(st.roasts),
+      salesStr: String(st.sales),
+      togglePause: () => this.togglePause(),
+    };
+  }
+}
+</script>
+</body>
+</html>

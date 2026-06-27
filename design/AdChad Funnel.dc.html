@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bungee&family=Permanent+Marker&family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'DM Sans', sans-serif; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+  @keyframes mq { to { transform: translateX(-50%) } }
+  @keyframes pop1 { 0%,7%{opacity:0;transform:scale(.3)} 10%{opacity:1;transform:scale(1.18)} 13%{transform:scale(1)} 86%{opacity:1;transform:scale(1)} 92%,100%{opacity:0;transform:scale(.85)} }
+  @keyframes pop2 { 0%,27%{opacity:0;transform:scale(.3)} 30%{opacity:1;transform:scale(1.18)} 33%{transform:scale(1)} 86%{opacity:1;transform:scale(1)} 92%,100%{opacity:0;transform:scale(.85)} }
+  @keyframes pop3 { 0%,47%{opacity:0;transform:scale(.3)} 50%{opacity:1;transform:scale(1.2)} 53%{transform:scale(1)} 86%{opacity:1;transform:scale(1)} 92%,100%{opacity:0;transform:scale(.85)} }
+  @keyframes review {
+    0%{transform:translateY(0) rotate(0)} 6%{transform:translateY(-7px) rotate(-3deg)} 10%{transform:translateY(2px) rotate(4deg)} 14%{transform:translateY(0) rotate(0)}
+    27%{transform:translateY(0) rotate(0)} 31%{transform:translateY(-5px) rotate(-5deg)} 35%{transform:translateY(0) rotate(0)}
+    47%{transform:translateY(0) rotate(0)} 51%{transform:translateY(3px) rotate(5deg)} 55%{transform:translateY(0) rotate(0)}
+    68%{transform:rotate(-3deg)} 72%{transform:rotate(3deg)} 76%{transform:rotate(-3deg)} 80%{transform:rotate(2deg)} 84%{transform:rotate(0)} 100%{transform:translateY(0) rotate(0)}
+  }
+  @keyframes throb { 0%,100%{transform:scale(1) rotate(-1deg)} 50%{transform:scale(1.04) rotate(-1deg)} }
+  @keyframes celebrate { 0%,100%{transform:translateY(0) rotate(-3deg)} 25%{transform:translateY(-12px) rotate(3deg)} 50%{transform:translateY(0) rotate(-3deg)} 75%{transform:translateY(-12px) rotate(3deg)} }
+  @keyframes screenIn { from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:translateY(0)} }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  @keyframes work { 0%,100%{transform:translateY(0) rotate(-4deg)} 50%{transform:translateY(-9px) rotate(4deg)} }
+  @keyframes lineIn { from{opacity:0; transform:translateX(-8px)} to{opacity:1; transform:translateX(0)} }
+  @keyframes floaty { 0%,100%{transform:rotate(7deg) translateY(0)} 50%{transform:rotate(7deg) translateY(-8px)} }
+  @keyframes wobble { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(6deg)} }
+  @keyframes walkX { 0%{transform:translateX(0)} 100%{transform:translateX(255px)} }
+  @keyframes walkX2 { 0%{transform:translateX(0)} 100%{transform:translateX(-235px)} }
+  @keyframes step { 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-9px) rotate(5deg)} }
+  @keyframes step2 { 0%,100%{transform:translateY(0) rotate(5deg)} 50%{transform:translateY(-7px) rotate(-5deg)} }
+</style>
+<script>
+(function(){
+  function fit(){
+    var h = window.innerHeight || document.documentElement.clientHeight || 800;
+    var s = Math.max(0.3, Math.min(1, (h - 92) / 902));
+    document.documentElement.style.setProperty('--fit', s);
+  }
+  fit();
+  window.addEventListener('resize', fit);
+  window.addEventListener('load', fit);
+  [0, 100, 300, 800].forEach(function(t){ setTimeout(fit, t); });
+  if (window.requestAnimationFrame) requestAnimationFrame(fit);
+  try { new ResizeObserver(fit).observe(document.documentElement); } catch(e){}
+})();
+</script>
+</helmet>
+
+<div style="min-height:100vh; width:100%; background:#15161a; background-image:radial-gradient(circle at 50% 0%, #232427, #15161a 70%); display:flex; flex-direction:column; align-items:center; gap:16px; padding:26px 0 40px; font-family:'DM Sans',sans-serif;">
+
+  <div style="display:flex; align-items:center; gap:12px; color:#fff;">
+    <div style="font-family:'Archivo Black',sans-serif; font-size:22px; letter-spacing:-1px;">ADCHAD</div>
+    <div style="font-family:'Space Mono',monospace; font-size:11px; color:#7c7f86; border-left:1px solid #3a3c42; padding-left:12px;">live funnel demo — tap through it →</div>
+  </div>
+
+  <!-- PHONE -->
+  <div style="width:calc(440px * var(--fit,1)); height:calc(898px * var(--fit,1)); flex:none;">
+  <div style="width:440px; height:898px; transform:scale(var(--fit,1)); transform-origin:top left; background:#0a0a0a; border-radius:48px; padding:7px; box-shadow:0 36px 90px rgba(0,0,0,.6), inset 0 0 0 2px #2a2a2a;">
+    <div style="width:100%; height:100%; border-radius:42px; overflow:hidden; position:relative; background:#000;">
+
+      <!-- ===================== ROAST ===================== -->
+      <sc-if value="{{ isRoast }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute; inset:0; display:flex; flex-direction:column; background:#3ce84a;">
+        <div style="height:38px; background:#111; overflow:hidden; display:flex; align-items:center; flex:none;">
+          <div style="display:flex; white-space:nowrap; font-family:'Bungee'; font-size:14px; color:#ff2d6f; animation:mq 13s linear infinite;">
+            <span>&nbsp;EXHIBIT A&nbsp;●&nbsp;I PULLED YOUR LIVE AD&nbsp;●&nbsp;IT'S BAD&nbsp;●&nbsp;23/100&nbsp;●&nbsp;EXHIBIT A&nbsp;●&nbsp;I PULLED YOUR LIVE AD&nbsp;●&nbsp;IT'S BAD&nbsp;●&nbsp;23/100&nbsp;●&nbsp;</span><span>&nbsp;EXHIBIT A&nbsp;●&nbsp;I PULLED YOUR LIVE AD&nbsp;●&nbsp;IT'S BAD&nbsp;●&nbsp;23/100&nbsp;●&nbsp;EXHIBIT A&nbsp;●&nbsp;I PULLED YOUR LIVE AD&nbsp;●&nbsp;IT'S BAD&nbsp;●&nbsp;23/100&nbsp;●&nbsp;</span>
+          </div>
+        </div>
+        <div style="flex:1; position:relative; overflow:hidden;">
+          <div style="position:absolute; top:20px; left:20px; transform:rotate(-3deg); background:#ff2d6f; color:#fff; font-family:'Archivo Black',sans-serif; font-size:29px; padding:3px 14px; border:4px solid #111; box-shadow:5px 5px 0 #111; z-index:6;">I FOUND YOUR AD</div>
+          <!-- the bad meta ad -->
+          <div style="position:absolute; top:88px; left:34px; width:300px; transform:rotate(-3deg); z-index:3;">
+            <div style="background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 10px 22px rgba(0,0,0,.3); border:1px solid #ddd;">
+              <div style="display:flex; align-items:center; gap:8px; padding:10px 12px;">
+                <div style="width:34px; height:34px; border-radius:50%; background:repeating-linear-gradient(45deg,#e9ebee,#e9ebee 6px,#dfe2e6 6px,#dfe2e6 12px);"></div>
+                <div style="line-height:1.2;"><div style="font-weight:700; font-size:13px; color:#222;">Bella Vista Med Spa</div><div style="font-size:11px; color:#8a8d91;">Sponsored · 🌐</div></div>
+              </div>
+              <div style="padding:0 12px 10px; font-size:12.5px; color:#222;">✨We Do Botox &amp; More!✨ Call us TODAY!!! 💉🔥 Limited time only 👇</div>
+              <div style="height:148px; background:repeating-linear-gradient(45deg,#e9ebee,#e9ebee 11px,#dfe2e6 11px,#dfe2e6 22px); display:flex; align-items:center; justify-content:center;"><span style="font-family:'Space Mono',monospace; font-size:10px; color:#9aa0a6; background:#fff8; padding:3px 8px; border-radius:4px;">stock photo · woman touching face</span></div>
+              <div style="background:#f0f2f5; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="line-height:1.25;"><div style="font-size:10px; color:#8a8d91; letter-spacing:.5px;">BELLAVISTAMEDSPA.COM</div><div style="font-weight:700; font-size:13px; color:#222;">We Do Botox &amp; More!</div></div>
+                <div style="background:#dadde1; color:#222; font-size:12px; font-weight:600; padding:7px 12px; border-radius:6px;">Learn More</div>
+              </div>
+            </div>
+          </div>
+          <!-- live review marks -->
+          <div style="position:absolute; top:300px; left:6px; transform:rotate(-90deg); z-index:5;"><div style="font-family:'Permanent Marker',cursive; color:#ff1414; font-size:16px; animation:pop1 10s ease-in-out infinite;">so generic 😭</div></div>
+          <div style="position:absolute; top:404px; left:198px; transform:rotate(-8deg); z-index:5;"><div style="width:118px; height:46px; border:4px solid #ff1414; border-radius:50%; animation:pop2 10s ease-in-out infinite;"></div></div>
+          <div style="position:absolute; top:452px; left:206px; transform:rotate(-6deg); z-index:5;"><div style="font-family:'Permanent Marker',cursive; color:#ff1414; font-size:17px; animation:pop2 10s ease-in-out infinite;">↑ "Learn what??"</div></div>
+          <div style="position:absolute; top:150px; left:262px; transform:rotate(9deg); z-index:5;"><div style="font-family:'Permanent Marker',cursive; color:#ff1414; font-size:19px; text-align:center; line-height:1; animation:pop3 10s ease-in-out infinite;">247 days<br>LIVE?!<br>😭</div></div>
+          <div style="position:absolute; bottom:74px; right:6px; width:248px; z-index:4;"><img src="uploads/chad-cutout.png" style="display:block; width:248px; transform-origin:bottom center; animation:review 10s ease-in-out infinite; filter:drop-shadow(0 10px 10px rgba(0,0,0,.3));"></div>
+          <div style="position:absolute; bottom:104px; left:16px; font-family:'Permanent Marker',cursive; color:#111; font-size:18px; transform:rotate(-4deg); z-index:5;">I already wrote<br>the good one →</div>
+        </div>
+        <div onClick="{{ goPaywall }}" style="flex:none; background:#111; padding:16px 20px; cursor:pointer;">
+          <div style="background:#ffe600; border:4px solid #fff; border-radius:14px; padding:16px 14px; text-align:center; box-shadow:0 0 0 4px #111; transform:rotate(-1deg); animation:throb 2.4s ease-in-out infinite;">
+            <div style="font-family:'Bungee',sans-serif; font-size:24px; color:#111;">UNFUCK IT → $5</div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===================== PAYWALL (option A) ===================== -->
+      <sc-if value="{{ isPaywall }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; display:flex; flex-direction:column; background:#3ce84a;">
+        <div style="height:36px; flex:none; background:#111; overflow:hidden; display:flex; align-items:center;">
+          <div style="display:flex; white-space:nowrap; font-family:'Bungee',sans-serif; font-size:13px; color:#ffe600; animation:mq 12s linear infinite;">
+            <span>&nbsp;THE FIX&nbsp;●&nbsp;97/100&nbsp;●&nbsp;I ALREADY FIXED IT&nbsp;●&nbsp;UNLOCK $5&nbsp;●&nbsp;THE FIX&nbsp;●&nbsp;97/100&nbsp;●&nbsp;I ALREADY FIXED IT&nbsp;●&nbsp;UNLOCK $5&nbsp;●&nbsp;</span><span>&nbsp;THE FIX&nbsp;●&nbsp;97/100&nbsp;●&nbsp;I ALREADY FIXED IT&nbsp;●&nbsp;UNLOCK $5&nbsp;●&nbsp;THE FIX&nbsp;●&nbsp;97/100&nbsp;●&nbsp;I ALREADY FIXED IT&nbsp;●&nbsp;UNLOCK $5&nbsp;●&nbsp;</span>
+          </div>
+        </div>
+        <div style="flex:1; overflow-y:auto; position:relative;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 18px 0;">
+            <div onClick="{{ goRoast }}" style="cursor:pointer; font-family:'Space Mono',monospace; font-size:12px; color:#04210d; font-weight:700;">‹ back to roast</div>
+            <div style="font-family:'Space Mono',monospace; font-size:11px; color:#0a5c22;">№0412</div>
+          </div>
+          <div style="padding:8px 22px 130px;">
+            <div style="font-family:'Anton',sans-serif; font-size:50px; line-height:.9; color:#111;">I ALREADY <span style="background:#ffe600; padding:0 8px; border:3px solid #111; box-shadow:4px 4px 0 #111;">FIXED IT.</span></div>
+            <div style="display:flex; align-items:stretch; gap:10px; margin-top:18px;">
+              <div style="flex:1; opacity:.7;">
+                <div style="font-family:'Space Mono',monospace; font-size:9px; color:#7a6c00; margin-bottom:5px;">YOURS · 23</div>
+                <div style="background:#fff; border:2px solid #111; border-radius:8px; padding:9px; height:110px; font-size:10px; color:#555; line-height:1.3;">"We Do Botox &amp; More!"<br><span style="color:#999;">Learn More ▸</span></div>
+              </div>
+              <div style="display:flex; align-items:center; font-family:'Bungee',sans-serif; color:#111; font-size:18px;">→</div>
+              <div style="flex:1; position:relative;">
+                <div style="font-family:'Space Mono',monospace; font-size:9px; color:#1f9c3a; margin-bottom:5px;">THE FIX · 97</div>
+                <div style="position:relative; border:2px solid #111; border-radius:8px; height:110px; overflow:hidden; filter:blur(9px);">
+                  <div style="position:absolute; inset:0; background:radial-gradient(circle at 70% 25%, #ffd36e, transparent 55%), linear-gradient(150deg,#13131a 0%,#3a0f24 50%,#ff2d6f 120%);"></div>
+                  <div style="position:absolute; right:-10px; bottom:-14px; width:78px; height:96px; border-radius:50% 50% 44% 44%; background:linear-gradient(160deg,#f6c89a,#caa074);"></div>
+                  <div style="position:absolute; right:6px; bottom:-4px; width:46px; height:34px; border-radius:50% 50% 0 0; background:#2a1018;"></div>
+                  <div style="position:absolute; left:9px; top:10px; width:30px; height:8px; border-radius:4px; background:#ffe600;"></div>
+                  <div style="position:absolute; left:9px; top:24px; width:62px; height:13px; border-radius:3px; background:#fff;"></div>
+                  <div style="position:absolute; left:9px; top:42px; width:48px; height:13px; border-radius:3px; background:#fff;"></div>
+                  <div style="position:absolute; left:9px; bottom:11px; width:54px; height:16px; border-radius:8px; background:#3ce84a;"></div>
+                </div>
+                <div style="position:absolute; inset:0; top:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;">
+                  <div style="font-size:24px;">🔒</div>
+                  <div style="font-family:'Space Mono',monospace; font-size:9px; color:#fff; background:#111; padding:3px 8px; border-radius:20px;">unlock for $5</div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:9px; margin-top:18px;">
+              <div style="align-self:flex-start; transform:rotate(-1.5deg); background:#ffe600; border:3px solid #111; box-shadow:3px 3px 0 #111; padding:7px 11px; font-weight:700; font-size:13px; color:#111;">✓ new headline, body &amp; CTA</div>
+              <div style="align-self:flex-start; transform:rotate(1deg); background:#fff; border:3px solid #111; box-shadow:3px 3px 0 #ff2d6f; padding:7px 11px; font-weight:700; font-size:13px; color:#111;">✓ a ready-to-use HD generated ad image</div>
+              <div style="align-self:flex-start; transform:rotate(-1deg); background:#ff2d6f; border:3px solid #111; box-shadow:3px 3px 0 #111; padding:7px 11px; font-weight:700; font-size:13px; color:#fff;">✓ in your inbox in 60 seconds</div>
+            </div>
+            <div onClick="{{ toggleBump }}" style="margin-top:16px; cursor:pointer; border:2px dashed #111; border-radius:12px; padding:12px; display:flex; gap:11px; align-items:center; background:#fff19a;">
+              <div style="width:24px; height:24px; border-radius:6px; border:2px solid #111; flex:none; background:#fff; display:flex; align-items:center; justify-content:center;">
+                <sc-if value="{{ bump }}" hint-placeholder-val="{{ false }}"><span style="color:#1f9c3a; font-weight:900; font-size:17px;">✓</span></sc-if>
+              </div>
+              <div style="flex:1;"><div style="font-family:'Archivo Black',sans-serif; font-size:13px; color:#111;">Add 2 MORE to A/B test <span style="color:#1f9c3a;">{{ bumpPriceStr }}</span></div><div style="font-size:11px; color:#6b6e00;">3 images total. Find your winner faster.</div></div>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute; bottom:100px; left:4px; width:172px; z-index:4; animation:walkX 5.4s ease-in-out infinite alternate;">
+          <img src="uploads/chad-cutout.png" style="display:block; width:172px; transform-origin:bottom center; animation:step .55s ease-in-out infinite; filter:drop-shadow(0 9px 9px rgba(0,0,0,.32));">
+        </div>
+        <div onClick="{{ goCheckout }}" style="flex:none; background:#111; padding:16px 20px; cursor:pointer; position:relative; z-index:5;">
+          <div style="background:#ffe600; border:4px solid #fff; border-radius:14px; padding:14px; text-align:center; box-shadow:0 0 0 4px #111; transform:rotate(-1deg); animation:throb 2.4s ease-in-out infinite;">
+            <div style="font-family:'Bungee',sans-serif; font-size:23px; color:#111;">{{ takeLabel }}</div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===================== CHECKOUT ===================== -->
+      <sc-if value="{{ isCheckout }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; display:flex; flex-direction:column; background:#f4f4f5;">
+        <div style="flex:none; display:flex; align-items:center; justify-content:space-between; padding:15px 18px; border-bottom:1px solid #e3e3e6;">
+          <div onClick="{{ goPaywall }}" style="cursor:pointer; font-family:'Space Mono',monospace; font-size:12px; color:#71717a;">‹ back</div>
+          <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:#52525b; font-weight:600;">🔒 Secure checkout</div>
+          <div style="font-family:'Archivo Black',sans-serif; font-size:13px; color:#111;">ADCHAD</div>
+        </div>
+        <div style="flex:1; overflow-y:auto; padding:20px 22px;">
+          <div style="font-size:13px; color:#71717a;">Pay AdChad</div>
+          <div style="font-family:'Anton',sans-serif; font-size:46px; color:#111; line-height:1; margin:2px 0 16px;">{{ totalStr }}</div>
+          <div style="background:#fff; border:1px solid #e7e7ea; border-radius:12px; padding:13px 14px; display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+            <div><div style="font-weight:600; font-size:13px; color:#18181b;">Ad fix — Bella Vista Med Spa</div><div style="font-size:11px; color:#a1a1aa;">roast №0412 · rewrite + creative</div></div>
+            <div style="font-weight:700; font-size:14px; color:#18181b;">{{ totalStr }}</div>
+          </div>
+          <div style="font-size:11px; font-weight:600; color:#71717a; margin-bottom:5px;">Email</div>
+          <div style="background:#fff; border:1px solid #e7e7ea; border-radius:9px; padding:11px 12px; font-size:13px; color:#3f3f46; margin-bottom:13px;">owner@bellavistamedspa.com</div>
+          <div style="font-size:11px; font-weight:600; color:#71717a; margin-bottom:5px;">Card information</div>
+          <div style="background:#fff; border:1px solid #e7e7ea; border-radius:9px; overflow:hidden; margin-bottom:18px;">
+            <div style="padding:11px 12px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; font-size:13px; color:#3f3f46;"><span>4242 4242 4242 4242</span><span style="letter-spacing:2px;">💳</span></div>
+            <div style="display:flex;">
+              <div style="flex:1; padding:11px 12px; border-right:1px solid #eee; font-size:13px; color:#3f3f46;">12 / 28</div>
+              <div style="flex:1; padding:11px 12px; font-size:13px; color:#3f3f46;">123</div>
+            </div>
+          </div>
+          <sc-if value="{{ testMode }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; gap:8px; align-items:center; background:#eef2ff; border:1px solid #c7d2fe; border-radius:8px; padding:9px 11px; font-size:11px; color:#4338ca;"><span>🔒</span><span>test mode — real Stripe API, no real charge.</span></div>
+          </sc-if>
+        </div>
+        <div onClick="{{ pay }}" style="flex:none; padding:16px 20px; background:#fff; border-top:1px solid #e3e3e6; cursor:pointer;">
+          <div style="background:#3ce84a; border-radius:12px; padding:15px; text-align:center; font-family:'Archivo Black',sans-serif; font-size:17px; color:#04210d; box-shadow:0 4px 0 #1f9c3a;">{{ payLabel }}</div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===================== PROCESSING ===================== -->
+      <sc-if value="{{ isProcessing }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; background:#0c0f0c; font-family:'Space Mono',monospace;">
+        <img src="uploads/chad-cutout.png" style="width:150px; animation:work 1s ease-in-out infinite; filter:drop-shadow(0 8px 10px rgba(0,0,0,.4));">
+        <div style="width:60px; height:60px; border:5px solid #1c241c; border-top-color:#3ce84a; border-radius:50%; animation:spin .8s linear infinite;"></div>
+        <div style="width:280px; display:flex; flex-direction:column; gap:9px;">
+          <div style="opacity:0; animation:lineIn .4s ease forwards .2s; color:#3ce84a; font-size:13px;">› payment captured ✓</div>
+          <div style="opacity:0; animation:lineIn .4s ease forwards .8s; color:#3ce84a; font-size:13px;">› writing new copy ✓</div>
+          <div style="opacity:0; animation:lineIn .4s ease forwards 1.5s; color:#3ce84a; font-size:13px;">› generating ad image ✓</div>
+          <div style="opacity:0; animation:lineIn .4s ease forwards 2.1s; color:#ffe600; font-size:13px;">› deploying to your inbox…</div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===================== DONE ===================== -->
+      <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; display:flex; flex-direction:column; background:#3ce84a;">
+        <div style="height:42px; flex:none; background:#111; display:flex; align-items:center; justify-content:center; font-family:'Bungee',sans-serif; font-size:18px; color:#ffe600;">FIX DEPLOYED 💪</div>
+        <div style="flex:1; overflow-y:auto; padding:18px 22px 10px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+            <div style="font-family:'Space Mono',monospace; font-size:11px; color:#0a3d16;">was</div>
+            <div style="font-family:'Archivo Black',sans-serif; font-size:13px; color:#0a3d16; text-decoration:line-through; opacity:.6;">23/100</div>
+            <div style="font-family:'Bungee',sans-serif; color:#111;">→</div>
+            <div style="font-family:'Anton',sans-serif; font-size:30px; color:#111; line-height:1;">97<span style="font-size:14px;">/100</span></div>
+          </div>
+          <!-- the fixed ad -->
+          <div style="background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 12px 26px rgba(0,0,0,.28); border:2px solid #111;">
+            <div style="display:flex; align-items:center; gap:8px; padding:11px 12px;">
+              <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#ff2d6f,#ffe600);"></div>
+              <div style="line-height:1.2;"><div style="font-weight:700; font-size:13px; color:#222;">Bella Vista Med Spa</div><div style="font-size:11px; color:#8a8d91;">Sponsored · 🌐</div></div>
+            </div>
+            <div style="padding:0 12px 10px; font-size:13px; color:#1a1a1a;">July chairs are filling. Locals are booking their glow-up 3 weeks out — don't be the one stuck on a waitlist. ⤵️</div>
+            <div style="height:172px; position:relative; background:linear-gradient(150deg,#13131a 0%,#3a0f24 55%,#ff2d6f 130%); overflow:hidden;">
+              <div style="position:absolute; top:14px; left:14px; font-family:'Space Mono',monospace; font-size:9px; color:#ffffffaa; letter-spacing:1px;">✦ GENERATED BY ADCHAD · 1024×1024</div>
+              <div style="position:absolute; bottom:46px; left:14px; right:14px; font-family:'Anton',sans-serif; font-size:34px; line-height:.92; color:#fff;">YOUR JULY<br>GLOW-UP STARTS<br>AT $99.</div>
+              <div style="position:absolute; bottom:16px; left:14px; font-family:'Space Mono',monospace; font-size:11px; color:#ffe600;">first 10 bookings only ●</div>
+            </div>
+            <div style="background:#f0f2f5; padding:11px 12px; display:flex; justify-content:space-between; align-items:center;">
+              <div style="line-height:1.25;"><div style="font-size:10px; color:#8a8d91; letter-spacing:.5px;">BELLAVISTAMEDSPA.COM</div><div style="font-weight:700; font-size:13px; color:#18181b;">Look 5 Years Younger by July</div></div>
+              <div style="background:#111; color:#fff; font-size:12px; font-weight:700; padding:8px 13px; border-radius:6px;">Book Now</div>
+            </div>
+          </div>
+          <div style="margin-top:13px; font-family:'Space Mono',monospace; font-size:11px; color:#0a3d16; display:flex; justify-content:space-between;">
+            <span>{{ totalStr }} paid ✓</span><span>sent to your inbox ✓</span>
+          </div>
+
+          <div style="margin-top:16px; background:#111; border-radius:14px; padding:14px 15px; display:flex; align-items:center; gap:12px;">
+            <img src="uploads/chad-cutout.png" style="width:62px; flex:none; transform-origin:bottom center; animation:celebrate 1.4s ease-in-out infinite;">
+            <div style="flex:1;">
+              <div style="font-family:'Archivo Black',sans-serif; font-size:14px; color:#fff; line-height:1.05;">Want a fresh one every week?</div>
+              <div style="font-size:11px; color:#9aa0a6; margin-top:2px;">New creative + I watch your competitors. <b style="color:#3ce84a;">$49/mo.</b></div>
+            </div>
+            <div style="font-family:'Bungee',sans-serif; color:#ffe600; font-size:20px;">→</div>
+          </div>
+        </div>
+        <div onClick="{{ reset }}" style="flex:none; padding:13px 20px; background:#111; cursor:pointer; text-align:center; font-family:'Space Mono',monospace; font-size:12px; color:#9aa0a6;">↺ run the demo again</div>
+      </div>
+      </sc-if>
+
+    </div>
+  </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:480,&quot;height&quot;:960},&quot;startStep&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;roast&quot;,&quot;paywall&quot;,&quot;checkout&quot;,&quot;done&quot;],&quot;default&quot;:&quot;roast&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;bumpPrice&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:7,&quot;min&quot;:0,&quot;max&quot;:50,&quot;tsType&quot;:&quot;number&quot;},&quot;testMode&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { step: 'roast', bump: false };
+
+  componentDidMount() {
+    if (this.props.startStep) this.setState({ step: this.props.startStep });
+  }
+  componentDidUpdate(prev) {
+    if (prev.startStep !== this.props.startStep && this.props.startStep) {
+      this.setState({ step: this.props.startStep });
+    }
+  }
+  componentWillUnmount() { clearTimeout(this._t); }
+
+  go(step) { clearTimeout(this._t); this.setState({ step }); }
+  toggleBump() { this.setState(s => ({ bump: !s.bump })); }
+  pay() {
+    this.setState({ step: 'processing' });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ step: 'done' }), 2900);
+  }
+  reset() { clearTimeout(this._t); this.setState({ step: 'roast', bump: false }); }
+
+  renderVals() {
+    const s = this.state;
+    const bumpPrice = this.props.bumpPrice ?? 7;
+    const total = 5 + (s.bump ? bumpPrice : 0);
+    return {
+      isRoast: s.step === 'roast',
+      isPaywall: s.step === 'paywall',
+      isCheckout: s.step === 'checkout',
+      isProcessing: s.step === 'processing',
+      isDone: s.step === 'done',
+      bump: s.bump,
+      bumpPriceStr: '+$' + bumpPrice,
+      totalStr: '$' + total + '.00',
+      payLabel: 'Pay $' + total + '.00',
+      unlockLabel: 'UNLOCK MY FIX → $' + total,
+      takeLabel: 'TAKE MY $' + total,
+      testMode: this.props.testMode ?? true,
+      goRoast: () => this.go('roast'),
+      goPaywall: () => this.go('paywall'),
+      goCheckout: () => this.go('checkout'),
+      toggleBump: () => this.toggleBump(),
+      pay: () => this.pay(),
+      reset: () => this.reset(),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bungee&family=Permanent+Marker&family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background:#0a0c0a; }
+  a { text-decoration: none; }
+  @keyframes mq { to { transform: translateX(-50%) } }
+  @keyframes wobble { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(5deg)} }
+  @keyframes bounce { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-14px) rotate(2deg)} }
+  @keyframes floaty { 0%,100%{transform:rotate(8deg) translateY(0)} 50%{transform:rotate(8deg) translateY(-9px)} }
+  @keyframes throb { 0%,100%{transform:scale(1) rotate(-1deg)} 50%{transform:scale(1.04) rotate(-1deg)} }
+  @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:.25} }
+  @keyframes pop { 0%{opacity:0; transform:scale(.7) rotate(-3deg)} 60%{transform:scale(1.06) rotate(1deg)} 100%{opacity:1; transform:scale(1) rotate(-1deg)} }
+</style>
+</helmet>
+
+<div style="background:#0a0c0a; overflow-x:hidden;">
+
+  <!-- ===== TOP TICKER ===== -->
+  <div style="height:38px; background:#ff2d6f; border-bottom:3px solid #111; overflow:hidden; display:flex; align-items:center;">
+    <div style="display:flex; white-space:nowrap; font-family:'Bungee',sans-serif; font-size:14px; color:#111; animation:mq 18s linear infinite;">
+      <span>&nbsp;YOUR ADS ARE BAD&nbsp;●&nbsp;I CAN PROVE IT&nbsp;●&nbsp;$5 TO UNFUCK THEM&nbsp;●&nbsp;THE AGENT NEVER SLEEPS&nbsp;●&nbsp;YOUR ADS ARE BAD&nbsp;●&nbsp;I CAN PROVE IT&nbsp;●&nbsp;$5 TO UNFUCK THEM&nbsp;●&nbsp;THE AGENT NEVER SLEEPS&nbsp;●&nbsp;</span><span>&nbsp;YOUR ADS ARE BAD&nbsp;●&nbsp;I CAN PROVE IT&nbsp;●&nbsp;$5 TO UNFUCK THEM&nbsp;●&nbsp;THE AGENT NEVER SLEEPS&nbsp;●&nbsp;YOUR ADS ARE BAD&nbsp;●&nbsp;I CAN PROVE IT&nbsp;●&nbsp;$5 TO UNFUCK THEM&nbsp;●&nbsp;THE AGENT NEVER SLEEPS&nbsp;●&nbsp;</span>
+    </div>
+  </div>
+
+  <!-- ===== NAV ===== -->
+  <div style="position:sticky; top:0; z-index:50; background:#0a0c0a; border-bottom:2px solid #1c241c;">
+    <div style="max-width:1200px; margin:0 auto; padding:12px 22px; display:flex; align-items:center; gap:18px;">
+      <div style="font-family:'Archivo Black',sans-serif; font-size:24px; letter-spacing:-1px; color:#fff;">ADCHAD</div>
+      <div style="display:flex; gap:22px; margin-left:14px;">
+        <a href="#how" style="font-family:'Space Mono',monospace; font-size:13px; color:#9fb0a0;">how it works</a>
+        <a href="#pricing" style="font-family:'Space Mono',monospace; font-size:13px; color:#9fb0a0;">pricing</a>
+        <a href="AdChad Live.dc.html" style="font-family:'Space Mono',monospace; font-size:13px; color:#9fb0a0;">live feed</a>
+      </div>
+      <a href="#hero" style="margin-left:auto; font-family:'Bungee',sans-serif; font-size:14px; color:#111; background:#3ce84a; border:3px solid #fff; box-shadow:3px 3px 0 #111; padding:8px 16px;" style-hover="background:#ffe600; box-shadow:1px 1px 0 #111; transform:translate(2px,2px);">GET ROASTED</a>
+    </div>
+  </div>
+
+  <!-- ===== HERO ===== -->
+  <div id="hero" style="background:#3ce84a; border-bottom:4px solid #111; position:relative; overflow:hidden;">
+    <div style="max-width:1200px; margin:0 auto; padding:62px 22px 70px; display:flex; gap:30px; align-items:center; flex-wrap:wrap;">
+      <div style="flex:1; min-width:330px;">
+        <div style="display:inline-block; transform:rotate(-2deg); background:#111; color:#3ce84a; font-family:'Space Mono',monospace; font-weight:700; font-size:12px; letter-spacing:1px; padding:5px 12px; margin-bottom:18px;">AN AI AD AGENCY THAT PROSPECTS FOR ITSELF</div>
+        <div style="font-family:'Anton',sans-serif; font-size:84px; line-height:.86; color:#111; letter-spacing:-1px;">YOUR META ADS<br>ARE <span style="color:#fff; -webkit-text-stroke:3px #111; text-shadow:5px 5px 0 #ff2d6f;">COOKED.</span></div>
+        <div style="font-family:'DM Sans',sans-serif; font-size:18px; color:#0a3d16; font-weight:500; margin-top:18px; max-width:480px;">I find small businesses running weak ads, roast them in public, then sell the fix for $5. You're probably one of them. Let's find out.</div>
+
+        <!-- interactive roast box -->
+        <div style="margin-top:26px; max-width:520px;">
+          <div style="display:flex; gap:8px; background:#fff; border:4px solid #111; border-radius:14px; padding:7px; box-shadow:6px 6px 0 #111;">
+            <input value="{{ url }}" onInput="{{ onUrl }}" placeholder="dropyourbusiness.com" style="flex:1; border:none; outline:none; font-family:'Space Mono',monospace; font-size:15px; color:#111; padding:10px 12px; background:transparent;">
+            <div onClick="{{ roastMe }}" style="cursor:pointer; font-family:'Bungee',sans-serif; font-size:15px; color:#fff; background:#ff2d6f; border:3px solid #111; padding:11px 16px; white-space:nowrap;" style-hover="background:#111;">ROAST ME</div>
+          </div>
+          <div style="font-family:'Space Mono',monospace; font-size:11px; color:#0a3d16; margin-top:8px; padding-left:4px;">free · brutal · weirdly useful</div>
+
+          <sc-if value="{{ roasted }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:14px; background:#111; border:4px solid #fff; box-shadow:6px 6px 0 #111; border-radius:14px; padding:16px 18px; animation:pop .35s ease;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div style="font-family:'Anton',sans-serif; font-size:52px; color:#ff2d6f; line-height:.8;">{{ scoreStr }}</div>
+              <div>
+                <div style="font-family:'Anton',sans-serif; font-size:18px; color:#fff;">/100</div>
+                <div style="display:inline-block; transform:rotate(-7deg); margin-top:3px; background:#ffe600; color:#111; font-family:'Bungee',sans-serif; font-size:12px; padding:2px 9px;">OUCH</div>
+              </div>
+              <div style="flex:1; font-family:'Space Mono',monospace; font-size:11px; color:#7d8a7d; text-align:right;">verdict for<br><span style="color:#3ce84a;">{{ targetStr }}</span></div>
+            </div>
+            <div style="font-family:'DM Sans',sans-serif; font-size:14px; color:#e3e5e9; margin-top:12px; line-height:1.45;">{{ line1 }}</div>
+            <div style="font-family:'DM Sans',sans-serif; font-size:14px; color:#e3e5e9; margin-top:7px; line-height:1.45;">{{ line2 }}</div>
+            <a href="AdChad Funnel.dc.html" style="display:block; margin-top:14px; text-align:center; font-family:'Bungee',sans-serif; font-size:16px; color:#111; background:#3ce84a; border:3px solid #fff; padding:11px; border-radius:10px;" style-hover="background:#ffe600;">UNFUCK IT → $5</a>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      <div style="flex:none; width:300px; position:relative; align-self:stretch; min-height:340px;">
+        <img src="uploads/chad-cutout.png" style="position:absolute; bottom:-70px; left:50%; transform:translateX(-50%); width:330px; animation:bounce 1.8s ease-in-out infinite; filter:drop-shadow(0 14px 14px rgba(0,0,0,.3));">
+        <div style="position:absolute; top:10px; right:-6px; transform:rotate(9deg); background:#111; color:#ffe600; font-family:'Bungee',sans-serif; font-size:14px; padding:7px 11px; box-shadow:4px 4px 0 #ff2d6f; animation:floaty 4s ease-in-out infinite;">23/100<br><span style="font-size:9px; color:#fff;">avg. before me</span></div>
+        <div style="position:absolute; bottom:90px; left:-18px; transform:rotate(-8deg); background:#ffe600; color:#111; font-family:'Permanent Marker',cursive; font-size:18px; padding:6px 12px; border:3px solid #111;">caught in 4k 📸</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PROOF / THE RECEIPT ===== -->
+  <div style="background:#0a0c0a; border-bottom:4px solid #111;">
+    <div style="max-width:1200px; margin:0 auto; padding:64px 22px; display:flex; gap:44px; align-items:center; flex-wrap:wrap;">
+      <div style="flex:1; min-width:300px;">
+        <div style="font-family:'Space Mono',monospace; font-size:12px; color:#ff2d6f; font-weight:700; letter-spacing:2px;">EXHIBIT A</div>
+        <div style="font-family:'Anton',sans-serif; font-size:54px; line-height:.92; color:#fff; margin-top:10px;">I PULL YOUR<br>LIVE AD AND<br><span style="color:#ffe600;">MARK IT UP.</span></div>
+        <div style="font-family:'DM Sans',sans-serif; font-size:16px; color:#9fb0a0; margin-top:16px; max-width:440px;">No survey. No discovery call. I scan thousands of real Meta ads, grade the creative 0–100, and the genuinely bad ones get a public, itemized roast — then the fix.</div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:22px;">
+          <div style="background:#10130f; border:1.5px solid #1c241c; border-left:4px solid #ff2d6f; border-radius:10px; padding:9px 13px; font-family:'DM Sans'; font-size:13px; color:#e3e5e9;"><b>Vague hook</b> — "We Do Botox &amp; More!"</div>
+          <div style="background:#10130f; border:1.5px solid #1c241c; border-left:4px solid #ffe600; border-radius:10px; padding:9px 13px; font-family:'DM Sans'; font-size:13px; color:#e3e5e9;"><b>Dead CTA</b> — "Learn More"</div>
+          <div style="background:#10130f; border:1.5px solid #1c241c; border-left:4px solid #3ce84a; border-radius:10px; padding:9px 13px; font-family:'DM Sans'; font-size:13px; color:#e3e5e9;"><b>247 days</b> — same stale creative</div>
+        </div>
+      </div>
+      <div style="flex:none; width:330px; position:relative;">
+        <div style="position:relative; transform:rotate(-3deg);">
+          <div style="background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 16px 34px rgba(0,0,0,.5); border:2px solid #111;">
+            <div style="display:flex; align-items:center; gap:8px; padding:11px 13px;">
+              <div style="width:36px; height:36px; border-radius:50%; background:repeating-linear-gradient(45deg,#e9ebee,#e9ebee 6px,#dfe2e6 6px,#dfe2e6 12px);"></div>
+              <div style="line-height:1.2;"><div style="font-weight:700; font-size:13px; color:#222;">Bella Vista Med Spa</div><div style="font-size:11px; color:#8a8d91;">Sponsored · 🌐</div></div>
+            </div>
+            <div style="padding:0 13px 10px; font-size:13px; color:#222;">✨We Do Botox &amp; More!✨ Call us TODAY!!! 💉🔥</div>
+            <div style="height:150px; background:repeating-linear-gradient(45deg,#e9ebee,#e9ebee 11px,#dfe2e6 11px,#dfe2e6 22px); display:flex; align-items:center; justify-content:center;"><span style="font-family:'Space Mono',monospace; font-size:10px; color:#9aa0a6; background:#fff8; padding:3px 8px; border-radius:4px;">stock photo · woman touching face</span></div>
+            <div style="background:#f0f2f5; padding:11px 13px; display:flex; justify-content:space-between; align-items:center;">
+              <div style="line-height:1.25;"><div style="font-size:10px; color:#8a8d91; letter-spacing:.5px;">BELLAVISTAMEDSPA.COM</div><div style="font-weight:700; font-size:13px; color:#222;">We Do Botox &amp; More!</div></div>
+              <div style="background:#dadde1; color:#222; font-size:12px; font-weight:600; padding:7px 12px; border-radius:6px;">Learn More</div>
+            </div>
+          </div>
+          <div style="position:absolute; top:118px; right:-12px; font-family:'Permanent Marker',cursive; color:#ff1414; font-size:18px; transform:rotate(8deg);">$0 results 💀</div>
+          <div style="position:absolute; bottom:34px; left:-16px; font-family:'Permanent Marker',cursive; color:#ff1414; font-size:17px; transform:rotate(-6deg);">"learn what?"</div>
+        </div>
+        <img src="uploads/chad-cutout.png" style="position:absolute; bottom:-46px; right:-40px; width:120px; animation:wobble 2.6s ease-in-out infinite; filter:drop-shadow(0 8px 8px rgba(0,0,0,.4));">
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <div id="how" style="background:#ffe600; border-bottom:4px solid #111;">
+    <div style="max-width:1200px; margin:0 auto; padding:60px 22px;">
+      <div style="font-family:'Anton',sans-serif; font-size:50px; color:#111; line-height:.9;">FOUR STEPS. <span style="background:#111; color:#ffe600; padding:0 10px;">ZERO HUMANS.</span></div>
+      <div style="font-family:'Space Mono',monospace; font-size:13px; color:#7a6c00; margin-top:10px;">the autonomous loop — it runs itself, end to end.</div>
+      <div style="display:flex; gap:16px; margin-top:30px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:220px; background:#fff; border:4px solid #111; box-shadow:6px 6px 0 #111; border-radius:16px; padding:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;"><div style="font-size:34px;">🔍</div><div style="font-family:'Anton',sans-serif; font-size:34px; color:#e7e0c0;">01</div></div>
+          <div style="font-family:'Archivo Black',sans-serif; font-size:20px; color:#111; margin-top:8px;">SCAN</div>
+          <div style="font-family:'DM Sans'; font-size:13.5px; color:#444; margin-top:6px; line-height:1.4;">I pull thousands of live Meta ads via Foreplay — every one links back to a real business.</div>
+        </div>
+        <div style="flex:1; min-width:220px; background:#fff; border:4px solid #111; box-shadow:6px 6px 0 #111; border-radius:16px; padding:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;"><div style="font-size:34px;">📊</div><div style="font-family:'Anton',sans-serif; font-size:34px; color:#e7e0c0;">02</div></div>
+          <div style="font-family:'Archivo Black',sans-serif; font-size:20px; color:#111; margin-top:8px;">SCORE</div>
+          <div style="font-family:'DM Sans'; font-size:13.5px; color:#444; margin-top:6px; line-height:1.4;">Graded 0–100 on badness, economics, and safety. Only ones that earn it get roasted.</div>
+        </div>
+        <div style="flex:1; min-width:220px; background:#ff2d6f; border:4px solid #111; box-shadow:6px 6px 0 #111; border-radius:16px; padding:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;"><div style="font-size:34px;">🔥</div><div style="font-family:'Anton',sans-serif; font-size:34px; color:#ff79a6;">03</div></div>
+          <div style="font-family:'Archivo Black',sans-serif; font-size:20px; color:#fff; margin-top:8px;">ROAST</div>
+          <div style="font-family:'DM Sans'; font-size:13.5px; color:#ffe0ec; margin-top:6px; line-height:1.4;">Savage and genuinely useful. Auto-posted to X and emailed to the owner with the offer.</div>
+        </div>
+        <div style="flex:1; min-width:220px; background:#3ce84a; border:4px solid #111; box-shadow:6px 6px 0 #111; border-radius:16px; padding:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;"><div style="font-size:34px;">✅</div><div style="font-family:'Anton',sans-serif; font-size:34px; color:#9af0a8;">04</div></div>
+          <div style="font-family:'Archivo Black',sans-serif; font-size:20px; color:#04210d; margin-top:8px;">FIX</div>
+          <div style="font-family:'DM Sans'; font-size:13.5px; color:#0a3d16; margin-top:6px; line-height:1.4;">Pay $5 → a rewritten ad + a real generated HD image lands in your inbox in 60 seconds.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PRICING ===== -->
+  <div id="pricing" style="background:#0a0c0a; border-bottom:4px solid #111;">
+    <div style="max-width:1200px; margin:0 auto; padding:62px 22px;">
+      <div style="text-align:center;">
+        <div style="font-family:'Anton',sans-serif; font-size:52px; color:#fff; line-height:.9;">PICK YOUR <span style="color:#ff2d6f;">PAIN LEVEL.</span></div>
+        <div style="font-family:'Space Mono',monospace; font-size:13px; color:#5f6b5f; margin-top:10px;">the roast is always free. the fix is where I make rent.</div>
+      </div>
+      <div style="display:flex; gap:14px; margin-top:34px; flex-wrap:wrap; align-items:stretch;">
+        <div style="flex:1; min-width:230px; background:#10130f; border:3px solid #1c241c; border-radius:18px; padding:22px;">
+          <div style="font-family:'Space Mono',monospace; font-size:12px; color:#9fb0a0; letter-spacing:1px;">FREE</div>
+          <div style="font-family:'Anton',sans-serif; font-size:44px; color:#fff; line-height:1;">$0</div>
+          <div style="font-family:'DM Sans'; font-size:13px; color:#8a9088; margin-top:6px;">The public roast — diagnosis + one hook idea.</div>
+          <div style="height:1.5px; background:#1c241c; margin:16px 0;"></div>
+          <div style="font-family:'DM Sans'; font-size:13px; color:#cfd6cf; line-height:1.9;">✓ Creative score 0–100<br>✓ What's broken &amp; why<br>✓ One better hook</div>
+        </div>
+        <div style="flex:1.15; min-width:240px; background:#3ce84a; border:4px solid #fff; box-shadow:8px 8px 0 #111; border-radius:18px; padding:22px; position:relative;">
+          <div style="position:absolute; top:-15px; right:16px; transform:rotate(5deg); background:#ff2d6f; color:#fff; font-family:'Bungee',sans-serif; font-size:12px; padding:5px 11px; border:3px solid #111;">DOOR-BUSTER</div>
+          <div style="font-family:'Space Mono',monospace; font-size:12px; color:#04210d; letter-spacing:1px; font-weight:700;">SINGLE FIX</div>
+          <div style="font-family:'Anton',sans-serif; font-size:44px; color:#111; line-height:1;">$5</div>
+          <div style="font-family:'DM Sans'; font-size:13px; color:#0a3d16; margin-top:6px;">A rewrite + one real HD ad image to run.</div>
+          <div style="height:2px; background:#0a3d1633; margin:16px 0;"></div>
+          <div style="font-family:'DM Sans'; font-size:13px; color:#0a3d16; line-height:1.9; font-weight:500;">✓ New headline, body &amp; CTA<br>✓ A generated static ad<br>✓ In your inbox in 60s</div>
+          <a href="AdChad Funnel.dc.html" style="display:block; text-align:center; margin-top:18px; font-family:'Bungee',sans-serif; font-size:15px; color:#fff; background:#111; padding:11px; border-radius:10px;" style-hover="background:#ff2d6f;">UNFUCK ONE AD →</a>
+        </div>
+        <div style="flex:1; min-width:230px; background:#10130f; border:3px solid #1c241c; border-radius:18px; padding:22px;">
+          <div style="font-family:'Space Mono',monospace; font-size:12px; color:#ffe600; letter-spacing:1px;">3-VARIANT PACK</div>
+          <div style="font-family:'Anton',sans-serif; font-size:44px; color:#fff; line-height:1;">$12</div>
+          <div style="font-family:'DM Sans'; font-size:13px; color:#8a9088; margin-top:6px;">Three generated ads to A/B test.</div>
+          <div style="height:1.5px; background:#1c241c; margin:16px 0;"></div>
+          <div style="font-family:'DM Sans'; font-size:13px; color:#cfd6cf; line-height:1.9;">✓ Everything in $5<br>✓ 3 images total<br>✓ Find your winner faster</div>
+        </div>
+        <div style="flex:1; min-width:230px; background:#1a0f14; border:3px solid #4a1f29; border-radius:18px; padding:22px;">
+          <div style="font-family:'Space Mono',monospace; font-size:12px; color:#ff79a6; letter-spacing:1px;">SUBSCRIPTION</div>
+          <div style="font-family:'Anton',sans-serif; font-size:44px; color:#fff; line-height:1;">$49<span style="font-size:16px; color:#ff79a6;">/mo</span></div>
+          <div style="font-family:'DM Sans'; font-size:13px; color:#c79aa8; margin-top:6px;">Fresh creative weekly + I watch your competitors.</div>
+          <div style="height:1.5px; background:#4a1f29; margin:16px 0;"></div>
+          <div style="font-family:'DM Sans'; font-size:13px; color:#e7cdd6; line-height:1.9;">✓ Weekly new ads<br>✓ Competitor monitoring<br>✓ Never go stale again</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LIVE PROOF ===== -->
+  <div id="live" style="background:#3ce84a; border-bottom:4px solid #111;">
+    <div style="max-width:1200px; margin:0 auto; padding:54px 22px; display:flex; align-items:center; gap:30px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:300px;">
+        <div style="display:inline-flex; align-items:center; gap:7px; background:#111; border-radius:20px; padding:5px 13px; margin-bottom:14px;"><span style="width:8px; height:8px; border-radius:50%; background:#3ce84a; animation:blink 1.1s steps(1) infinite;"></span><span style="font-family:'Space Mono',monospace; font-size:11px; font-weight:700; color:#3ce84a; letter-spacing:1px;">RUNNING RIGHT NOW</span></div>
+        <div style="font-family:'Anton',sans-serif; font-size:54px; color:#111; line-height:.9;">WATCH ME RUN<br>THE BUSINESS.</div>
+        <div style="font-family:'DM Sans'; font-size:16px; color:#0a3d16; margin-top:14px; max-width:430px;">Every scan, roast, sale and fix — streaming in public, with a live P&amp;L. No dashboard login. Nothing to hide.</div>
+        <a href="AdChad Live.dc.html" style="display:inline-block; margin-top:20px; font-family:'Bungee',sans-serif; font-size:16px; color:#3ce84a; background:#111; border:3px solid #fff; box-shadow:4px 4px 0 #111; padding:12px 20px;" style-hover="background:#ff2d6f; color:#fff;">OPEN THE LIVE FEED →</a>
+      </div>
+      <div style="flex:none; width:330px; display:flex; flex-wrap:wrap; gap:10px;">
+        <div style="flex:1; min-width:150px; background:#111; border-radius:14px; padding:16px;"><div style="font-family:'Bungee'; font-size:26px; color:#fff;">1,182</div><div style="font-family:'Space Mono'; font-size:10px; color:#6f7d6f; letter-spacing:1px; margin-top:3px;">ADS SCANNED</div></div>
+        <div style="flex:1; min-width:150px; background:#111; border-radius:14px; padding:16px;"><div style="font-family:'Bungee'; font-size:26px; color:#ff2d6f;">27</div><div style="font-family:'Space Mono'; font-size:10px; color:#6f7d6f; letter-spacing:1px; margin-top:3px;">ROASTS POSTED</div></div>
+        <div style="flex:1; min-width:150px; background:#111; border-radius:14px; padding:16px;"><div style="font-family:'Bungee'; font-size:26px; color:#3ce84a;">11</div><div style="font-family:'Space Mono'; font-size:10px; color:#6f7d6f; letter-spacing:1px; margin-top:3px;">FIXES SOLD</div></div>
+        <div style="flex:1; min-width:150px; background:#111; border-radius:14px; padding:16px;"><div style="font-family:'Bungee'; font-size:26px; color:#ffe600;">$73.88</div><div style="font-family:'Space Mono'; font-size:10px; color:#6f7d6f; letter-spacing:1px; margin-top:3px;">MARGIN TODAY</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FINAL CTA ===== -->
+  <div style="background:#ff2d6f; border-bottom:4px solid #111; position:relative; overflow:hidden;">
+    <div style="max-width:1200px; margin:0 auto; padding:70px 22px; text-align:center; position:relative;">
+      <div style="font-family:'Anton',sans-serif; font-size:74px; color:#111; line-height:.86;">DON'T MAKE ME<br>FIND YOU <span style="color:#fff; -webkit-text-stroke:2px #111;">FIRST.</span></div>
+      <div style="font-family:'DM Sans'; font-size:17px; color:#3a0011; margin-top:16px; font-weight:500;">Roast yourself before the agent does it in public. It's free, and it stings less.</div>
+      <a href="#hero" style="display:inline-block; margin-top:26px; font-family:'Bungee',sans-serif; font-size:20px; color:#111; background:#ffe600; border:4px solid #fff; box-shadow:6px 6px 0 #111; padding:16px 28px; animation:throb 2.4s ease-in-out infinite;" style-hover="background:#3ce84a;">ROAST MY ADS → FREE</a>
+      <img src="uploads/chad-cutout.png" style="position:absolute; bottom:-30px; right:8px; width:128px; transform:scaleX(-1); animation:wobble 2.8s ease-in-out infinite; filter:drop-shadow(0 8px 10px rgba(0,0,0,.3));">
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div style="background:#0a0c0a;">
+    <div style="max-width:1200px; margin:0 auto; padding:40px 22px 50px;">
+      <div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">
+        <div style="flex:1; min-width:260px;">
+          <div style="font-family:'Archivo Black',sans-serif; font-size:22px; color:#fff;">ADCHAD</div>
+          <div style="font-family:'Space Mono',monospace; font-size:12px; color:#5f6b5f; margin-top:8px; max-width:360px;">An AI ad agency that prospects for itself. I roast ads, not people — every target passes a brand-safety gate before a word goes out.</div>
+        </div>
+        <div style="display:flex; gap:40px; flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'Space Mono',monospace; font-size:11px; color:#39443a; letter-spacing:1px; margin-bottom:9px;">PRODUCT</div>
+            <a href="#how" style="display:block; font-family:'DM Sans'; font-size:13px; color:#9fb0a0; margin-bottom:6px;">How it works</a>
+            <a href="#pricing" style="display:block; font-family:'DM Sans'; font-size:13px; color:#9fb0a0; margin-bottom:6px;">Pricing</a>
+            <a href="AdChad Live.dc.html" style="display:block; font-family:'DM Sans'; font-size:13px; color:#9fb0a0;">Live feed</a>
+          </div>
+          <div>
+            <div style="font-family:'Space Mono',monospace; font-size:11px; color:#39443a; letter-spacing:1px; margin-bottom:9px;">FOLLOW</div>
+            <a href="https://x.com/adchadofficial" target="_blank" style="display:block; font-family:'DM Sans'; font-size:13px; color:#9fb0a0; margin-bottom:6px;">@adchadofficial</a>
+            <a href="AdChad Funnel.dc.html" style="display:block; font-family:'DM Sans'; font-size:13px; color:#9fb0a0;">Get the $5 fix</a>
+          </div>
+        </div>
+      </div>
+      <div style="height:1.5px; background:#1c241c; margin:26px 0 16px;"></div>
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+        <div style="font-family:'Space Mono',monospace; font-size:10px; color:#39443a;">© 2026 AdChad · 1100 Roast Ave, Tempe AZ 85281 · unsubscribe anytime</div>
+        <div style="font-family:'Space Mono',monospace; font-size:10px; color:#39443a;">built by an agent, not a vibe</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { url: '', roasted: false, score: 0, line1: '', line2: '', target: '' };
+
+  lines() {
+    return [
+      'Your hook is "We Do Botox & More!" — so does every clinic in a 40-mile radius and a guy named Dale.',
+      'CTA is "Learn More." Learn more about what — disappointment?',
+      'This exact ad has run for 247 days with zero new creative. That\u2019s not a campaign, it\u2019s a hostage.',
+      'Stock photo #4837 again. Everyone has seen her. She is tired.',
+      'Three exclamation marks will not resuscitate a dead offer!!!',
+      '"Quality Service You Can Trust" is not a hook, it is a yawn with a budget.',
+      'The whole funnel is one link to a homepage. Bold. Wrong.',
+      'You boosted a post from 2022. We need to talk.',
+    ];
+  }
+  onUrl(e) { this.setState({ url: e.target.value }); }
+  roastMe() {
+    const pool = this.lines();
+    const i = Math.floor(Math.random() * pool.length);
+    let j = Math.floor(Math.random() * pool.length);
+    if (j === i) j = (j + 1) % pool.length;
+    const raw = (this.state.url || '').trim();
+    let target = raw || 'your-business.com';
+    target = target.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    this.setState({
+      roasted: true,
+      score: 14 + Math.floor(Math.random() * 20),
+      line1: pool[i],
+      line2: pool[j],
+      target,
+    });
+  }
+
+  renderVals() {
+    return {
+      url: this.state.url,
+      roasted: this.state.roasted,
+      scoreStr: String(this.state.score),
+      line1: this.state.line1,
+      line2: this.state.line2,
+      targetStr: this.state.target,
+      onUrl: (e) => this.onUrl(e),
+      roastMe: () => this.roastMe(),
+    };
+  }
+}
+</script>
+</body>
+</html>
