@@ -1,7 +1,7 @@
 'use client'
 import { useRef, useState } from 'react'
 
-// The REAL on-demand roast — replaces the mockup's fake URL→roast box.
+// The REAL on-demand roast - replaces the mockup's fake URL→roast box.
 // Uploads a screenshot + email to /api/roast, then reveals the score card.
 type RoastResult = { prospectId: string; score: number; verdict: string; roast: string; originalUrl: string }
 
@@ -29,9 +29,9 @@ export default function RoastBox() {
       const res = await fetch('/api/roast', { method: 'POST', body: fd })
       const data = await res.json().catch(() => ({}))
       if (res.ok) { setResult(data as RoastResult); setStatus('done') }
-      else { setError((data as { error?: string }).error || 'roast failed — try again'); setStatus('error') }
+      else { setError((data as { error?: string }).error || 'roast failed, try again'); setStatus('error') }
     } catch {
-      setError('network died mid-roast — try again'); setStatus('error')
+      setError('network died mid-roast, try again'); setStatus('error')
     }
   }
 
@@ -48,7 +48,7 @@ export default function RoastBox() {
         .rb-input::placeholder{color:#8a8d91}
       `}</style>
 
-      {/* the input box — white brutalist card, matches the mockup's hero box */}
+      {/* the input box - white brutalist card, matches the mockup's hero box */}
       <div style={{ background: '#fff', border: `4px solid ${INK}`, borderRadius: 14, padding: 10, boxShadow: `6px 6px 0 ${INK}` }}>
         {/* file drop zone */}
         <label
@@ -93,7 +93,7 @@ export default function RoastBox() {
         </div>
       </div>
 
-      {/* processing state — Chad's reviewing your ad (~30s) */}
+      {/* processing state - Chad's reviewing your ad (~30s) */}
       {status === 'loading' && (
         <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 14, background: INK, border: '4px solid #fff', boxShadow: `6px 6px 0 ${INK}`, borderRadius: 14, padding: '16px 18px' }}>
           <img src="/chad-cutout.png" alt="" style={{ width: 56, animation: 'work 1.1s ease-in-out infinite' }} />
@@ -115,7 +115,7 @@ export default function RoastBox() {
         </div>
       )}
 
-      {/* the score card — revealed on 200 */}
+      {/* the score card - revealed on 200 */}
       {status === 'done' && result && (
         <div style={{ marginTop: 14, background: INK, border: '4px solid #fff', boxShadow: `6px 6px 0 ${INK}`, borderRadius: 14, padding: '16px 18px', animation: 'pop .35s ease' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
