@@ -25,3 +25,25 @@ Drove the **real agent on the box** (`hermes -z "/prospect find a target in the 
 
 This proves the spec-02 #4 contract: it tried the full query → **broadened once** to the bare term (`zxqvwklmn`) → still empty → reported "no ads found" and **STOPPED** (no file-cat'ing / no spiral). Wall-clock 3m40s, CPU 12.9s — the time is slow non-streaming Nemotron round-trips, not a runaway loop (the old failure was 9 min+ climbing toward the 150-turn cap). `max_turns=50` remains the deterministic backstop.
 
+---
+
+## On-demand roast endpoint (spec-11) — PASS
+
+`POST /api/roast` driven with a real ad screenshot (`public/originals/COf1oofGrqI8AWQvVTam.png`) + a unique email, against the dev server + paused kill-switch.
+
+**Response (node/JSON.parse, 699 B, valid):** `score: 65`, `verdict: "Clear message and offer, but lacks strong CTA and brand visibility."`, `roast: "This ad is sloppy, low-effort garbage with zero pull…"`, `prospectId: web-qa-roast-…`, `originalUrl: https://…public.blob.vercel-storage.com/roasts/…` (uploaded to Blob).
+**Persistence:** `GET /p/<prospectId>` → **HTTP 200**, renders the roast ("roasted you") — so the `intake` op wrote ad+prospect+roast(channel='roast')+score and `db page` surfaces them.
+**Kill-switch:** paused → no email sent (verified by branch; the roast still returns to the uploader, which is the product).
+
+Validation + rate-limit covered by `tests/ratelimit.test.ts` + input guards (mime/5 MB/email). Watch item: the gemini score (65) runs generous vs the roast's savagery — tune the score prompt harsher if brand wants lower numbers.
+
+---
+
+## Brand redesign — Home / Funnel / Live (spec-10) — PASS
+
+Driven on the dev server (:3001) via chrome-devtools; full project `tsc=0`; all three pages 200, no error markers.
+- **Home (`/`, desktop):** faithful to the mockup — pink ticker, green "YOUR META ADS ARE COOKED." hero + the real upload `RoastBox`, EXHIBIT-A markup, FOUR STEPS, $0/$5/$12/$49 pricing, "WATCH ME RUN THE BUSINESS" with **real** counters (33 scanned · 1 roast · 2 sales · $60.00 margin), pink CTA, footer. **Zero console errors.** `pipeline-runs/screenshots/2026-06-26-redesign/home-desktop.png`.
+- **Funnel (`/p/<id>`, mobile):** real VIO hydrafacial ad + real roast + real **score 65/100** + UNFUCK→$5. `funnel-mobile.png`.
+- **Live (`/live`, mobile):** P&L tiles (REVENUE/SPEND/MARGIN) + SCANNED/ROASTS/SALES counters + accent-bordered timeline + NEW badge + score chips, real `/api/feed`. `live-mobile.png`.
+- **QA finding (FIXED):** on-demand web-upload prospects (`email_source='inbound'`) leaked into the PUBLIC feed as "New target: unknown · score N". Fixed the `feed` op to exclude inbound prospects → verified **0 leaked**, 10 db tests still green.
+
