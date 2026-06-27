@@ -75,7 +75,7 @@ export default async function Home() {
           <div style={{ flex: 'none', width: 300, position: 'relative', alignSelf: 'stretch', minHeight: 340 }}>
             <img src="/chad-cutout.png" alt="Chad, the AI ad agency mascot" style={{ position: 'absolute', bottom: -70, left: '50%', transform: 'translateX(-50%)', width: 430, filter: 'drop-shadow(0 14px 14px rgba(0,0,0,.3))' }} />
             <div style={{ position: 'absolute', top: 10, right: -6, transform: 'rotate(9deg)', background: INK, color: YELLOW, fontFamily: F_BUNGEE, fontSize: 14, padding: '7px 11px', boxShadow: `4px 4px 0 ${PINK}`, animation: 'floaty 4s ease-in-out infinite' }}>23/100<br /><span style={{ fontSize: 9, color: '#fff' }}>avg. before me</span></div>
-            <div style={{ position: 'absolute', bottom: 90, left: -18, transform: 'rotate(-8deg)', background: YELLOW, color: INK, fontFamily: F_MARKER, fontSize: 18, padding: '6px 12px', border: `3px solid ${INK}` }}>caught in 4k 📸</div>
+            <div style={{ position: 'absolute', bottom: 90, left: -18, transform: 'rotate(-8deg)', background: YELLOW, color: INK, fontFamily: F_MARKER, fontSize: 18, padding: '6px 12px', border: `3px solid ${INK}` }}>skill issue 💀</div>
           </div>
         </div>
       </div>
