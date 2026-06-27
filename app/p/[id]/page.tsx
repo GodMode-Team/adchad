@@ -1,54 +1,63 @@
 import { run } from '../../../tools/db'
+import Funnel from './Funnel'
 
 export const dynamic = 'force-dynamic'
 
-const isVideo = (u?: string | null) => !!u && /\.(mp4|webm|mov)$/i.test(u)
-
-// The conversion page: their ad + the roast + one CTA. Mobile-first. Linked from the tweet/email.
-export default async function SalesPage({ params }: { params: Promise<{ id: string }> }) {
+// The conversion funnel: their real ad + the real roast → real Stripe checkout. Mobile-first.
+// params/searchParams are Promises in Next 15.
+export default async function SalesPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ paid?: string }>
+}) {
   const { id } = await params
+  const sp = await searchParams
   const data: any = await run('page', { id }).catch(() => ({ found: false }))
 
-  const wrap = { maxWidth: 440, margin: '0 auto', padding: '24px 18px 64px', fontFamily: 'system-ui, sans-serif', color: '#f5f5f5', background: '#0b0b0c', minHeight: '100vh' } as const
   if (!data.found) {
-    return <main style={wrap}>This roast has moved on. <a href="/" style={{ color: '#e11' }}>AdChad →</a></main>
+    return (
+      <main
+        style={{
+          minHeight: '100dvh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 18,
+          background: 'var(--green)',
+          color: 'var(--ink)',
+          textAlign: 'center',
+          padding: 28,
+        }}
+      >
+        <div style={{ fontFamily: 'var(--f-display)', fontSize: 56, lineHeight: 0.92, letterSpacing: -1 }}>
+          THIS ROAST
+          <br />
+          MOVED ON.
+        </div>
+        <div style={{ fontFamily: 'var(--f-mono)', fontSize: 13, color: '#0a3d16', maxWidth: 300 }}>
+          The page you&apos;re after has rolled off. The roasting never stops, though.
+        </div>
+        <a
+          href="/"
+          style={{
+            fontFamily: 'var(--f-bungee)',
+            fontSize: 20,
+            background: 'var(--ink)',
+            color: 'var(--yellow)',
+            padding: '14px 22px',
+            borderRadius: 14,
+            border: '4px solid #fff',
+            boxShadow: '0 0 0 4px var(--ink)',
+          }}
+        >
+          AdChad →
+        </a>
+      </main>
+    )
   }
 
-  const { name, ad, roast_text } = data
-  const checkout = `/api/checkout?p=${encodeURIComponent(id)}&tier=5`
-  return (
-    <main style={wrap}>
-      <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#e11', marginBottom: 8 }}>AdChad roasted you</div>
-      <h1 style={{ fontSize: 30, lineHeight: 1.1, margin: '0 0 16px', fontWeight: 900 }}>
-        {name ? `${name}, your ad is bad.` : 'Your ad is bad.'}
-      </h1>
-
-      {roast_text && (
-        <blockquote style={{ margin: '0 0 20px', padding: '14px 16px', background: '#fff', color: '#0a0a0a', borderRadius: 12, fontSize: 17, lineHeight: 1.4, fontWeight: 600 }}>
-          {roast_text}
-        </blockquote>
-      )}
-
-      {ad?.creative_url && (
-        <>
-          <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #eee', marginBottom: 6 }}>
-            {isVideo(ad.creative_url)
-              ? <video src={ad.creative_url} controls muted playsInline style={{ width: '100%', display: 'block' }} />
-              : <img src={ad.creative_url} alt="your ad" style={{ width: '100%', display: 'block' }} />}
-          </div>
-          <p style={{ fontSize: 12, color: '#888', margin: '0 0 24px' }}>↑ the ad we&apos;re talking about.</p>
-        </>
-      )}
-
-      <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>We&apos;ll unfuck it.</div>
-      <p style={{ fontSize: 15, color: '#bbb', margin: '0 0 20px', lineHeight: 1.45 }}>
-        Rewritten headline, body, and CTA + a ready-to-run ad image — built by the same AI that called yours out. In your inbox in minutes.
-      </p>
-
-      <a href={checkout} style={{ display: 'block', textAlign: 'center', background: '#e11', color: '#fff', fontWeight: 900, fontSize: 20, padding: 18, borderRadius: 12, textDecoration: 'none', letterSpacing: 0.5 }}>
-        UNFUCK IT — $5 →
-      </a>
-      <p style={{ fontSize: 12, color: '#999', textAlign: 'center', marginTop: 12 }}>One $5 payment. No subscription. 100% AI, delivered in minutes.</p>
-    </main>
-  )
+  return <Funnel data={data} paid={sp.paid === '1'} id={id} />
 }
