@@ -21,8 +21,8 @@ export async function checkout(o: { prospect: string; tier: number }): Promise<{
       quantity: 1,
     }],
     metadata: { prospect: o.prospect, tier: String(o.tier) },
-    success_url: `${base}/?paid=1`,
-    cancel_url: `${base}/?p=${encodeURIComponent(o.prospect)}`,
+    success_url: `${base}/p/${encodeURIComponent(o.prospect)}?paid=1`,
+    cancel_url: `${base}/p/${encodeURIComponent(o.prospect)}`,
   })
   return { url: s.url!, id: s.id }
 }
