@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 const INK = 'var(--ink)', GREEN = 'var(--green)', PINK = 'var(--pink)', YELLOW = 'var(--yellow)', BG = 'var(--bg)'
 const F_DISPLAY = 'var(--f-display)', F_HEAVY = 'var(--f-heavy)', F_BUNGEE = 'var(--f-bungee)', F_MARKER = 'var(--f-marker)', F_MONO = 'var(--f-mono)', F_SANS = 'var(--f-sans)'
 
-const tick = ' YOUR ADS ARE BAD ● I CAN PROVE IT ● $5 TO UNFUCK THEM ● THE AGENT NEVER SLEEPS ●'
+const tick = ' YOUR ADS ARE DOGSHIT ● I CAN PROVE IT IN 4K ● YOUR CTR IS A CRY FOR HELP ● YOUR AGENCY ROBBED YOU BLIND ●'
 const wrap = { maxWidth: 1200, margin: '0 auto' } as const
 
 export default async function Home() {
@@ -65,7 +65,7 @@ export default async function Home() {
           <div style={{ flex: 1, minWidth: 330 }}>
             <div style={{ display: 'inline-block', transform: 'rotate(-2deg)', background: INK, color: GREEN, fontFamily: F_MONO, fontWeight: 700, fontSize: 12, letterSpacing: 1, padding: '5px 12px', marginBottom: 18 }}>AN AI AD AGENCY THAT PROSPECTS FOR ITSELF</div>
             <div style={{ fontFamily: F_DISPLAY, fontSize: 84, lineHeight: 0.86, color: INK, letterSpacing: -1 }}>
-              YOUR META ADS<br />ARE <span style={{ color: '#fff', WebkitTextStroke: `3px ${INK}`, textShadow: `5px 5px 0 ${PINK}` }}>COOKED.</span>
+              YOUR ADS<br />ARE <span style={{ color: '#fff', WebkitTextStroke: `3px ${INK}`, textShadow: `5px 5px 0 ${PINK}` }}>COOKED.</span>
             </div>
             <div style={{ fontFamily: F_SANS, fontSize: 18, color: '#0a3d16', fontWeight: 500, marginTop: 18, maxWidth: 480 }}>
               I find small businesses running weak ads, roast them in public, then sell the fix for $5. You&apos;re probably one of them. Let&apos;s find out.
@@ -73,7 +73,7 @@ export default async function Home() {
             <RoastBox />
           </div>
           <div style={{ flex: 'none', width: 300, position: 'relative', alignSelf: 'stretch', minHeight: 340 }}>
-            <img src="/chad-cutout.png" alt="Chad, the AI ad agency mascot" style={{ position: 'absolute', bottom: -70, left: '50%', transform: 'translateX(-50%)', width: 330, animation: 'bounce 1.8s ease-in-out infinite', filter: 'drop-shadow(0 14px 14px rgba(0,0,0,.3))' }} />
+            <img src="/chad-cutout.png" alt="Chad, the AI ad agency mascot" style={{ position: 'absolute', bottom: -70, left: '50%', transform: 'translateX(-50%)', width: 430, filter: 'drop-shadow(0 14px 14px rgba(0,0,0,.3))' }} />
             <div style={{ position: 'absolute', top: 10, right: -6, transform: 'rotate(9deg)', background: INK, color: YELLOW, fontFamily: F_BUNGEE, fontSize: 14, padding: '7px 11px', boxShadow: `4px 4px 0 ${PINK}`, animation: 'floaty 4s ease-in-out infinite' }}>23/100<br /><span style={{ fontSize: 9, color: '#fff' }}>avg. before me</span></div>
             <div style={{ position: 'absolute', bottom: 90, left: -18, transform: 'rotate(-8deg)', background: YELLOW, color: INK, fontFamily: F_MARKER, fontSize: 18, padding: '6px 12px', border: `3px solid ${INK}` }}>caught in 4k 📸</div>
           </div>
@@ -86,7 +86,7 @@ export default async function Home() {
           <div style={{ flex: 1, minWidth: 300 }}>
             <div style={{ fontFamily: F_MONO, fontSize: 12, color: PINK, fontWeight: 700, letterSpacing: 2 }}>EXHIBIT A</div>
             <div style={{ fontFamily: F_DISPLAY, fontSize: 54, lineHeight: 0.92, color: '#fff', marginTop: 10 }}>I PULL YOUR<br />LIVE AD AND<br /><span style={{ color: YELLOW }}>MARK IT UP.</span></div>
-            <div style={{ fontFamily: F_SANS, fontSize: 16, color: '#9fb0a0', marginTop: 16, maxWidth: 440 }}>No survey. No discovery call. I scan thousands of real Meta ads, grade the creative 0–100, and the genuinely bad ones get a public, itemized roast — then the fix.</div>
+            <div style={{ fontFamily: F_SANS, fontSize: 16, color: '#9fb0a0', marginTop: 16, maxWidth: 440 }}>No survey. No discovery call. I scan thousands of real ads, grade the creative 0–100, and the genuinely bad ones get a public, itemized roast — then the fix.</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 22 }}>
               <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderLeft: `4px solid ${PINK}`, borderRadius: 10, padding: '9px 13px', fontFamily: F_SANS, fontSize: 13, color: '#e3e5e9' }}><b>Vague hook</b> — &quot;We Do Botox &amp; More!&quot;</div>
               <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderLeft: `4px solid ${YELLOW}`, borderRadius: 10, padding: '9px 13px', fontFamily: F_SANS, fontSize: 13, color: '#e3e5e9' }}><b>Dead CTA</b> — &quot;Learn More&quot;</div>
@@ -111,7 +111,7 @@ export default async function Home() {
               <div style={{ position: 'absolute', top: 118, right: -12, fontFamily: F_MARKER, color: '#ff1414', fontSize: 18, transform: 'rotate(8deg)' }}>$0 results 💀</div>
               <div style={{ position: 'absolute', bottom: 34, left: -16, fontFamily: F_MARKER, color: '#ff1414', fontSize: 17, transform: 'rotate(-6deg)' }}>&quot;learn what?&quot;</div>
             </div>
-            <img src="/chad-cutout.png" alt="" style={{ position: 'absolute', bottom: -46, right: -40, width: 120, animation: 'wobble 2.6s ease-in-out infinite', filter: 'drop-shadow(0 8px 8px rgba(0,0,0,.4))' }} />
+            <img src="/chad-cutout.png" alt="" style={{ position: 'absolute', bottom: -46, right: -40, width: 120, filter: 'drop-shadow(0 8px 8px rgba(0,0,0,.4))' }} />
           </div>
         </div>
       </div>
@@ -120,10 +120,9 @@ export default async function Home() {
       <div id="how" style={{ background: YELLOW, borderBottom: `4px solid ${INK}` }}>
         <div style={{ ...wrap, padding: '60px 22px' }}>
           <div style={{ fontFamily: F_DISPLAY, fontSize: 50, color: INK, lineHeight: 0.9 }}>FOUR STEPS. <span style={{ background: INK, color: YELLOW, padding: '0 10px' }}>ZERO HUMANS.</span></div>
-          <div style={{ fontFamily: F_MONO, fontSize: 13, color: '#7a6c00', marginTop: 10 }}>the autonomous loop — it runs itself, end to end.</div>
           <div style={{ display: 'flex', gap: 16, marginTop: 30, flexWrap: 'wrap' }}>
             {([
-              ['🔍', '01', 'SCAN', 'I pull thousands of live Meta ads via Foreplay — every one links back to a real business.', '#fff', INK, '#e7e0c0', '#444'],
+              ['🔍', '01', 'SCAN', 'I pull thousands of live ads and trace every one back to a real business.', '#fff', INK, '#e7e0c0', '#444'],
               ['📊', '02', 'SCORE', 'Graded 0–100 on badness, economics, and safety. Only ones that earn it get roasted.', '#fff', INK, '#e7e0c0', '#444'],
               ['🔥', '03', 'ROAST', 'Savage and genuinely useful. Auto-posted to X and emailed to the owner with the offer.', PINK, '#fff', '#ff79a6', '#ffe0ec'],
               ['✅', '04', 'FIX', 'Pay $5 → a rewritten ad + a real generated HD image lands in your inbox in 60 seconds.', GREEN, '#04210d', '#9af0a8', '#0a3d16'],
@@ -143,7 +142,6 @@ export default async function Home() {
         <div style={{ ...wrap, padding: '62px 22px' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontFamily: F_DISPLAY, fontSize: 52, color: '#fff', lineHeight: 0.9 }}>PICK YOUR <span style={{ color: PINK }}>PAIN LEVEL.</span></div>
-            <div style={{ fontFamily: F_MONO, fontSize: 13, color: '#5f6b5f', marginTop: 10 }}>the roast is always free. the fix is where I make rent.</div>
           </div>
           <div style={{ display: 'flex', gap: 14, marginTop: 34, flexWrap: 'wrap', alignItems: 'stretch' }}>
             {/* FREE */}
@@ -156,7 +154,6 @@ export default async function Home() {
             </div>
             {/* SINGLE FIX — $5 → #hero (roast first, we need a prospect id before checkout) */}
             <div style={{ flex: 1.15, minWidth: 240, background: GREEN, border: '4px solid #fff', boxShadow: `8px 8px 0 ${INK}`, borderRadius: 18, padding: 22, position: 'relative' }}>
-              <div style={{ position: 'absolute', top: -15, right: 16, transform: 'rotate(5deg)', background: PINK, color: '#fff', fontFamily: F_BUNGEE, fontSize: 12, padding: '5px 11px', border: `3px solid ${INK}` }}>DOOR-BUSTER</div>
               <div style={{ fontFamily: F_MONO, fontSize: 12, color: '#04210d', letterSpacing: 1, fontWeight: 700 }}>SINGLE FIX</div>
               <div style={{ fontFamily: F_DISPLAY, fontSize: 44, color: INK, lineHeight: 1 }}>$5</div>
               <div style={{ fontFamily: F_SANS, fontSize: 13, color: '#0a3d16', marginTop: 6 }}>A rewrite + one real HD ad image to run.</div>
@@ -211,9 +208,9 @@ export default async function Home() {
       <div style={{ background: PINK, borderBottom: `4px solid ${INK}`, position: 'relative', overflow: 'hidden' }}>
         <div style={{ ...wrap, padding: '70px 22px', textAlign: 'center', position: 'relative' }}>
           <div style={{ fontFamily: F_DISPLAY, fontSize: 74, color: INK, lineHeight: 0.86 }}>DON&apos;T MAKE ME<br />FIND YOU <span style={{ color: '#fff', WebkitTextStroke: `2px ${INK}` }}>FIRST.</span></div>
-          <div style={{ fontFamily: F_SANS, fontSize: 17, color: '#3a0011', marginTop: 16, fontWeight: 500 }}>Roast yourself before the agent does it in public. It&apos;s free, and it stings less.</div>
+          <div style={{ fontFamily: F_SANS, fontSize: 17, color: '#3a0011', marginTop: 16, fontWeight: 500 }}>Roast yourself before the agent does it in public.</div>
           <a className="ac-final-cta" href="#hero" style={{ display: 'inline-block', marginTop: 26, fontFamily: F_BUNGEE, fontSize: 20, color: INK, background: YELLOW, border: '4px solid #fff', boxShadow: `6px 6px 0 ${INK}`, padding: '16px 28px', animation: 'throb 2.4s ease-in-out infinite' }}>ROAST MY ADS → FREE</a>
-          <img src="/chad-cutout.png" alt="" style={{ position: 'absolute', bottom: -30, right: 8, width: 128, transform: 'scaleX(-1)', animation: 'wobble 2.8s ease-in-out infinite', filter: 'drop-shadow(0 8px 10px rgba(0,0,0,.3))' }} />
+          <img src="/chad-cutout.png" alt="" style={{ position: 'absolute', bottom: -30, right: 8, width: 128, transform: 'scaleX(-1)', filter: 'drop-shadow(0 8px 10px rgba(0,0,0,.3))' }} />
         </div>
       </div>
 
@@ -223,7 +220,7 @@ export default async function Home() {
           <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 260 }}>
               <div style={{ fontFamily: F_HEAVY, fontSize: 22, color: '#fff' }}>ADCHAD</div>
-              <div style={{ fontFamily: F_MONO, fontSize: 12, color: '#5f6b5f', marginTop: 8, maxWidth: 360 }}>An AI ad agency that prospects for itself. I roast ads, not people — every target passes a brand-safety gate before a word goes out.</div>
+              <div style={{ fontFamily: F_MONO, fontSize: 12, color: '#5f6b5f', marginTop: 8, maxWidth: 360 }}>An AI ad agency that hunts down garbage ads, drags them in public for sport, then sells the $5 fix. Run a weak one and you&apos;re next.</div>
             </div>
             <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap' }}>
               <div>
@@ -241,7 +238,7 @@ export default async function Home() {
           </div>
           <div style={{ height: 1.5, background: 'var(--line)', margin: '26px 0 16px' }} />
           <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-            <div style={{ fontFamily: F_MONO, fontSize: 10, color: '#39443a' }}>© 2026 AdChad · 1100 Roast Ave, Tempe AZ 85281 · roast in public · unsubscribe anytime</div>
+            <div style={{ fontFamily: F_MONO, fontSize: 10, color: '#39443a' }}>© 2026 AdChad</div>
             <div style={{ fontFamily: F_MONO, fontSize: 10, color: '#39443a' }}>built by an agent, not a vibe</div>
           </div>
         </div>

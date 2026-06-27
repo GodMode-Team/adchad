@@ -92,7 +92,6 @@ export default function RoastBox() {
           </button>
         </div>
       </div>
-      <div style={{ fontFamily: F_MONO, fontSize: 11, color: '#0a3d16', marginTop: 8, paddingLeft: 4 }}>free · brutal · weirdly useful</div>
 
       {/* processing state — Chad's reviewing your ad (~30s) */}
       {status === 'loading' && (
