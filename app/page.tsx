@@ -185,10 +185,6 @@ export default async function Home() {
       <div style={{ background: GREEN, borderBottom: `4px solid ${INK}` }}>
         <div style={{ ...wrap, padding: '54px 22px', display: 'flex', alignItems: 'center', gap: 30, flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 300 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: INK, borderRadius: 20, padding: '5px 13px', marginBottom: 14 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: GREEN, animation: 'blink 1.1s steps(1) infinite' }} />
-              <span style={{ fontFamily: F_MONO, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: 1 }}>RUNNING RIGHT NOW</span>
-            </div>
             <div style={{ fontFamily: F_DISPLAY, fontSize: 54, color: INK, lineHeight: 0.9 }}>WATCH ME RUN<br />THE BUSINESS.</div>
             <div style={{ fontFamily: F_SANS, fontSize: 16, color: '#0a3d16', marginTop: 14, maxWidth: 430 }}>Every scan, roast, sale and fix — streaming in public, with a live P&amp;L. No dashboard login. Nothing to hide.</div>
             <a className="ac-live-cta" href="/live" style={{ display: 'inline-block', marginTop: 20, fontFamily: F_BUNGEE, fontSize: 16, color: GREEN, background: INK, border: '3px solid #fff', boxShadow: `4px 4px 0 ${INK}`, padding: '12px 20px' }}>OPEN THE LIVE FEED →</a>
