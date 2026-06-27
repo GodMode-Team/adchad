@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bungee&family=Permanent+Marker&family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'DM Sans', sans-serif; }
+  @keyframes bounce { 0%,100% { transform: translateX(-50%) translateY(0) rotate(-2deg) } 50% { transform: translateX(-50%) translateY(-16px) rotate(2deg) } }
+  @keyframes bounceR { 0%,100% { transform: translateY(0) rotate(-2deg) } 50% { transform: translateY(-14px) rotate(2deg) } }
+  @keyframes mq { to { transform: translateX(-50%) } }
+  @keyframes shake { 0%,100%{transform:rotate(-13deg) translate(0,0)} 25%{transform:rotate(-13deg) translate(-2px,1px)} 75%{transform:rotate(-13deg) translate(2px,-1px)} }
+  @keyframes floaty { 0%,100%{transform:rotate(8deg) translateY(0)} 50%{transform:rotate(8deg) translateY(-9px)} }
+  @keyframes throb { 0%,100%{transform:scale(1) rotate(-2deg)} 50%{transform:scale(1.05) rotate(-2deg)} }
+  @keyframes pop1 { 0%,7%{opacity:0;transform:scale(.3)} 10%{opacity:1;transform:scale(1.18)} 13%{transform:scale(1)} 86%{opacity:1;transform:scale(1)} 92%,100%{opacity:0;transform:scale(.85)} }
+  @keyframes pop2 { 0%,27%{opacity:0;transform:scale(.3)} 30%{opacity:1;transform:scale(1.18)} 33%{transform:scale(1)} 86%{opacity:1;transform:scale(1)} 92%,100%{opacity:0;transform:scale(.85)} }
+  @keyframes pop3 { 0%,47%{opacity:0;transform:scale(.3)} 50%{opacity:1;transform:scale(1.2)} 53%{transform:scale(1)} 86%{opacity:1;transform:scale(1)} 92%,100%{opacity:0;transform:scale(.85)} }
+  @keyframes review {
+    0%{transform:translateY(0) rotate(0deg)}
+    6%{transform:translateY(-7px) rotate(-3deg)}
+    10%{transform:translateY(2px) rotate(4deg)}
+    14%{transform:translateY(0) rotate(0deg)}
+    27%{transform:translateY(0) rotate(0deg)}
+    31%{transform:translateY(-5px) rotate(-5deg)}
+    35%{transform:translateY(0) rotate(0deg)}
+    47%{transform:translateY(0) rotate(0deg)}
+    51%{transform:translateY(3px) rotate(5deg)}
+    55%{transform:translateY(0) rotate(0deg)}
+    68%{transform:rotate(-3deg)} 72%{transform:rotate(3deg)} 76%{transform:rotate(-3deg)} 80%{transform:rotate(2deg)} 84%{transform:rotate(0deg)}
+    100%{transform:translateY(0) rotate(0deg)}
+  }
+</style>
+</helmet>
+
+<div style="position:absolute; left:80px; top:44px; width:1100px;">
+  <div style="font-family:'Archivo Black',sans-serif; font-size:58px; line-height:0.92; letter-spacing:-2px; color:#111;">RANSOM SHITPOST <span style="color:#ff2d6f;">— 3 TAKES</span></div>
+  <div style="font-family:'Space Mono',monospace; font-size:14px; color:#555; margin-top:14px; max-width:780px;">Chad <b>fully visible</b> in all three · "UNFUCK IT → $5" stays · the "<b>this ad is 247 days stale</b>" angle (no spend guessing — staleness is provable) · banner reworked from plain "ROASTED" into a savage rotating ticker · in B2, <b>AdChad reviews the actual ad live</b> — his comments land one-by-one as he reacts. Pick a winner (or a banner from one + a layout from another).</div>
+</div>
+
+<!-- ============ B1 — COOKED (refined, chad hero) ============ -->
+<div style="position:absolute; left:80px; top:268px; width:430px;">
+  <div data-drags-parent="1" style="position:absolute; top:-52px; left:0;">
+    <div style="font-family:'Archivo Black',sans-serif; font-size:17px; color:#111;">B1 · COOKED — CHAD HERO</div>
+    <div style="font-family:'Space Mono',monospace; font-size:11px; color:#777;">cleaner. chad centered + fully visible. price sticker points at him.</div>
+  </div>
+  <div style="width:430px; height:828px; border:5px solid #111; border-radius:38px; overflow:hidden; position:relative; background:#3ce84a;">
+    <div style="height:38px; background:#ffe600; border-bottom:4px solid #111; overflow:hidden; display:flex; align-items:center;">
+      <div style="display:flex; white-space:nowrap; font-family:'Bungee'; font-size:14px; color:#111; animation:mq 14s linear infinite;">
+        <span>&nbsp;23/100&nbsp;●&nbsp;CAUGHT IN 4K&nbsp;●&nbsp;SAME AD FOR 247 DAYS&nbsp;●&nbsp;CTA: "LEARN MORE" 😴&nbsp;●&nbsp;I ALREADY FIXED IT&nbsp;●&nbsp;</span><span>&nbsp;23/100&nbsp;●&nbsp;CAUGHT IN 4K&nbsp;●&nbsp;SAME AD FOR 247 DAYS&nbsp;●&nbsp;CTA: "LEARN MORE" 😴&nbsp;●&nbsp;I ALREADY FIXED IT&nbsp;●&nbsp;</span>
+      </div>
+    </div>
+    <div style="position:absolute; top:56px; left:22px; transform:rotate(-4deg); background:#ff2d6f; color:#fff; font-family:'Archivo Black'; font-size:30px; padding:2px 12px; border:4px solid #111; box-shadow:5px 5px 0 #111; z-index:4;">YOUR AD IS</div>
+    <div style="position:absolute; top:104px; left:26px; transform:rotate(2deg); background:#ffe600; color:#111; font-family:'Anton'; font-size:78px; letter-spacing:1px; padding:0 16px; border:4px solid #111; box-shadow:6px 6px 0 #ff2d6f; z-index:4;">COOKED</div>
+    <div style="position:absolute; top:96px; right:12px; transform:rotate(7deg); background:#111; color:#3ce84a; font-family:'Space Mono'; font-weight:700; font-size:15px; padding:9px 12px; box-shadow:4px 4px 0 #ffe600; animation:floaty 4s ease-in-out infinite; z-index:6; text-align:center; line-height:1.25;">247<span style="font-size:11px;"> days</span><br><span style="color:#fff; font-size:12px;">same ad ↓</span></div>
+    <img src="uploads/chad-cutout.png" style="position:absolute; top:208px; left:50%; width:300px; animation:bounce 1.6s ease-in-out infinite; filter:drop-shadow(0 12px 12px rgba(0,0,0,.3)); z-index:5;">
+    <div style="position:absolute; bottom:104px; left:0; right:0; text-align:center; padding:0 22px;">
+      <div style="font-family:'Space Mono'; font-weight:700; font-size:13px; color:#0a3d16; background:#fff; display:inline-block; padding:8px 14px; border:3px solid #111; transform:rotate(-1deg); box-shadow:3px 3px 0 #111;">your hook: "We Do Botox &amp; More!" — bro 😭</div>
+    </div>
+    <div style="position:absolute; bottom:0; left:0; right:0; background:#111; padding:18px 22px;">
+      <div style="background:#ffe600; border:4px solid #fff; border-radius:14px; padding:14px; text-align:center; box-shadow:0 0 0 4px #111; transform:rotate(-1deg); animation:throb 2.4s ease-in-out infinite;">
+        <div style="font-family:'Bungee'; font-size:23px; color:#111;">UNFUCK IT → $5</div>
+        <div style="font-family:'Space Mono'; font-size:10px; color:#3a3000;">I already wrote the good one. send it.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ B2 — THE EVIDENCE (ad screenshot) ============ -->
+<div style="position:absolute; left:605px; top:268px; width:430px;">
+  <div data-drags-parent="1" style="position:absolute; top:-52px; left:0;">
+    <div style="font-family:'Archivo Black',sans-serif; font-size:17px; color:#111;">B2 · THE EVIDENCE</div>
+    <div style="font-family:'Space Mono',monospace; font-size:11px; color:#777;">chad reviews it live — comments land one by one as he reacts.</div>
+  </div>
+  <div style="width:430px; height:828px; border:5px solid #111; border-radius:38px; overflow:hidden; position:relative; background:#3ce84a;">
+    <div style="height:38px; background:#111; overflow:hidden; display:flex; align-items:center;">
+      <div style="display:flex; white-space:nowrap; font-family:'Bungee'; font-size:14px; color:#ff2d6f; animation:mq 13s linear infinite;">
+        <span>&nbsp;EXHIBIT A&nbsp;●&nbsp;I PULLED YOUR LIVE AD&nbsp;●&nbsp;IT'S BAD&nbsp;●&nbsp;23/100&nbsp;●&nbsp;EXHIBIT A&nbsp;●&nbsp;I PULLED YOUR LIVE AD&nbsp;●&nbsp;IT'S BAD&nbsp;●&nbsp;23/100&nbsp;●&nbsp;</span><span>&nbsp;EXHIBIT A&nbsp;●&nbsp;I PULLED YOUR LIVE AD&nbsp;●&nbsp;IT'S BAD&nbsp;●&nbsp;23/100&nbsp;●&nbsp;EXHIBIT A&nbsp;●&nbsp;I PULLED YOUR LIVE AD&nbsp;●&nbsp;IT'S BAD&nbsp;●&nbsp;23/100&nbsp;●&nbsp;</span>
+      </div>
+    </div>
+    <div style="position:absolute; top:50px; left:20px; transform:rotate(-3deg); background:#ff2d6f; color:#fff; font-family:'Archivo Black'; font-size:30px; padding:3px 14px; border:4px solid #111; box-shadow:5px 5px 0 #111; z-index:6;">I FOUND YOUR AD</div>
+    <!-- the mock meta ad -->
+    <div style="position:absolute; top:118px; left:34px; width:300px; transform:rotate(-3deg); z-index:3;">
+      <div style="background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 10px 22px rgba(0,0,0,.3); border:1px solid #ddd;">
+        <div style="display:flex; align-items:center; gap:8px; padding:10px 12px;">
+          <div style="width:34px; height:34px; border-radius:50%; background:repeating-linear-gradient(45deg,#e9ebee,#e9ebee 6px,#dfe2e6 6px,#dfe2e6 12px);"></div>
+          <div style="line-height:1.2;"><div style="font-weight:700; font-size:13px; color:#222;">Bella Vista Med Spa</div><div style="font-size:11px; color:#8a8d91;">Sponsored · 🌐</div></div>
+        </div>
+        <div style="padding:0 12px 10px; font-size:12.5px; color:#222;">✨We Do Botox &amp; More!✨ Call us TODAY!!! 💉🔥 Limited time only 👇</div>
+        <div style="height:150px; background:repeating-linear-gradient(45deg,#e9ebee,#e9ebee 11px,#dfe2e6 11px,#dfe2e6 22px); display:flex; align-items:center; justify-content:center;"><span style="font-family:'Space Mono'; font-size:10px; color:#9aa0a6; background:#fff8; padding:3px 8px; border-radius:4px;">stock photo · woman touching face</span></div>
+        <div style="background:#f0f2f5; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="line-height:1.25;"><div style="font-size:10px; color:#8a8d91; letter-spacing:.5px;">BELLAVISTAMEDSPA.COM</div><div style="font-weight:700; font-size:13px; color:#222;">We Do Botox &amp; More!</div></div>
+          <div style="background:#dadde1; color:#222; font-size:12px; font-weight:600; padding:7px 12px; border-radius:6px;">Learn More</div>
+        </div>
+      </div>
+    </div>
+    <!-- red marker scrawl — lands one at a time as AdChad reviews -->
+    <div style="position:absolute; top:300px; left:6px; transform:rotate(-90deg); z-index:5;">
+      <div style="font-family:'Permanent Marker'; color:#ff1414; font-size:16px; animation:pop1 10s ease-in-out infinite;">so generic 😭</div>
+    </div>
+    <div style="position:absolute; top:404px; left:198px; transform:rotate(-8deg); z-index:5;">
+      <div style="width:118px; height:46px; border:4px solid #ff1414; border-radius:50%; animation:pop2 10s ease-in-out infinite;"></div>
+    </div>
+    <div style="position:absolute; top:452px; left:206px; transform:rotate(-6deg); z-index:5;">
+      <div style="font-family:'Permanent Marker'; color:#ff1414; font-size:17px; animation:pop2 10s ease-in-out infinite;">↑ "Learn what??"</div>
+    </div>
+    <div style="position:absolute; top:148px; left:258px; transform:rotate(9deg); z-index:5;">
+      <div style="font-family:'Permanent Marker'; color:#ff1414; font-size:19px; text-align:center; line-height:1; animation:pop3 10s ease-in-out infinite;">247 days<br>LIVE?!<br>😭</div>
+    </div>
+    <div style="position:absolute; bottom:108px; right:6px; width:256px; z-index:4;">
+      <img src="uploads/chad-cutout.png" style="display:block; width:256px; transform-origin:bottom center; animation:review 10s ease-in-out infinite; filter:drop-shadow(0 10px 10px rgba(0,0,0,.3));">
+    </div>
+    <div style="position:absolute; bottom:128px; left:18px; font-family:'Permanent Marker'; color:#111; font-size:18px; transform:rotate(-4deg); z-index:5;">I already wrote<br>the good one →</div>
+    <div style="position:absolute; bottom:0; left:0; right:0; background:#111; padding:18px 22px;">
+      <div style="background:#ffe600; border:4px solid #fff; border-radius:14px; padding:14px; text-align:center; box-shadow:0 0 0 4px #111; transform:rotate(-1deg); animation:throb 2.4s ease-in-out infinite;">
+        <div style="font-family:'Bungee'; font-size:23px; color:#111;">UNFUCK IT → $5</div>
+        <div style="font-family:'Space Mono'; font-size:10px; color:#3a3000;">rewrite + a real generated ad image</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ B3 — PRICE SHOCK ============ -->
+<div style="position:absolute; left:1130px; top:268px; width:430px;">
+  <div data-drags-parent="1" style="position:absolute; top:-52px; left:0;">
+    <div style="font-family:'Archivo Black',sans-serif; font-size:17px; color:#111;">B3 · PRICE SHOCK</div>
+    <div style="font-family:'Space Mono',monospace; font-size:11px; color:#777;">leads with the stat. 247 days of the exact same stale ad.</div>
+  </div>
+  <div style="width:430px; height:828px; border:5px solid #111; border-radius:38px; overflow:hidden; position:relative; background:#ff2d6f;">
+    <div style="height:38px; background:#3ce84a; border-bottom:4px solid #111; overflow:hidden; display:flex; align-items:center;">
+      <div style="display:flex; white-space:nowrap; font-family:'Bungee'; font-size:14px; color:#111; animation:mq 13s linear infinite;">
+        <span>&nbsp;8 MONTHS LIVE&nbsp;●&nbsp;ONE AD&nbsp;●&nbsp;ZERO NEW CREATIVES&nbsp;●&nbsp;STILL LOSING&nbsp;●&nbsp;THE FIX IS $5&nbsp;●&nbsp;8 MONTHS LIVE&nbsp;●&nbsp;ONE AD&nbsp;●&nbsp;ZERO NEW CREATIVES&nbsp;●&nbsp;STILL LOSING&nbsp;●&nbsp;THE FIX IS $5&nbsp;●&nbsp;</span><span>&nbsp;8 MONTHS LIVE&nbsp;●&nbsp;ONE AD&nbsp;●&nbsp;ZERO NEW CREATIVES&nbsp;●&nbsp;STILL LOSING&nbsp;●&nbsp;THE FIX IS $5&nbsp;●&nbsp;8 MONTHS LIVE&nbsp;●&nbsp;ONE AD&nbsp;●&nbsp;ZERO NEW CREATIVES&nbsp;●&nbsp;STILL LOSING&nbsp;●&nbsp;THE FIX IS $5&nbsp;●&nbsp;</span>
+      </div>
+    </div>
+    <div style="position:absolute; top:52px; left:0; right:0; text-align:center; z-index:4;">
+      <div style="display:inline-block; transform:rotate(-2deg); background:#111; color:#fff; font-family:'Archivo Black'; font-size:17px; padding:4px 14px;">YOU'VE RUN THIS AD FOR</div>
+    </div>
+    <div style="position:absolute; top:88px; left:0; right:0; text-align:center; z-index:4;">
+      <div style="font-family:'Anton'; font-size:124px; line-height:.8; color:#ffe600; -webkit-text-stroke:3px #111; text-shadow:6px 6px 0 #111;">247</div>
+      <div style="display:inline-block; transform:rotate(2deg); margin-top:2px; background:#ffe600; color:#111; font-family:'Bungee'; font-size:22px; padding:3px 14px; border:3px solid #111; box-shadow:4px 4px 0 #111;">DAYS STRAIGHT</div>
+    </div>
+    <div style="position:absolute; top:238px; left:0; right:0; text-align:center; z-index:4;">
+      <div style="display:inline-block; background:#fff; color:#111; font-family:'Archivo Black'; font-size:19px; padding:4px 14px; transform:rotate(-1deg); border:3px solid #111;">…and <span style="color:#ff2d6f;">never changed it.</span></div>
+    </div>
+    <img src="uploads/chad-cutout.png" style="position:absolute; top:286px; left:50%; width:282px; animation:bounce 1.6s ease-in-out infinite; filter:drop-shadow(0 12px 12px rgba(0,0,0,.35)); z-index:5;">
+    <div style="position:absolute; top:300px; left:6px; transform:rotate(-13deg); background:#111; color:#3ce84a; font-family:'Bungee'; font-size:18px; padding:7px 10px; box-shadow:4px 4px 0 #ffe600; animation:shake 3.5s ease-in-out infinite; z-index:6; line-height:1; text-align:center;">23<span style="font-size:11px; color:#fff;">/100</span></div>
+    <div style="position:absolute; top:560px; right:8px; transform:rotate(8deg); background:#ffe600; color:#111; font-family:'Space Mono'; font-weight:700; font-size:12px; padding:7px 10px; border:3px solid #111; box-shadow:3px 3px 0 #111; animation:floaty 4.2s ease-in-out infinite; z-index:6; text-decoration:line-through; text-decoration-color:#ff2d6f; text-decoration-thickness:3px;">"Learn More"</div>
+    <div style="position:absolute; bottom:0; left:0; right:0; background:#111; padding:18px 22px;">
+      <div style="background:#3ce84a; border:4px solid #fff; border-radius:14px; padding:14px; text-align:center; box-shadow:0 0 0 4px #111; transform:rotate(-1deg); animation:throb 2.4s ease-in-out infinite;">
+        <div style="font-family:'Bungee'; font-size:23px; color:#111;">UNFUCK IT → $5</div>
+        <div style="font-family:'Space Mono'; font-size:10px; color:#0a3d16;">a fresh ad in 60 seconds. start for $5.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- post-its -->
+<div style="position:absolute; left:80px; top:1150px; width:310px; background:#fef4a8; padding:16px; font:13px/1.45 'DM Sans',sans-serif; box-shadow:0 2px 8px rgba(0,0,0,.14); transform:rotate(-1.5deg);">
+  <b>Why "247 days" not "$4,200":</b> I can't estimate ad spend, so the hero metric is now <b>ad staleness</b> — exactly how long the same creative has run untouched (0 new variants). Provably public + pulled straight from Foreplay's "live since" data.
+</div>
+<div style="position:absolute; left:1130px; top:1150px; width:310px; background:#fef4a8; padding:16px; font:13px/1.45 'DM Sans',sans-serif; box-shadow:0 2px 8px rgba(0,0,0,.14); transform:rotate(1.5deg);">
+  Mix-and-match welcome: e.g. B2's marked-up ad screenshot + B3's price-shock headline + B1's banner. Tell me the combo and I'll build the full clickable funnel from it.
+</div>
+</x-dc>
+</body>
+</html>

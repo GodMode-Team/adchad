@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bungee&family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'DM Sans', sans-serif; }
+  @keyframes wobble { 0%,100% { transform: rotate(-6deg) } 50% { transform: rotate(6deg) } }
+  @keyframes bounce { 0%,100% { transform: translateY(0) rotate(-2deg) } 50% { transform: translateY(-18px) rotate(2deg) } }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  @keyframes mq { to { transform: translateX(-50%) } }
+  @keyframes blink { 0%,49% { opacity: 1 } 50%,100% { opacity: 0 } }
+  @keyframes shake { 0%,100%{transform:translate(0,0) rotate(-3deg)} 25%{transform:translate(-2px,1px) rotate(-3deg)} 75%{transform:translate(2px,-1px) rotate(-3deg)} }
+  @keyframes floaty { 0%,100%{transform:translateY(0) rotate(8deg)} 50%{transform:translateY(-10px) rotate(8deg)} }
+  @keyframes glitch { 0%,92%,100%{transform:translate(0,0)} 94%{transform:translate(-3px,1px)} 96%{transform:translate(3px,-1px)} 98%{transform:translate(-2px,0)} }
+</style>
+</helmet>
+
+<div style="position:absolute; left:80px; top:44px; width:1100px;">
+  <div style="font-family:'Archivo Black',sans-serif; font-size:62px; line-height:0.92; letter-spacing:-2px; color:#111;">ADCHAD <span style="color:#ff2d6f;">ROAST</span> PAGE</div>
+  <div style="font-family:'Space Mono',monospace; font-size:14px; color:#555; margin-top:14px; max-width:760px;">4 directions for the <b>/?p=id</b> funnel — the page an owner lands on after the agent roasts them. Free diagnosis → $5 fix. Pick one (or Frankenstein two together) and I'll build it into the live, clickable prototype with the fake Stripe checkout.</div>
+</div>
+
+<!-- ============ FRAME A — REPORT CARD ============ -->
+<div style="position:absolute; left:80px; top:268px; width:430px;">
+  <div data-drags-parent="1" style="position:absolute; top:-52px; left:0;">
+    <div style="font-family:'Archivo Black',sans-serif; font-size:17px; color:#111;">A · THE REPORT CARD</div>
+    <div style="font-family:'Space Mono',monospace; font-size:11px; color:#777;">savage but credible. graded takedown.</div>
+  </div>
+  <div style="width:430px; height:828px; border:5px solid #111; border-radius:38px; overflow:hidden; position:relative; background:#fdf3e3; box-shadow:0 20px 50px rgba(0,0,0,.22);">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 22px; font-family:'Space Mono',monospace; font-size:11px; color:#9a8f7d; border-bottom:2px dashed #d8cdb6;">
+      <span>adchad.ai/?p=8f2a4c</span><span>ROAST №0412</span>
+    </div>
+    <div style="padding:26px 26px 0;">
+      <div style="font-family:'Space Mono',monospace; font-size:12px; font-weight:700; letter-spacing:2px; color:#ff2d6f; text-transform:uppercase;">◖ diagnosis complete</div>
+      <div style="font-family:'Archivo Black',sans-serif; font-size:33px; line-height:1.0; letter-spacing:-1px; color:#111; margin-top:12px;">Bella Vista Med Spa, we gotta talk about your ad.</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px; padding:20px 26px 8px;">
+      <div style="font-family:'Anton',sans-serif; font-size:96px; line-height:.8; color:#ff2d6f;">23</div>
+      <div>
+        <div style="font-family:'Anton',sans-serif; font-size:26px; color:#111;">/100</div>
+        <div style="display:inline-block; transform:rotate(-9deg); margin-top:6px; background:#111; color:#ffe600; font-family:'Bungee',sans-serif; font-size:15px; padding:4px 12px; border-radius:4px;">OUCH</div>
+      </div>
+    </div>
+    <div style="padding:6px 26px 0; display:flex; flex-direction:column; gap:9px;">
+      <div style="display:flex; align-items:baseline; gap:10px; border-bottom:1.5px solid #e7dcc6; padding-bottom:8px;">
+        <div style="font-family:'Archivo Black',sans-serif; font-size:22px; color:#e8123f; width:42px;">D−</div>
+        <div><b style="font-family:'DM Sans';">Hook.</b> <span style="color:#5b5345; font-size:14px;">"We Do Botox & More!" — so does every clinic in a 40-mile radius and a guy named Dale.</span></div>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:10px; border-bottom:1.5px solid #e7dcc6; padding-bottom:8px;">
+        <div style="font-family:'Archivo Black',sans-serif; font-size:22px; color:#e8123f; width:42px;">F</div>
+        <div><b style="font-family:'DM Sans';">CTA.</b> <span style="color:#5b5345; font-size:14px;">"Learn More." Learn more about what — disappointment?</span></div>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:10px; padding-bottom:4px;">
+        <div style="font-family:'Archivo Black',sans-serif; font-size:22px; color:#d98a00; width:42px;">C−</div>
+        <div><b style="font-family:'DM Sans';">Offer.</b> <span style="color:#5b5345; font-size:14px;">$4,200/mo to look identical to your competitors. That's a donation.</span></div>
+      </div>
+    </div>
+    <div style="position:absolute; bottom:84px; left:0; right:0; padding:0 26px;">
+      <div style="background:#111; color:#fdf3e3; padding:14px 18px; border-radius:14px; font-family:'DM Sans'; font-size:14px;">We already rewrote it. The fixed version is one tap away. <span style="color:#3ce84a; font-weight:700;">Want to see what it should've said?</span></div>
+    </div>
+    <div style="position:absolute; bottom:0; left:0; right:0; background:#ff2d6f; padding:18px 26px; display:flex; justify-content:space-between; align-items:center;">
+      <div><div style="font-family:'Archivo Black'; color:#fff; font-size:19px;">Fix this ad → $5</div><div style="font-family:'Space Mono'; font-size:10px; color:#ffd6e7;">rewrite + a real generated ad image</div></div>
+      <div style="background:#ffe600; color:#111; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:900;">→</div>
+    </div>
+    <img src="uploads/chad-cutout.png" style="position:absolute; bottom:74px; right:-14px; width:118px; transform-origin:bottom center; animation:wobble 2.6s ease-in-out infinite; filter:drop-shadow(0 6px 8px rgba(0,0,0,.25));">
+  </div>
+</div>
+
+<!-- ============ FRAME B — RANSOM SHITPOST ============ -->
+<div style="position:absolute; left:605px; top:268px; width:430px;">
+  <div data-drags-parent="1" style="position:absolute; top:-52px; left:0;">
+    <div style="font-family:'Archivo Black',sans-serif; font-size:17px; color:#111;">B · RANSOM SHITPOST</div>
+    <div style="font-family:'Space Mono',monospace; font-size:11px; color:#777;">maximum chaos. sticker-bomb.</div>
+  </div>
+  <div style="width:430px; height:828px; border:5px solid #111; border-radius:38px; overflow:hidden; position:relative; background:#3ce84a;">
+    <div style="height:34px; background:#ffe600; border-bottom:4px solid #111; overflow:hidden; display:flex; align-items:center;">
+      <div style="display:flex; white-space:nowrap; font-family:'Bungee'; font-size:16px; color:#111; animation:mq 8s linear infinite;">
+        <span>ROASTED&nbsp;•&nbsp;ROASTED&nbsp;•&nbsp;ROASTED&nbsp;•&nbsp;ROASTED&nbsp;•&nbsp;</span><span>ROASTED&nbsp;•&nbsp;ROASTED&nbsp;•&nbsp;ROASTED&nbsp;•&nbsp;ROASTED&nbsp;•&nbsp;</span>
+      </div>
+    </div>
+    <div style="position:absolute; top:54px; left:18px; transform:rotate(-5deg); background:#ff2d6f; color:#fff; font-family:'Archivo Black'; font-size:46px; padding:2px 14px; border:4px solid #111; box-shadow:5px 5px 0 #111;">YOUR</div>
+    <div style="position:absolute; top:108px; right:24px; transform:rotate(4deg); background:#111; color:#ffe600; font-family:'Bungee'; font-size:42px; padding:4px 16px;">AD IS</div>
+    <div style="position:absolute; top:166px; left:30px; transform:rotate(-3deg); background:#ffe600; color:#111; font-family:'Anton'; font-size:74px; letter-spacing:1px; padding:0 16px; border:4px solid #111; box-shadow:6px 6px 0 #ff2d6f;">COOKED</div>
+    <img src="uploads/chad-cutout.png" style="position:absolute; top:250px; left:50%; transform:translateX(-50%); width:300px; animation:bounce 1.5s ease-in-out infinite; filter:drop-shadow(0 10px 10px rgba(0,0,0,.3)); z-index:2;">
+    <div style="position:absolute; top:280px; left:8px; transform:rotate(-14deg); background:#fff; border:4px solid #111; font-family:'Bungee'; font-size:30px; color:#ff2d6f; padding:6px 12px; box-shadow:4px 4px 0 #111; animation:shake 3s ease-in-out infinite; z-index:3;">23<span style="font-size:16px; color:#111;">/100</span></div>
+    <div style="position:absolute; top:430px; right:6px; transform:rotate(11deg); background:#111; color:#3ce84a; font-family:'Space Mono'; font-weight:700; font-size:15px; padding:8px 12px; box-shadow:4px 4px 0 #ffe600; animation:floaty 4s ease-in-out infinite; z-index:3; max-width:150px;">$4.2k/mo<br>for THIS?? 💀</div>
+    <div style="position:absolute; top:548px; left:14px; transform:rotate(-7deg); background:#ff2d6f; color:#fff; font-family:'Bungee'; font-size:22px; padding:4px 12px; border:3px solid #111; z-index:3;">LMAO</div>
+    <div style="position:absolute; bottom:108px; left:0; right:0; text-align:center; padding:0 24px;">
+      <div style="font-family:'Space Mono'; font-weight:700; font-size:13px; color:#0a3d16; background:#ffe600; display:inline-block; padding:6px 14px; border:3px solid #111; transform:rotate(-1deg);">your hook: "We Do Botox &amp; More!" — bro 😭</div>
+    </div>
+    <div style="position:absolute; bottom:0; left:0; right:0; background:#111; padding:18px 22px;">
+      <div style="background:#ffe600; border:4px solid #fff; border-radius:14px; padding:14px; text-align:center; box-shadow:0 0 0 4px #111; transform:rotate(-1deg);">
+        <div style="font-family:'Bungee'; font-size:22px; color:#111;">UNFUCK IT → $5</div>
+        <div style="font-family:'Space Mono'; font-size:10px; color:#3a3000;">we already wrote the good one. send it.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FRAME C — TABLOID COVER ============ -->
+<div style="position:absolute; left:1130px; top:268px; width:430px;">
+  <div data-drags-parent="1" style="position:absolute; top:-52px; left:0;">
+    <div style="font-family:'Archivo Black',sans-serif; font-size:17px; color:#111;">C · TABLOID COVER</div>
+    <div style="font-family:'Space Mono',monospace; font-size:11px; color:#777;">yellow-journalism. you're the cover star.</div>
+  </div>
+  <div style="width:430px; height:828px; border:5px solid #111; border-radius:38px; overflow:hidden; position:relative; background:#ffe600;">
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#111; padding:10px 20px;">
+      <span style="font-family:'Anton'; font-size:30px; color:#ffe600; letter-spacing:1px;">THE ROAST</span>
+      <span style="font-family:'Space Mono'; font-size:10px; color:#ff2d6f; text-align:right;">ISSUE 412<br>JUN 2026</span>
+    </div>
+    <div style="padding:14px 22px 0;">
+      <div style="font-family:'Anton'; font-size:88px; line-height:.82; color:#ff2d6f; -webkit-text-stroke:2px #111; text-shadow:4px 4px 0 #111;">EXPOSED</div>
+      <div style="font-family:'Archivo Black'; font-size:16px; color:#111; margin-top:4px;">BELLA VISTA MED SPA · scored a humiliating 23/100</div>
+    </div>
+    <img src="uploads/chad-cutout.png" style="position:absolute; bottom:78px; left:50%; transform:translateX(-52%); width:300px; filter:drop-shadow(0 8px 10px rgba(0,0,0,.25)); z-index:1;">
+    <div style="position:absolute; top:250px; left:14px; width:185px; transform:rotate(-3deg); background:#fff; border:3px solid #111; padding:8px 10px; box-shadow:4px 4px 0 #ff2d6f; z-index:2;">
+      <div style="font-family:'Archivo Black'; font-size:15px; color:#111; line-height:1.05;">Spent <span style="color:#e8123f;">$4,200/mo</span> to look like EVERYONE else</div>
+    </div>
+    <div style="position:absolute; top:372px; right:12px; width:175px; transform:rotate(3deg); background:#ff2d6f; border:3px solid #111; padding:8px 10px; box-shadow:4px 4px 0 #111; z-index:2;">
+      <div style="font-family:'Archivo Black'; font-size:14px; color:#fff; line-height:1.08;">Their CTA is literally "Learn More" 💀💀</div>
+    </div>
+    <div style="position:absolute; top:498px; left:18px; width:180px; transform:rotate(-2deg); background:#111; padding:8px 10px; box-shadow:4px 4px 0 #ffe600; z-index:2;">
+      <div style="font-family:'Archivo Black'; font-size:13px; color:#3ce84a; line-height:1.1;">Hook so generic a strip-mall Dale uses it. We fixed it →</div>
+    </div>
+    <div style="position:absolute; bottom:0; left:0; right:0; background:#111; padding:14px 22px; display:flex; justify-content:space-between; align-items:center; z-index:3;">
+      <div style="font-family:'monospace'; font-size:34px; color:#fff; letter-spacing:-2px;">▌▌▎▌▏▎▌▌▏▌</div>
+      <div style="text-align:right;"><div style="font-family:'Archivo Black'; font-size:18px; color:#ffe600;">THE $5 FIX</div><div style="font-family:'Space Mono'; font-size:10px; color:#ff2d6f;">is inside → tap to read</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FRAME D — TERMINAL ROAST ============ -->
+<div style="position:absolute; left:1655px; top:268px; width:430px;">
+  <div data-drags-parent="1" style="position:absolute; top:-52px; left:0;">
+    <div style="font-family:'Archivo Black',sans-serif; font-size:17px; color:#111;">D · TERMINAL ROAST</div>
+    <div style="font-family:'Space Mono',monospace; font-size:11px; color:#777;">the agent talks. on-theme. live-feel.</div>
+  </div>
+  <div style="width:430px; height:828px; border:5px solid #111; border-radius:38px; overflow:hidden; position:relative; background:#0c0f0c; font-family:'Space Mono',monospace;">
+    <div style="display:flex; align-items:center; gap:7px; padding:13px 18px; background:#161a16; border-bottom:1px solid #243024;">
+      <span style="width:11px;height:11px;border-radius:50%;background:#ff2d6f;"></span>
+      <span style="width:11px;height:11px;border-radius:50%;background:#ffe600;"></span>
+      <span style="width:11px;height:11px;border-radius:50%;background:#3ce84a;"></span>
+      <span style="margin-left:8px; font-size:12px; color:#6f7d6f;">adchad@agent — roast.sh</span>
+      <img src="uploads/chad-cutout.png" style="margin-left:auto; width:40px; animation:glitch 4s steps(1) infinite;">
+    </div>
+    <div style="padding:18px; font-size:13px; line-height:1.65;">
+      <div style="color:#3ce84a;">$ adchad scan <span style="color:#fff;">bella-vista-med-spa</span></div>
+      <div style="color:#6f7d6f;">› pulling meta ads via foreplay… <span style="color:#ffe600;">1 active</span></div>
+      <div style="color:#6f7d6f;">› enriching → email ✓  segment <span style="color:#fff;">B</span></div>
+      <div style="color:#6f7d6f;">› scoring creative ███████░░ </div>
+      <div style="margin:10px 0; padding:10px 12px; background:#1c0f16; border-left:3px solid #ff2d6f;">
+        <span style="color:#ff2d6f; font-weight:700;">VERDICT 23/100 — OUCH.</span>
+      </div>
+      <div style="color:#cfe0cf;">&gt; hook <span style="color:#ff6b9d;">"We Do Botox &amp; More!"</span> is what every clinic + a guy named Dale already says.</div>
+      <div style="color:#cfe0cf; margin-top:7px;">&gt; CTA <span style="color:#ff6b9d;">"Learn More"</span> → learn more about <span style="color:#fff;">disappointment?</span></div>
+      <div style="color:#cfe0cf; margin-top:7px;">&gt; <span style="color:#ffe600;">$4,200/mo</span> to blend in. that's a donation, not a campaign.</div>
+      <div style="margin-top:14px; color:#6f7d6f;">› generating fix…</div>
+      <div style="margin-top:8px; border:1px solid #243024; border-radius:8px; overflow:hidden; font-size:12px;">
+        <div style="background:#241016; color:#ff6b9d; padding:7px 10px;">- We Do Botox &amp; More!</div>
+        <div style="background:#0f2417; color:#7dffa6; padding:7px 10px;">+ Look 5 Years Younger by July. Booked solid by locals who hate "subtle."</div>
+      </div>
+    </div>
+    <div style="position:absolute; bottom:0; left:0; right:0; padding:16px 18px; background:#0c0f0c; border-top:1px solid #243024;">
+      <div style="background:#3ce84a; color:#04210d; padding:14px; border-radius:10px; font-weight:700; font-size:15px; display:flex; justify-content:space-between; align-items:center;">
+        <span>&gt; deploy_fix --pay $5</span><span style="animation:blink 1s steps(1) infinite;">▋</span>
+      </div>
+      <div style="color:#4f5d4f; font-size:10px; margin-top:8px; text-align:center;">real rewrite + generated ad image · runs the second you pay</div>
+    </div>
+  </div>
+</div>
+
+<!-- post-its -->
+<div style="position:absolute; left:80px; top:1150px; width:300px; background:#fef4a8; padding:16px; font:13px/1.45 'DM Sans',sans-serif; box-shadow:0 2px 8px rgba(0,0,0,.14); transform:rotate(-1.5deg);">
+  All 4 use the <b>same fictional roast</b> (Bella Vista Med Spa, 23/100) so you're judging <i>treatment</i>, not copy. Copy gets sharper in the real build.
+</div>
+<div style="position:absolute; left:1655px; top:1150px; width:300px; background:#fef4a8; padding:16px; font:13px/1.45 'DM Sans',sans-serif; box-shadow:0 2px 8px rgba(0,0,0,.14); transform:rotate(1.5deg);">
+  Chad is animated in all four (wobble / bounce / float / glitch). The winner gets the full funnel: roast → fix-reveal paywall → fake Stripe → "fix deployed" receipt.
+</div>
+</x-dc>
+</body>
+</html>
