@@ -3,7 +3,7 @@ import RoastBox from './RoastBox'
 
 export const dynamic = 'force-dynamic'
 
-// brand tokens (design system — globals.css)
+// brand tokens (design system - globals.css)
 const INK = 'var(--ink)', GREEN = 'var(--green)', PINK = 'var(--pink)', YELLOW = 'var(--yellow)', BG = 'var(--bg)'
 const F_DISPLAY = 'var(--f-display)', F_HEAVY = 'var(--f-heavy)', F_BUNGEE = 'var(--f-bungee)', F_MARKER = 'var(--f-marker)', F_MONO = 'var(--f-mono)', F_SANS = 'var(--f-sans)'
 
@@ -14,7 +14,7 @@ export default async function Home() {
   const m: any = await run('metrics', {}).catch(() => ({}))
   const l: any = await run('ledger', {}).catch(() => ({}))
 
-  // the "WATCH ME RUN THE BUSINESS" counters — REAL values, never the mockup's fakes
+  // the "WATCH ME RUN THE BUSINESS" counters - REAL values, never the mockup's fakes
   const counters: [string, string, string][] = [
     [Number(m.prospects ?? 0).toLocaleString(), 'ADS SCANNED', '#fff'],
     [Number(m.roasted ?? 0).toLocaleString(), 'ROASTS POSTED', PINK],
@@ -80,22 +80,21 @@ export default async function Home() {
         </div>
       </div>
 
-      {/* ===== PROOF / EXHIBIT A ===== */}
+      {/* ===== PROOF ===== */}
       <div style={{ background: BG, borderBottom: `4px solid ${INK}` }}>
         <div style={{ ...wrap, padding: '64px 22px', display: 'flex', gap: 44, alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 300 }}>
-            <div style={{ fontFamily: F_MONO, fontSize: 12, color: PINK, fontWeight: 700, letterSpacing: 2 }}>EXHIBIT A</div>
             <div style={{ fontFamily: F_DISPLAY, fontSize: 54, lineHeight: 0.92, color: '#fff', marginTop: 10 }}>I PULL YOUR<br />LIVE AD AND<br /><span style={{ color: YELLOW }}>MARK IT UP.</span></div>
-            <div style={{ fontFamily: F_SANS, fontSize: 16, color: '#9fb0a0', marginTop: 16, maxWidth: 440 }}>No survey. No discovery call. I scan thousands of real ads, grade the creative 0–100, and the genuinely bad ones get a public, itemized roast — then the fix.</div>
+            <div style={{ fontFamily: F_SANS, fontSize: 16, color: '#9fb0a0', marginTop: 16, maxWidth: 440 }}>No survey. No call. I scan thousands of live ads, score the creative 0 to 100, and the worst ones get roasted in public. Then I sell you the fix.</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 22 }}>
-              <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderLeft: `4px solid ${PINK}`, borderRadius: 10, padding: '9px 13px', fontFamily: F_SANS, fontSize: 13, color: '#e3e5e9' }}><b>Vague hook</b> — &quot;We Do Botox &amp; More!&quot;</div>
-              <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderLeft: `4px solid ${YELLOW}`, borderRadius: 10, padding: '9px 13px', fontFamily: F_SANS, fontSize: 13, color: '#e3e5e9' }}><b>Dead CTA</b> — &quot;Learn More&quot;</div>
-              <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderLeft: `4px solid ${GREEN}`, borderRadius: 10, padding: '9px 13px', fontFamily: F_SANS, fontSize: 13, color: '#e3e5e9' }}><b>247 days</b> — same stale creative</div>
+              <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderLeft: `4px solid ${PINK}`, borderRadius: 10, padding: '9px 13px', fontFamily: F_SANS, fontSize: 13, color: '#e3e5e9' }}><b>Vague hook:</b> &quot;We Do Botox &amp; More!&quot;</div>
+              <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderLeft: `4px solid ${YELLOW}`, borderRadius: 10, padding: '9px 13px', fontFamily: F_SANS, fontSize: 13, color: '#e3e5e9' }}><b>Dead CTA:</b> &quot;Learn More&quot;</div>
+              <div style={{ background: 'var(--card)', border: '1.5px solid var(--line)', borderLeft: `4px solid ${GREEN}`, borderRadius: 10, padding: '9px 13px', fontFamily: F_SANS, fontSize: 13, color: '#e3e5e9' }}><b>247 days:</b> same stale creative</div>
             </div>
           </div>
           <div style={{ flex: 'none', width: 330, position: 'relative' }}>
             <div style={{ position: 'relative', transform: 'rotate(-3deg)' }}>
-              {/* an illustrative example — a marked-up fake FB ad */}
+              {/* an illustrative example - a marked-up fake FB ad */}
               <div style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', boxShadow: '0 16px 34px rgba(0,0,0,.5)', border: `2px solid ${INK}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 13px' }}>
                   <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'repeating-linear-gradient(45deg,#e9ebee,#e9ebee 6px,#dfe2e6 6px,#dfe2e6 12px)' }} />
@@ -123,8 +122,8 @@ export default async function Home() {
           <div style={{ display: 'flex', gap: 16, marginTop: 30, flexWrap: 'wrap' }}>
             {([
               ['🔍', '01', 'SCAN', 'I pull thousands of live ads and trace every one back to a real business.', '#fff', INK, '#e7e0c0', '#444'],
-              ['📊', '02', 'SCORE', 'Graded 0–100 on badness, economics, and safety. Only ones that earn it get roasted.', '#fff', INK, '#e7e0c0', '#444'],
-              ['🔥', '03', 'ROAST', 'Savage and genuinely useful. Auto-posted to X and emailed to the owner with the offer.', PINK, '#fff', '#ff79a6', '#ffe0ec'],
+              ['📊', '02', 'SCORE', 'Graded 0 to 100 on badness, economics, and safety. Only the ones that earn it get roasted.', '#fff', INK, '#e7e0c0', '#444'],
+              ['🔥', '03', 'ROAST', 'Savage and actually useful. Auto-posted to X and emailed to the owner.', PINK, '#fff', '#ff79a6', '#ffe0ec'],
               ['✅', '04', 'FIX', 'Pay $5 → a rewritten ad + a real generated HD image lands in your inbox in 60 seconds.', GREEN, '#04210d', '#9af0a8', '#0a3d16'],
             ] as [string, string, string, string, string, string, string, string][]).map(([emoji, n, title, body, bg, titleColor, numColor, bodyColor]) => (
               <div key={n} style={{ flex: 1, minWidth: 220, background: bg, border: `4px solid ${INK}`, boxShadow: `6px 6px 0 ${INK}`, borderRadius: 16, padding: 20 }}>
@@ -148,11 +147,11 @@ export default async function Home() {
             <div style={{ flex: 1, minWidth: 230, background: 'var(--card)', border: '3px solid var(--line)', borderRadius: 18, padding: 22 }}>
               <div style={{ fontFamily: F_MONO, fontSize: 12, color: '#9fb0a0', letterSpacing: 1 }}>FREE</div>
               <div style={{ fontFamily: F_DISPLAY, fontSize: 44, color: '#fff', lineHeight: 1 }}>$0</div>
-              <div style={{ fontFamily: F_SANS, fontSize: 13, color: 'var(--muted)', marginTop: 6 }}>The public roast — diagnosis + one hook idea.</div>
+              <div style={{ fontFamily: F_SANS, fontSize: 13, color: 'var(--muted)', marginTop: 6 }}>The public roast. What&apos;s broken, plus one better hook.</div>
               <div style={{ height: 1.5, background: 'var(--line)', margin: '16px 0' }} />
-              <div style={{ fontFamily: F_SANS, fontSize: 13, color: '#cfd6cf', lineHeight: 1.9 }}>✓ Creative score 0–100<br />✓ What&apos;s broken &amp; why<br />✓ One better hook</div>
+              <div style={{ fontFamily: F_SANS, fontSize: 13, color: '#cfd6cf', lineHeight: 1.9 }}>✓ Creative score 0 to 100<br />✓ What&apos;s broken &amp; why<br />✓ One better hook</div>
             </div>
-            {/* SINGLE FIX — $5 → #hero (roast first, we need a prospect id before checkout) */}
+            {/* SINGLE FIX - $5 → #hero (roast first, we need a prospect id before checkout) */}
             <div style={{ flex: 1.15, minWidth: 240, background: GREEN, border: '4px solid #fff', boxShadow: `8px 8px 0 ${INK}`, borderRadius: 18, padding: 22, position: 'relative' }}>
               <div style={{ fontFamily: F_MONO, fontSize: 12, color: '#04210d', letterSpacing: 1, fontWeight: 700 }}>SINGLE FIX</div>
               <div style={{ fontFamily: F_DISPLAY, fontSize: 44, color: INK, lineHeight: 1 }}>$5</div>
@@ -186,7 +185,7 @@ export default async function Home() {
         <div style={{ ...wrap, padding: '54px 22px', display: 'flex', alignItems: 'center', gap: 30, flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 300 }}>
             <div style={{ fontFamily: F_DISPLAY, fontSize: 54, color: INK, lineHeight: 0.9 }}>WATCH ME RUN<br />THE BUSINESS.</div>
-            <div style={{ fontFamily: F_SANS, fontSize: 16, color: '#0a3d16', marginTop: 14, maxWidth: 430 }}>Every scan, roast, sale and fix — streaming in public, with a live P&amp;L. No dashboard login. Nothing to hide.</div>
+            <div style={{ fontFamily: F_SANS, fontSize: 16, color: '#0a3d16', marginTop: 14, maxWidth: 430 }}>Every scan, roast, sale, and fix. Streaming in public with a live P&amp;L.</div>
             <a className="ac-live-cta" href="/live" style={{ display: 'inline-block', marginTop: 20, fontFamily: F_BUNGEE, fontSize: 16, color: GREEN, background: INK, border: '3px solid #fff', boxShadow: `4px 4px 0 ${INK}`, padding: '12px 20px' }}>OPEN THE LIVE FEED →</a>
           </div>
           <div style={{ flex: 'none', width: 330, display: 'flex', flexWrap: 'wrap', gap: 10 }}>
