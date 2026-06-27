@@ -25,7 +25,7 @@ This is the case that wastes everyone's time: someone hands you ads and says "ro
 1. **Find the ad.**
    - Attached image → it's the newest file in the image cache: `ls -t ~/.hermes/image_cache/ | head -1` (prepend `~/.hermes/image_cache/`). Don't `base64`, don't `file`, don't inspect it — `roast` reads it for you, local path or URL.
    - A URL in the message → use the URL verbatim.
-2. **Roast it:** `cd "$PROJECT_DIR" && pnpm -s tool roast --image "<path-or-url>" --brand "<brand from the message>"` → `{xPost, emailSubject, emailBody}`.
+2. **Roast it:** `cd "$PROJECT_DIR" && pnpm -s tool roast --image "<path-or-url>" --brand "<brand from the message>"` → `{xPost, emailSubject, emailBody, score, verdict}`. **Roasting a `/prospect` target** (you have its ids)? Add `--ad-id "<foreplay_id>" --prospect-id "<id>"` — the tool then records the creative score so the public Live feed + funnel show a real number.
 3. **Reply in-thread with the `xPost`.** That's the deliverable for an operator ask. **STOP here** — you are done. (One image, multiple ads in it? Still one call — roast the set: "a $T company running 6 ads this lazy.")
 
 That's the whole loop. If step 2 errors, say what broke in one line — do not start web-searching as a fallback.
