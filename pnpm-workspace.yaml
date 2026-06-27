@@ -3,3 +3,8 @@
 onlyBuiltDependencies:
   - esbuild
   - sharp
+
+# Skip the pre-`run` deps check so `pnpm tool ...` never triggers an install (and its build-approval
+# gate) at runtime. pnpm 11 dropped this key from .npmrc, so it must live here; the .npmrc line is kept
+# for pnpm 10. Without this, the skills' `pnpm -s tool ...` calls break on a fresh pnpm-11 box.
+verifyDepsBeforeRun: false
