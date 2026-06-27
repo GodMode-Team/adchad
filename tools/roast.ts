@@ -24,7 +24,7 @@ Output format for every roast:
 
 Stay in character at all times. Be meaner when the ad deserves it.`
 
-export type Roast = { xPost: string; emailSubject: string; emailBody: string; raw: string }
+export type Roast = { xPost: string; emailSubject: string; emailBody: string; raw: string; score: number; verdict: string }
 
 // pull a labelled section out of Caleb's "1. X Post: … 2. Email subject: … 3. Body: …" format
 function section(txt: string, start: RegExp, end: RegExp | null): string {
@@ -40,7 +40,7 @@ function section(txt: string, start: RegExp, end: RegExp | null): string {
 }
 
 /** Roast an ad in AdChad's voice (Grok, sees the image). Returns the X post + email, per Caleb's format. */
-export async function roast(opts: { image: string; handle?: string | null; brand?: string | null; look?: AdLook }): Promise<Roast> {
+export async function roast(opts: { image: string; handle?: string | null; brand?: string | null; look?: AdLook; adId?: string | null; prospectId?: string | null }): Promise<Roast> {
   if (!opts.image) throw new Error('roast: --image (the ad to roast) is required')
   const t0 = Date.now()
   const look = opts.look ?? await describe(opts.image) // SEE the ad (vision) unless the caller already did — avoids paying for vision twice
@@ -77,10 +77,19 @@ export async function roast(opts: { image: string; handle?: string | null; brand
   console.error(`roast: grok (${MODEL}) ${Date.now() - t1}ms`)
   const raw: string = (j.choices?.[0]?.message?.content ?? '').replace(/<think>[\s\S]*?<\/think>/g, '').trim()
 
+  // persist the creative score so the public feed/funnel show a real number on the AGENT's roast path
+  // (the score comes free from the vision `look` above). Keyed on both ids so prospect + roast feed events match.
+  if (opts.adId && opts.prospectId) {
+    const { run } = await import('./db')
+    await run('score', { ad_id: opts.adId, prospect_id: opts.prospectId, total: look.score }).catch(() => {})
+  }
+
   return {
     xPost: section(raw, /\**\s*\d?\.?\s*\**X Post\**\s*:?/i, /\**\s*\d?\.?\s*\**Email subject/i),
     emailSubject: section(raw, /\**\s*\d?\.?\s*\**Email subject\**\s*:?/i, /\**\s*\d?\.?\s*\**Body/i),
     emailBody: section(raw, /\**\s*\d?\.?\s*\**Body\**\s*:?/i, null),
     raw,
+    score: look.score,
+    verdict: look.verdict,
   }
 }
