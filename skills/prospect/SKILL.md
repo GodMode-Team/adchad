@@ -11,6 +11,12 @@ metadata:
 
 # prospect — find + pick a target
 
+> **Follow the battle plan.** Two prospecting modes, both legit:
+> - **Traction (the plan's #1 edge):** roast **recognizable X brands** — find a brand the judges/audience already follow running a genuinely lazy ad, roast it *publicly on X*. They see it, they reply, the Hall of Shame gets real engagement that can't be faked. **Punch UP** at big brands only — safe + funny *because* it's self-aware (yes, even Stripe/NVIDIA).
+> - **Revenue:** the Foreplay/SMB flow below — reachable owners you can actually sell the $5 fix to.
+>
+> Never punch **down** at a struggling small business — roast the *ad*, root for the *owner*. Voice, look, and the 6-box viral gate: `../../brand/CHARACTER.md` + `../../brand/taste/ADCHAD-TASTE-PACK.md`. Full guideline check: `../../brand/BATTLE-PLAN-ALIGNMENT.md`.
+
 ## When
 The acquire heartbeat, or "find someone to roast in <niche>."
 
