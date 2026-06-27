@@ -4,3 +4,4 @@
 - [Prose-spec criteria unvalidated](pattern-prose-spec-no-qa.md) — skill/SKILL.md + spec prose changes ship without any manual-qa exercise of the new behavior.
 - [QA findings not promoted to tests](pattern-qa-not-self-healed.md) — QA MINORs get code-fixed but the self-healing regression test is skipped.
 - [Live-DB read-only constraint](probe-live-db-readonly.md) — feed/db tests insert+delete on live Neon; reviewer cannot re-run them, must rely on quoted evidence.
+- [Primitive built, no prod caller](pattern-primitive-no-caller.md) — new db op/tool unit-tested but never wired into the agent flow → feature empty in prod despite green tests. Grep callers across skills/tools/app.

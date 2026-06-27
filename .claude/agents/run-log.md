@@ -26,3 +26,23 @@ The 6 db-feed tests: events/stats shape · newest-first + ts/kind/title · numer
 
 ## Chunk A — prospect spiral-guard (skill prose; QA-gated)
 Implementation: `skills/prospect/SKILL.md` step 2 (bare-niche + broaden-once-then-stop). No unit test (prose). Manual-QA evidence: see `manual-qa-log.md` → "prospect spiral-guard".
+
+---
+
+# Redesign — creative score + on-demand roast (spec-11) — RED→GREEN
+
+### RED (before implementation)
+`pnpm exec vitest run` per file:
+- `tests/tools/score.test.ts` — FAIL: `vision.describe()` returns no `score` (`expected 'undefined' to be 'number'`).
+- `tests/tools/db-score.test.ts` — 3 FAIL: `db: unknown op 'score'`; `db page`/`db feed` carry no numeric `score`.
+- `tests/tools/db-intake.test.ts` — FAIL: `db: unknown op 'intake'` (thrown at tools/db.ts default).
+- `tests/ratelimit.test.ts` — FAIL (suite): `Cannot find module '../lib/ratelimit'`.
+
+### GREEN (after implementation)
+- `vitest run tests/tools/score.test.ts tests/tools/db-score.test.ts` → Test Files 2 passed, **Tests 4 passed**.
+- `vitest run tests/ratelimit.test.ts tests/tools/db-intake.test.ts` → Test Files 2 passed, **Tests 3 passed**.
+- Adversarial MAJOR-1 fix — agent path persists the score: `vitest run tests/tools/roast-score.test.ts` → **1 passed** (10.6s; writes `scores.total=42` when `roast()` is given `--ad-id`+`--prospect-id`).
+- Full suite `pnpm test` → **Test Files 12 passed; Tests 33 passed | 3 skipped**. `npx tsc --noEmit` → exit 0.
+
+## Pages (Chunks 4–6) + design system (Chunk 1)
+Presentational → Manual QA (chrome-devtools @390px + desktop), see `manual-qa-log.md` → "Brand redesign". No component-test harness in the repo (vitest = tools/routes only).
