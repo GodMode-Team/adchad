@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react'
 import LiveFeed from '../../LiveFeed'
+import MetaAd from '../../MetaAd'
 
 type Step = 'roast' | 'paywall' | 'done'
 
@@ -65,25 +66,6 @@ function Creative({ url, controls = false }: { url?: string | null; controls?: b
     : <img src={url} alt="your ad" style={{ width: '100%', display: 'block' }} />
 }
 
-// The real ad rendered as a faux sponsored post — no marker scribbles (we let the verdict do the talking).
-function AdCard({ name, copy, creative, controls = false }: { name: string; copy?: string | null; creative?: string | null; controls?: boolean }) {
-  return (
-    <div style={{ transform: 'rotate(-1.5deg)' }}>
-      <div style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', border: '3px solid var(--ink)', boxShadow: '6px 6px 0 var(--ink)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px' }}>
-          <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#cfd3d8,#e9ebee)', flex: 'none' }} />
-          <div style={{ lineHeight: 1.2 }}>
-            <div style={{ fontWeight: 700, fontSize: 13, color: '#222' }}>{name}</div>
-            <div style={{ fontSize: 11, color: '#8a8d91' }}>Sponsored · 🌐</div>
-          </div>
-        </div>
-        {copy && <div style={{ padding: '0 12px 10px', fontSize: 12.5, color: '#222' }}>{copy}</div>}
-        <Creative url={creative} controls={controls} />
-      </div>
-    </div>
-  )
-}
-
 export default function Funnel({ data, paid, id }: { data: any; paid: boolean; id: string }) {
   // If they're back from Stripe (?paid=1), drop them straight on the celebration screen.
   const [step, setStep] = useState<Step>(paid ? 'done' : 'roast')
@@ -100,7 +82,7 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
 
   // Thank-you page state: the $49 upsell decline + this order's fix status (polled → swaps the placeholder for the tweet).
   const [declined, setDeclined] = useState(false)
-  const [fix, setFix] = useState<{ delivered: boolean; tweetUrl?: string | null; image?: string | null }>({ delivered: false })
+  const [fix, setFix] = useState<{ delivered: boolean; tweetUrl?: string | null; image?: string | null; headline?: string | null; body?: string | null; cta?: string | null; name?: string | null }>({ delivered: false })
   const tweetId = fix.tweetUrl ? fix.tweetUrl.match(/status\/(\d+)/)?.[1] ?? null : null
 
   useEffect(() => {
@@ -145,7 +127,7 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
             <div style={{ ...ROW, marginTop: 28 }}>
               {/* LEFT — the exhibit */}
               <div style={{ ...COL, paddingTop: 16 }}>
-                <AdCard name={name} copy={data.ad?.copy} creative={creative} controls />
+                <MetaAd name={name} body={data.ad?.copy} creative={creative} controls rotate={-1.5} />
               </div>
 
               {/* RIGHT — score → verdict → "I wrote the good one" */}
@@ -306,21 +288,29 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
         {/* C — watch chad work / your ad is ready + tweet + feed (dark) */}
         <Band bg="var(--bg)">
           <div style={{ fontFamily: 'var(--f-display)', fontSize: 30, color: tweetId ? 'var(--green)' : '#fff' }}>{tweetId ? 'YOUR AD IS READY 🎉' : 'WATCH CHAD WORK'}</div>
-          <div style={{ borderRadius: 16, border: '2px solid #1c241c', background: '#0f140f', overflow: 'hidden' }}>
-            {tweetId ? (
-              <div style={{ padding: 8 }}>
+          {tweetId ? (
+            // ready → the live public reply on the left, the finished drop-in Meta ad rendered on the right
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'flex-start' }}>
+              <div style={{ flex: '1 1 300px', minWidth: 0, borderRadius: 16, border: '2px solid #1c241c', background: '#0f140f', overflow: 'hidden', padding: 8 }}>
+                <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: '#5f6b5f', padding: '2px 4px 6px' }}>live on X ↓</div>
                 <blockquote className="twitter-tweet" data-theme="dark" data-conversation="none" data-align="center">
                   <a href={fix.tweetUrl!}>Your fixed ad →</a>
                 </blockquote>
               </div>
-            ) : (
+              <div style={{ flex: '1 1 300px', minWidth: 0 }}>
+                <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: '#5f6b5f', padding: '2px 4px 6px' }}>your drop-in Meta ad ↓</div>
+                <MetaAd name={fix.name || name} body={fix.body} headline={fix.headline} cta={fix.cta} creative={fix.image} />
+              </div>
+            </div>
+          ) : (
+            <div style={{ borderRadius: 16, border: '2px solid #1c241c', background: '#0f140f', overflow: 'hidden' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '34px 20px', textAlign: 'center' }}>
                 <div style={{ fontSize: 26 }}>⏳</div>
                 <div style={{ fontFamily: 'var(--f-sans)', fontWeight: 700, fontSize: 15, color: '#cfe8d6' }}>The link to your ad will appear here when ready.</div>
                 <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: '#5f6b5f' }}>usually ~2 minutes — Chad&apos;s on it 👇</div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
           <LiveFeed max={12} />
         </Band>
 

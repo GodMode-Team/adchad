@@ -1,8 +1,9 @@
 'use client'
 import { useEffect } from 'react'
+import MetaAd from './MetaAd'
 
 type Shame = { tweetId: string; adTweetId: string | null; score: number | null }
-type Fame = { tweetUrl: string }
+type Fame = { image: string | null; headline: string | null; body: string | null; cta: string | null; name: string | null; tweetUrl: string | null }
 
 function Embed({ url, theme }: { url: string; theme: 'dark' | 'light' }) {
   return <blockquote className="twitter-tweet" data-theme={theme} data-conversation="none" data-align="center"><a href={url}>{' '}</a></blockquote>
@@ -17,7 +18,7 @@ const xurl = (id: string) => `https://x.com/adchadofficial/status/${id}`
 // ids are SSR'd by the home page (run('halls')); we just load X's widget once to hydrate the blockquotes.
 export default function Halls({ shame, fame }: { shame: Shame[]; fame: Fame[] }) {
   useEffect(() => {
-    if (!shame.length && !fame.length) return
+    if (!shame.length) return // only Shame uses live tweet embeds now; Fame renders MetaAd cards
     const w = window as any
     if (w.twttr?.widgets) { w.twttr.widgets.load(); return }
     const s = document.createElement('script')
@@ -25,7 +26,7 @@ export default function Halls({ shame, fame }: { shame: Shame[]; fame: Fame[] })
     s.async = true
     s.onload = () => w.twttr?.widgets?.load?.()
     document.body.appendChild(s)
-  }, [shame, fame])
+  }, [shame])
 
   return (
     <>
@@ -67,7 +68,12 @@ export default function Halls({ shame, fame }: { shame: Shame[]; fame: Fame[] })
               : fame.map((t, i) => (
                 <div key={i} style={card}>
                   <Chip text="FIXED ✓" bg="#3ce84a" color="#04210d" />
-                  <div style={{ width: '100%' }}><Embed url={t.tweetUrl} theme="light" /></div>
+                  <div style={{ width: '100%' }}>
+                    <MetaAd name={t.name || 'this business'} body={t.body} headline={t.headline} cta={t.cta} creative={t.image} />
+                  </div>
+                  {t.tweetUrl && (
+                    <a href={t.tweetUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: '#7a6c00', fontWeight: 700, textDecoration: 'underline' }}>see it live on X ↗</a>
+                  )}
                 </div>
               ))}
           </div>
