@@ -1,5 +1,6 @@
 import { run } from '../tools/db'
 import RoastModal from './RoastModal'
+import Halls from './Halls'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,6 +14,7 @@ const wrap = { maxWidth: 1200, margin: '0 auto' } as const
 export default async function Home() {
   const m: any = await run('metrics', {}).catch(() => ({}))
   const l: any = await run('ledger', {}).catch(() => ({}))
+  const halls: any = await run('halls', {}).catch(() => ({ shame: [], fame: [] }))
 
   // the "WATCH ME RUN THE BUSINESS" counters - REAL values, never the mockup's fakes
   const counters: [string, string, string][] = [
@@ -58,6 +60,7 @@ export default async function Home() {
           </div>
           <div style={{ display: 'flex', gap: 22, marginLeft: 14 }}>
             <a className="ac-link" href="#how" style={{ fontFamily: F_MONO, fontSize: 13, color: '#9fb0a0' }}>how it works</a>
+            <a className="ac-link" href="#fame" style={{ fontFamily: F_MONO, fontSize: 13, color: '#9fb0a0' }}>hall of fame</a>
             <a className="ac-link" href="/live" style={{ fontFamily: F_MONO, fontSize: 13, color: '#9fb0a0' }}>live feed</a>
           </div>
           <a className="ac-nav-cta" href="#hero" style={{ marginLeft: 'auto', fontFamily: F_BUNGEE, fontSize: 14, color: INK, background: GREEN, border: '3px solid #fff', boxShadow: `3px 3px 0 ${INK}`, padding: '8px 16px' }}>GET ROASTED</a>
@@ -196,6 +199,9 @@ export default async function Home() {
           </div>
         </div>
       </div>
+
+      {/* ===== HALL OF SHAME + HALL OF FAME (live tweet embeds) ===== */}
+      <Halls shame={halls.shame ?? []} fame={halls.fame ?? []} />
 
       {/* ===== FINAL CTA ===== */}
       <div style={{ background: PINK, borderBottom: `4px solid ${INK}`, position: 'relative', overflow: 'hidden' }}>
