@@ -50,8 +50,11 @@ a { color: inherit; text-decoration: none; }
 .roast-ctabar { position: fixed; left: 0; right: 0; bottom: 0; } /* mobile: ALWAYS-visible pinned bar (sticky hides at scroll-top) */
 .roast-handoff-mobile { display: flex; }
 .roast-cta-desktop { display: none; }
+/* paywall: pinned pay bar on mobile (card scrolls away); hidden on desktop where the order card carries its own button */
+.paywall-ctabar { position: fixed; left: 0; right: 0; bottom: 0; }
 @media (min-width: 760px) {
   .roast-ctabar { display: none; }        /* desktop: the CTA moves inline below the verdict instead */
   .roast-handoff-mobile { display: none; }
   .roast-cta-desktop { display: flex; }   /* desktop: button + dancing Chad below the verdict */
+  .paywall-ctabar { display: none; }      /* desktop: order card's own "TAKE MY $X" is the CTA */
 }
