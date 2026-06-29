@@ -63,8 +63,8 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
     }
     case 'halls': { // home page: Hall of Shame = lowest-scored public roasts (their tweet); Hall of Fame = delivered fixes (their X reply)
       // distinct on the tweet so a re-recorded roast/fix never shows twice; then rank (shame = worst, fame = newest).
-      const shame = await sql<any[]>`select tweet_id, score from (
-          select distinct on (i.ref) i.ref as tweet_id, i.created_at,
+      const shame = await sql<any[]>`select tweet_id, ad_id, score from (
+          select distinct on (i.ref) i.ref as tweet_id, i.ad_id, i.created_at,
             (select total from scores s where s.ad_id = i.ad_id order by s.created_at desc limit 1) as score
           from interactions i
           where i.channel='x' and i.direction='out' and i.ref is not null
@@ -77,7 +77,8 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
           order by link_url, created_at desc
         ) q order by created_at desc limit 3`
       return {
-        shame: shame.map((r) => ({ tweetId: String(r.tweet_id), score: r.score != null ? Number(r.score) : null })),
+        // ad_id is `xad-<originalTweetId>` (from xroast) → the original ad tweet so the Hall of Shame shows ad + roast
+        shame: shame.map((r) => ({ tweetId: String(r.tweet_id), adTweetId: /^xad-\d+$/.test(String(r.ad_id)) ? String(r.ad_id).slice(4) : null, score: r.score != null ? Number(r.score) : null })),
         fame: fame.map((r) => ({ tweetUrl: String(r.tweet_url) })),
       }
     }
