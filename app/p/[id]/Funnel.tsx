@@ -53,10 +53,10 @@ function Creative({ url, controls = false }: { url?: string | null; controls?: b
     : <img src={url} alt="your ad" style={{ width: '100%', display: 'block' }} />
 }
 
-// The real ad rendered as a faux sponsored post + a couple of marker scribbles.
+// The real ad rendered as a faux sponsored post — no marker scribbles (we let the verdict do the talking).
 function AdCard({ name, copy, creative, controls = false }: { name: string; copy?: string | null; creative?: string | null; controls?: boolean }) {
   return (
-    <div style={{ position: 'relative', transform: 'rotate(-1.5deg)' }}>
+    <div style={{ transform: 'rotate(-1.5deg)' }}>
       <div style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', border: '3px solid var(--ink)', boxShadow: '6px 6px 0 var(--ink)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px' }}>
           <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#cfd3d8,#e9ebee)', flex: 'none' }} />
@@ -68,8 +68,6 @@ function AdCard({ name, copy, creative, controls = false }: { name: string; copy
         {copy && <div style={{ padding: '0 12px 10px', fontSize: 12.5, color: '#222' }}>{copy}</div>}
         <Creative url={creative} controls={controls} />
       </div>
-      <div style={{ position: 'absolute', top: -16, right: -8, transform: 'rotate(9deg)', fontFamily: 'var(--f-marker)', color: '#ff1414', fontSize: 16, animation: 'pop .5s ease both' }}>still live?!</div>
-      <div style={{ position: 'absolute', bottom: -14, left: -6, transform: 'rotate(-6deg)', fontFamily: 'var(--f-marker)', color: '#ff1414', fontSize: 16, animation: 'pop .6s ease both' }}>so generic 😭</div>
     </div>
   )
 }
