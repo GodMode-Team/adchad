@@ -62,19 +62,19 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
       return { delivered: !!r, image: r?.image ?? null, tweetUrl: r?.tweet_url ?? null }
     }
     case 'halls': { // home page: Hall of Shame = lowest-scored public roasts (their tweet); Hall of Fame = delivered fixes (their X reply)
-      // distinct on the tweet so a re-recorded roast/fix never shows twice; then rank (shame = worst, fame = newest).
+      // ONE entry per business (distinct prospect) so two fixes of the same ad can't fill both slots; then rank.
       const shame = await sql<any[]>`select tweet_id, ad_id, score from (
-          select distinct on (i.ref) i.ref as tweet_id, i.ad_id, i.created_at,
+          select distinct on (i.prospect_id) i.ref as tweet_id, i.ad_id, i.created_at,
             (select total from scores s where s.ad_id = i.ad_id order by s.created_at desc limit 1) as score
           from interactions i
           where i.channel='x' and i.direction='out' and i.ref is not null
-          order by i.ref, i.created_at desc
+          order by i.prospect_id, i.created_at desc
         ) q order by score asc nulls last, created_at desc limit 3`
       const fame = await sql<any[]>`select tweet_url from (
-          select distinct on (link_url) link_url as tweet_url, created_at
+          select distinct on (prospect_id) link_url as tweet_url, created_at
           from interactions
           where channel='fix' and direction='out' and link_url is not null
-          order by link_url, created_at desc
+          order by prospect_id, created_at desc
         ) q order by created_at desc limit 3`
       return {
         // ad_id is `xad-<originalTweetId>` (from xroast) → the original ad tweet so the Hall of Shame shows ad + roast
