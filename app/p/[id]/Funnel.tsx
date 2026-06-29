@@ -33,10 +33,12 @@ function Marquee({ text, color, seconds = 13 }: { text: string; color: string; s
 }
 
 // Sticky bottom CTA bar — full-bleed ink bar, button capped + centered so it isn't absurdly wide on desktop.
-function CtaBar({ children, as = 'div', href, onClick }: { children: ReactNode; as?: 'a' | 'div'; href?: string; onClick?: () => void }) {
+// `display` is owned by `.cta-bar-base` (CSS) so a className like `roast-ctabar` can hide it on desktop via media query.
+function CtaBar({ children, as = 'div', href, onClick, className }: { children: ReactNode; as?: 'a' | 'div'; href?: string; onClick?: () => void; className?: string }) {
   const inner = <div style={{ maxWidth: 520, margin: '0 auto' }}>{children}</div>
-  const style = { flex: 'none', display: 'block', width: '100%', border: 0, background: 'var(--ink)', padding: '16px 20px', cursor: 'pointer', position: 'sticky', bottom: 0, zIndex: 5 } as const
-  return as === 'a' ? <a href={href} style={style}>{inner}</a> : <button onClick={onClick} style={style}>{inner}</button>
+  const style = { flex: 'none', width: '100%', border: 0, background: 'var(--ink)', padding: '16px 20px', cursor: 'pointer', zIndex: 5 } as const // position lives in .cta-bar-base / .roast-ctabar (CSS) so a media query can flip sticky→fixed→hidden
+  const cls = `cta-bar-base${className ? ' ' + className : ''}`
+  return as === 'a' ? <a href={href} style={style} className={cls}>{inner}</a> : <button onClick={onClick} style={style} className={cls}>{inner}</button>
 }
 
 // One ad creative (image or video) rendered from a real URL.
@@ -91,7 +93,7 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
     return (
       <Shell>
         <Marquee color="var(--pink)" text={` EXHIBIT A ● I PULLED ${name.toUpperCase()}'S LIVE AD ● IT'S BAD ● ${scoreStr} ● `} />
-        <div style={{ flex: 1, padding: '30px 20px 34px' }}>
+        <div style={{ flex: 1, padding: '30px 20px 110px' }}>{/* extra bottom space so the fixed mobile CTA bar never covers content */}
           <div style={PAGE}>
             <div style={{ display: 'inline-block', transform: 'rotate(-3deg)', background: 'var(--pink)', color: '#fff', fontFamily: 'var(--f-heavy)', fontSize: 28, padding: '4px 14px', border: '4px solid var(--ink)', boxShadow: '5px 5px 0 var(--ink)' }}>
               I FOUND YOUR AD
@@ -122,16 +124,26 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
                   </div>
                 )}
 
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, marginTop: 2 }}>
+                {/* MOBILE — Chad + tease; the actual button is the pinned bottom bar */}
+                <div className="roast-handoff-mobile" style={{ alignItems: 'flex-end', gap: 10, marginTop: 2 }}>
                   <img src="/chad-cutout.png" alt="" style={{ width: 96, flex: 'none', transformOrigin: 'bottom center', animation: 'wobble 3.2s ease-in-out infinite' }} />
                   <div style={{ fontFamily: 'var(--f-marker)', color: 'var(--ink)', fontSize: 18, transform: 'rotate(-3deg)', paddingBottom: 18 }}>I already wrote<br />the good one →</div>
+                </div>
+
+                {/* DESKTOP — the CTA sits right under the verdict, Chad dancing beside it */}
+                <div className="roast-cta-desktop" style={{ flexDirection: 'column', gap: 10, marginTop: 6 }}>
+                  <div style={{ fontFamily: 'var(--f-marker)', color: 'var(--ink)', fontSize: 18, transform: 'rotate(-2deg)' }}>I already wrote the good one ↓</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <button onClick={() => setStep('paywall')} style={{ cursor: 'pointer', background: 'var(--yellow)', border: '4px solid #fff', borderRadius: 14, padding: '16px 24px', boxShadow: '0 0 0 4px var(--ink)', transform: 'rotate(-1deg)', animation: 'throb 2.4s ease-in-out infinite', fontFamily: 'var(--f-bungee)', fontSize: 22, color: 'var(--ink)' }}>UNFUCK IT → $5</button>
+                    <img src="/chad-cutout.png" alt="" style={{ width: 92, flex: 'none', transformOrigin: 'bottom center', animation: 'bounce 1.4s ease-in-out infinite' }} />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <CtaBar onClick={() => setStep('paywall')}>
+        <CtaBar onClick={() => setStep('paywall')} className="roast-ctabar">
           <div style={{ background: 'var(--yellow)', border: '4px solid #fff', borderRadius: 14, padding: '16px 14px', textAlign: 'center', boxShadow: '0 0 0 4px var(--ink)', transform: 'rotate(-1deg)', animation: 'throb 2.4s ease-in-out infinite' }}>
             <span style={{ fontFamily: 'var(--f-bungee)', fontSize: 24, color: 'var(--ink)' }}>UNFUCK IT → $5</span>
           </div>

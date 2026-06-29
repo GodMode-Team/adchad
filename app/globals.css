@@ -43,3 +43,15 @@ a { color: inherit; text-decoration: none; }
 .fnl-shell { width: 100%; min-height: 100dvh; display: flex; flex-direction: column; background: var(--green); color: var(--ink); position: relative; overflow-x: hidden; }
 .live-wrap { width: 100%; max-width: 474px; }
 @media (min-width: 760px) { .live-wrap { max-width: 680px; } }
+
+/* roast CTA — a pinned, always-visible bottom bar on mobile; inline below the verdict (with a dancing Chad) on
+   desktop. Display lives in CSS (not inline) so the media query can flip it. */
+.cta-bar-base { display: block; position: sticky; bottom: 0; }
+.roast-ctabar { position: fixed; left: 0; right: 0; bottom: 0; } /* mobile: ALWAYS-visible pinned bar (sticky hides at scroll-top) */
+.roast-handoff-mobile { display: flex; }
+.roast-cta-desktop { display: none; }
+@media (min-width: 760px) {
+  .roast-ctabar { display: none; }        /* desktop: the CTA moves inline below the verdict instead */
+  .roast-handoff-mobile { display: none; }
+  .roast-cta-desktop { display: flex; }   /* desktop: button + dancing Chad below the verdict */
+}
