@@ -16,7 +16,7 @@ export function interactionEvent(i: any): any | null {
   if (i.channel === 'email' && i.direction === 'out')
     return { ts: i.created_at, kind: 'email', icon: '📧', title: `Emailed ${who}` }
   if (i.channel === 'fix') // image is viewer-fetched — require https to block http tracking / mixed content
-    return { ts: i.created_at, kind: 'fix', icon: '✅', title: `Delivered fix to ${who}`, image: i.ref && String(i.ref).startsWith('https://') ? i.ref : undefined }
+    return { ts: i.created_at, kind: 'fix', icon: '✅', title: `Delivered fix to ${who}`, image: i.ref && String(i.ref).startsWith('https://') ? i.ref : undefined, link: i.link_url ? String(i.link_url) : undefined }
   return null // channel='note'/out (internal reasoning) and anything else: not shown
 }
 
@@ -55,6 +55,11 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
         : await sql<any[]>`select advertiser, creative_url, copy, link_url from ads where brand_id=${id} and creative_url is not null order by created_at desc limit 1`
       const [sc] = await sql<any[]>`select total from scores where ad_id=${r?.ad_id ?? null} or prospect_id=${id} order by created_at desc limit 1`
       return { found: true, name: p.name, segment: p.segment, ad: ad ?? null, roast_text: r?.text ?? null, score: sc ? Number(sc.total) : null }
+    }
+    case 'fixstatus': { // thank-you page polls this: is THIS prospect's fix delivered yet, and what's the tweet to embed?
+      const [r] = await sql<any[]>`select ref as image, link_url as tweet_url, created_at from interactions
+        where prospect_id=${String(f.id)} and channel='fix' and direction='out' order by created_at desc limit 1`
+      return { delivered: !!r, image: r?.image ?? null, tweetUrl: r?.tweet_url ?? null }
     }
     case 'orders': { // unfulfilled paid orders, for the fulfill heartbeat
       const rows = await sql<any[]>`select o.id, o.prospect_id, o.tier, o.amount, o.buyer_email, o.status
@@ -128,7 +133,7 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
             (select total from scores s where s.prospect_id = prospects.id order by s.created_at desc limit 1) as score
           from prospects where coalesce(email_source, '') <> 'inbound' order by created_at desc limit 50`,
         // text is projected to NULL unless it's a public X roast — privacy enforced in SQL, not just in the JS branch below
-        sql<any[]>`select i.created_at, i.channel, i.direction, i.ref,
+        sql<any[]>`select i.created_at, i.channel, i.direction, i.ref, i.link_url,
             case when i.channel = 'x' and i.direction = 'out' then i.text else null end as text,
             p.name as prospect_name,
             (select total from scores s where s.ad_id = i.ad_id order by s.created_at desc limit 1) as score
