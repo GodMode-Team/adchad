@@ -56,12 +56,14 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
   }
 
   // DELIVER — public X reply into the roast thread, else email. (Persist-before-deliver above keeps retries free.)
+  let fixLink: string | null = null // the fix's public X reply URL — surfaced in the feed + embedded on the thank-you page
   if (viaX) {
     const ctaNote = r.cta ? ` Set your Meta CTA button to "${r.cta}".` : ''
     const multi = r.imageUrls.length > 1
     const lead = multi ? `${r.headline} — ${r.imageUrls.length} variants to A/B test.` : r.headline
     const caption = `${lead}${ctaNote} ${multi ? 'your A/B pack' : 'your $5 fix'}, live 👇`
     const posted = await deps.xreply({ text: caption, imageUrls: r.imageUrls, replyToTweetId: roastTweetId!, handle: p?.x_handle ?? null })
+    fixLink = posted.url
     console.log(`[fulfill] order ${o.id} → fix replied on X (${r.imageUrls.length} img): ${posted.url}`)
   } else {
     const imgsBlock = r.imageUrls.length > 1
@@ -75,8 +77,8 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
   }
 
   await sql`update fixes set delivered_at=now() where order_id=${o.id}` // mark delivered right after → a later hiccup can't re-deliver
-  await sql`insert into interactions (prospect_id, channel, direction, ref, text)
-            values (${o.prospect_id}, 'fix', 'out', ${r.imageUrls[0]}, ${r.headline + ' — ' + r.cta})` // ref=image keeps the /live thumbnail
+  await sql`insert into interactions (prospect_id, channel, direction, ref, link_url, text)
+            values (${o.prospect_id}, 'fix', 'out', ${r.imageUrls[0]}, ${fixLink}, ${r.headline + ' — ' + r.cta})` // ref=image (thumbnail), link_url=the X reply
   await sql`update prospects set stage='customer' where id=${o.prospect_id}`
   return 'delivered'
 }

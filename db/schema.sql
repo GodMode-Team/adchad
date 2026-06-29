@@ -97,5 +97,6 @@ create table if not exists ledger (
 );
 
 alter table interactions add column if not exists ad_id text;  -- the SPECIFIC ad a roast/fix targets (not just the brand)
+alter table interactions add column if not exists link_url text;  -- public link for the event (e.g. the fix's X reply) — safe to surface in the feed
 
 insert into control (id, paused) values (1, false) on conflict (id) do nothing;

@@ -18,10 +18,11 @@ describe('feed — interaction → event mapping', () => {
     expect(interactionEvent({ ...base, channel: 'x', direction: 'in' }).title).toMatch(/replied/i)
   })
 
-  it('maps a delivered fix (https image kept for the thumbnail)', () => {
-    const e = interactionEvent({ ...base, channel: 'fix', direction: 'out', ref: 'https://blob/x.png' })
+  it('maps a delivered fix — keeps the image thumbnail AND links the tweet', () => {
+    const e = interactionEvent({ ...base, channel: 'fix', direction: 'out', ref: 'https://blob/x.png', link_url: 'https://x.com/adchadofficial/status/2071679272071073812' })
     expect(e.kind).toBe('fix')
     expect(e.image).toBe('https://blob/x.png')
+    expect(e.link).toBe('https://x.com/adchadofficial/status/2071679272071073812')
   })
 
   it('maps a public X roast', () => {

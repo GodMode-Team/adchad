@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { migrate, sql } from '../../lib/db'
 import { fulfillOrder } from '../../tools/fulfill'
+import { run } from '../../tools/db'
 
 // Live DB, no mocks (house style). fix()/send()/xreply() are injected stubs so the money-path tests neither spend
 // on gpt-image-2 nor send a real email/tweet. We drive fulfillOrder(id) directly (not the global drain) so the live
@@ -124,6 +125,10 @@ describe('fulfill — delivers via a public X reply when there is a roast tweet'
     expect(xreplyCalls[0].imageUrls).toEqual(['https://example.com/fixed.png']) // with the new creative
     const [fx] = await sql<any[]>`select delivered_at from fixes where order_id=${orderId}`
     expect(fx.delivered_at).toBeTruthy()
+    // the fix tweet URL is stored for the feed link + the thank-you-page embed
+    const [fxInt] = await sql<any[]>`select link_url from interactions where prospect_id=${pid} and channel='fix' and direction='out'`
+    expect(fxInt.link_url).toBe('https://x.com/adchadofficial/status/reply99')
+    expect(await run('fixstatus', { id: pid })).toMatchObject({ delivered: true, tweetUrl: 'https://x.com/adchadofficial/status/reply99' })
   })
 })
 

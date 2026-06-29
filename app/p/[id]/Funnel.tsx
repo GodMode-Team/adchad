@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import LiveFeed from '../../LiveFeed'
 
 type Step = 'roast' | 'paywall' | 'done'
 
@@ -87,6 +88,39 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
 
   const tier = bump ? 12 : 5
   const checkoutHref = `/api/checkout?p=${encodeURIComponent(id)}&tier=${tier}`
+
+  // Thank-you page state: the $49 upsell decline + this order's fix status (polled → swaps the placeholder for the tweet).
+  const [declined, setDeclined] = useState(false)
+  const [fix, setFix] = useState<{ delivered: boolean; tweetUrl?: string | null; image?: string | null }>({ delivered: false })
+  const tweetId = fix.tweetUrl ? fix.tweetUrl.match(/status\/(\d+)/)?.[1] ?? null : null
+
+  useEffect(() => {
+    if (step !== 'done' || fix.delivered) return
+    let on = true
+    let t: ReturnType<typeof setInterval>
+    const pull = async () => {
+      try {
+        const r = await fetch(`/api/fix-status?p=${encodeURIComponent(id)}`, { cache: 'no-store' })
+        const d = await r.json()
+        if (on && d?.delivered) { setFix(d); clearInterval(t) }
+      } catch { /* keep polling */ }
+    }
+    pull()
+    t = setInterval(pull, 5000)
+    return () => { on = false; clearInterval(t) }
+  }, [step, id, fix.delivered])
+
+  // Once the fix tweet is known, render it as a real embedded tweet (load X's widget script on demand).
+  useEffect(() => {
+    if (!tweetId) return
+    const w = window as any
+    if (w.twttr?.widgets) { w.twttr.widgets.load(); return }
+    const s = document.createElement('script')
+    s.src = 'https://platform.twitter.com/widgets.js'
+    s.async = true
+    s.onload = () => w.twttr?.widgets?.load?.()
+    document.body.appendChild(s)
+  }, [tweetId])
 
   // ============================ ROAST ============================
   if (step === 'roast') {
@@ -224,66 +258,84 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
   }
 
   // ============================ DONE (paid=1) ============================
+  const upsellHref = `/api/checkout?p=${encodeURIComponent(id)}&tier=49`
   return (
     <Shell>
       <div style={{ height: 44, flex: 'none', background: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--f-bungee)', fontSize: 18, color: 'var(--yellow)' }}>FIX DEPLOYED 💪</div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '30px 20px 36px' }}>
-        <div style={PAGE}>
-          <div style={ROW}>
-            {/* LEFT — the receipt */}
-            <div style={{ ...COL }}>
-              <div style={{ fontFamily: 'var(--f-display)', fontSize: 48, lineHeight: 0.92, color: 'var(--ink)' }}>PAYMENT<br />RECEIVED.</div>
-              <div style={{ marginTop: 12, fontSize: 16, lineHeight: 1.45, fontWeight: 600, color: '#04210d' }}>
-                Your fix is generating right now — you&apos;ll have it in ~2 minutes: a fresh headline, body, CTA and a ready-to-run ad creative.
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 0' }}>
-                <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: '#0a3d16' }}>score</div>
-                <div style={{ fontFamily: 'var(--f-heavy)', fontSize: 15, color: '#0a3d16', textDecoration: 'line-through', opacity: 0.6 }}>{score != null ? score : '??'}</div>
-                <div style={{ fontFamily: 'var(--f-bungee)', color: 'var(--ink)' }}>→</div>
-                <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, fontWeight: 700, color: 'var(--ink)' }}>your fix is cooking…</div>
-              </div>
-              {/* watch the order get worked on, live */}
-              <a href="https://adchad.ai/live" style={{ display: 'inline-flex', alignItems: 'center', gap: 9, marginTop: 22, background: 'var(--ink)', border: '3px solid var(--green)', borderRadius: 12, padding: '12px 16px', boxShadow: '4px 4px 0 var(--green)' }}>
-                <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#ff5a5a', flex: 'none', animation: 'livedot 1.2s ease-in-out infinite' }} />
-                <span style={{ fontFamily: 'var(--f-bungee)', fontSize: 14, color: 'var(--yellow)' }}>WATCH CHAD BUILD IT — LIVE →</span>
-              </a>
-            </div>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '26px 18px 48px' }}>
+        <div style={{ width: '100%', maxWidth: 680, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-            {/* RIGHT — their OLD ad, marked for death */}
-            <div style={{ ...COL }}>
-              <div style={{ position: 'relative' }}>
-                <div style={{ filter: 'grayscale(1) contrast(.95) brightness(.93)', background: '#fff', borderRadius: 12, overflow: 'hidden', border: '3px solid var(--ink)', boxShadow: '6px 6px 0 var(--ink)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px' }}>
-                    <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#ff2d6f,#ffe600)', flex: 'none' }} />
-                    <div style={{ lineHeight: 1.2 }}>
-                      <div style={{ fontWeight: 700, fontSize: 13, color: '#222' }}>{name}</div>
-                      <div style={{ fontSize: 11, color: '#8a8d91' }}>your old ad</div>
-                    </div>
-                  </div>
-                  <Creative url={creative} />
-                </div>
-                {/* big red X — outside the grayscale filter so it stays vivid */}
-                <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-                  <div style={{ position: 'absolute', top: '50%', left: '-3%', width: '106%', height: 16, background: '#ff1414', transform: 'translateY(-50%) rotate(26deg)', boxShadow: '0 0 0 3px #fff' }} />
-                  <div style={{ position: 'absolute', top: '50%', left: '-3%', width: '106%', height: 16, background: '#ff1414', transform: 'translateY(-50%) rotate(-26deg)', boxShadow: '0 0 0 3px #fff' }} />
-                </div>
-                <div style={{ position: 'absolute', top: -18, right: -6, transform: 'rotate(8deg)', fontFamily: 'var(--f-marker)', color: '#ff1414', fontSize: 26 }}>RIP 🪦</div>
-              </div>
+          <div style={{ fontFamily: 'var(--f-display)', fontSize: 40, lineHeight: 0.9, color: 'var(--ink)' }}>PAYMENT RECEIVED.</div>
+
+          {/* 1 — upsell video */}
+          <video
+            src="https://teaser-page-virid.vercel.app/adchad-upsell.mp4"
+            controls autoPlay muted playsInline
+            style={{ width: '100%', display: 'block', borderRadius: 14, border: '3px solid var(--ink)', boxShadow: '6px 6px 0 var(--ink)', background: '#000' }}
+          />
+
+          {/* 2 — pitch + Yes/No */}
+          <div style={{ fontFamily: 'var(--f-heavy)', fontSize: 19, lineHeight: 1.2, color: 'var(--ink)' }}>
+            By the time you finish watching this video, your ad will be ready.
+          </div>
+          {declined ? (
+            <a href={upsellHref} style={{ fontFamily: 'var(--f-mono)', fontSize: 13, fontWeight: 700, color: '#0a3d16' }}>
+              💀 enjoy the losses — changed your mind? Hire Chad, $49/mo →
+            </a>
+          ) : (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+              <a href={upsellHref} style={{ flex: '1 1 240px', textAlign: 'center', background: 'var(--yellow)', border: '4px solid var(--ink)', borderRadius: 14, padding: '15px 16px', boxShadow: '4px 4px 0 var(--ink)', fontFamily: 'var(--f-bungee)', fontSize: 17, color: 'var(--ink)' }}>
+                Hire Chad now for $49/mo
+              </a>
+              <button onClick={() => setDeclined(true)} style={{ flex: '1 1 240px', cursor: 'pointer', textAlign: 'center', background: 'transparent', border: '3px solid var(--ink)', borderRadius: 14, padding: '15px 16px', fontFamily: 'var(--f-mono)', fontWeight: 700, fontSize: 14, color: '#0a3d16' }}>
+                No thanks, I enjoy losing money
+              </button>
             </div>
+          )}
+
+          {/* 3 — watch chad work */}
+          <div style={{ fontFamily: 'var(--f-display)', fontSize: 30, color: 'var(--ink)', marginTop: 8 }}>WATCH CHAD WORK</div>
+
+          {/* 4 — the fix lands here: placeholder → live embedded tweet */}
+          <div style={{ borderRadius: 16, border: '2px solid #1c241c', background: '#0f140f', overflow: 'hidden' }}>
+            {tweetId ? (
+              <div style={{ padding: 8 }}>
+                <blockquote className="twitter-tweet" data-theme="dark" data-conversation="none" data-align="center">
+                  <a href={fix.tweetUrl!}>Your fixed ad →</a>
+                </blockquote>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '34px 20px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26 }}>⏳</div>
+                <div style={{ fontFamily: 'var(--f-sans)', fontWeight: 700, fontSize: 15, color: '#cfe8d6' }}>The link to your ad will appear here when ready.</div>
+                <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: '#5f6b5f' }}>usually ~2 minutes — Chad&apos;s on it 👇</div>
+              </div>
+            )}
           </div>
 
-          {/* $49/mo upsell — full width under the columns */}
-          <a href={`/api/checkout?p=${encodeURIComponent(id)}&tier=49`} style={{ display: 'flex', marginTop: 22, background: 'var(--ink)', borderRadius: 14, padding: '14px 15px', alignItems: 'center', gap: 12 }}>
-            <img src="/chad-cutout.png" alt="" style={{ width: 62, flex: 'none', transformOrigin: 'bottom center', animation: 'bounce 1.6s ease-in-out infinite' }} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'var(--f-heavy)', fontSize: 14, color: '#fff', lineHeight: 1.05 }}>Want a fresh one every week?</div>
-              <div style={{ fontSize: 11, color: '#9aa0a6', marginTop: 2 }}>New creative + I watch your competitors. <b style={{ color: 'var(--green)' }}>$49/mo.</b></div>
+          {/* 5 — the live feed */}
+          <LiveFeed max={12} />
+
+          {/* 6 — the dead ad, all the way at the bottom */}
+          <div style={{ position: 'relative', width: '100%', maxWidth: 360, margin: '6px auto 0' }}>
+            <div style={{ filter: 'grayscale(1) contrast(.95) brightness(.93)', background: '#fff', borderRadius: 12, overflow: 'hidden', border: '3px solid var(--ink)', boxShadow: '6px 6px 0 var(--ink)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px' }}>
+                <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#ff2d6f,#ffe600)', flex: 'none' }} />
+                <div style={{ lineHeight: 1.2 }}>
+                  <div style={{ fontWeight: 700, fontSize: 13, color: '#222' }}>{name}</div>
+                  <div style={{ fontSize: 11, color: '#8a8d91' }}>your old ad</div>
+                </div>
+              </div>
+              <Creative url={creative} />
             </div>
-            <div style={{ fontFamily: 'var(--f-bungee)', color: 'var(--yellow)', fontSize: 20 }}>→</div>
-          </a>
+            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+              <div style={{ position: 'absolute', top: '50%', left: '-3%', width: '106%', height: 16, background: '#ff1414', transform: 'translateY(-50%) rotate(26deg)', boxShadow: '0 0 0 3px #fff' }} />
+              <div style={{ position: 'absolute', top: '50%', left: '-3%', width: '106%', height: 16, background: '#ff1414', transform: 'translateY(-50%) rotate(-26deg)', boxShadow: '0 0 0 3px #fff' }} />
+            </div>
+            <div style={{ position: 'absolute', top: -18, right: -6, transform: 'rotate(8deg)', fontFamily: 'var(--f-marker)', color: '#ff1414', fontSize: 26 }}>RIP 🪦</div>
+          </div>
         </div>
       </div>
-      <a href="/work" style={{ flex: 'none', padding: '13px 20px', background: 'var(--ink)', textAlign: 'center', fontFamily: 'var(--f-mono)', fontSize: 12, color: '#9aa0a6' }}>see the rest of the work →</a>
     </Shell>
   )
 }
