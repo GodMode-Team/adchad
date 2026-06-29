@@ -27,7 +27,7 @@ Thank-you page (?paid=1)                 [buyer already has a card on file from 
             • copy: "Great choice… Fill out this form and I'll get started.
                      You can expect your first report a week from filling out the form."
             • a button → the intake form (/onboard/<id>)
-        → ALSO email them: "You hired Chad" + the same form link + the 1-week expectation
+        → ALSO email them (at their Stripe-captured email — no re-ask): "You hired Chad" + the form link + the 1-week expectation
    └─ buyer fills the intake form (/onboard/<id>)
         → responses stored; the 1-week clock starts at submission
         → confirmation: deliverables + "first report by <date+7d>"
@@ -78,11 +78,19 @@ subscription per prospect — check before create).
 - The rest of the page (WATCH CHAD WORK + tweet + feed + dead ad) stays.
 - On `requires_action` / failure: show the existing $49 Checkout link as the fallback CTA.
 
-## 3. The email
-Sent from the upsell handler (reuse `tools/email.ts send`). Chad voice.
+## 3. The confirmation email
+Sent from the upsell handler (reuse `tools/email.ts send`). Chad voice. It confirms the hire, links
+the form, and lays out the same expectations shown on the page.
+- **Who we send to — grab it from Stripe, don't ask again.** The buyer's email is already captured by
+  the $5/$12 Stripe Checkout (`session.customer_details.email`) and **already stored on `orders.buyer_email`**
+  by our webhook (it also lives on the Stripe Customer / can be read via `stripe.customers.retrieve`).
+  The upsell handler reads it from there → **zero re-entry**.
+  - *Fallback (worst case):* if it's somehow missing (a future card-on-file path that skipped email
+    capture), prompt for the email on the thank-you page before charging — but with Checkout-captured
+    email this should never fire.
 - **Subject:** "You hired Chad. Let's get to work. 💪"
-- **Body:** confirms the $49/mo, the 3 deliverables, the **form link** (`/onboard/<id>`), and
-  "your first report lands **one week after you submit the form** — so don't sit on it."
+- **Body:** confirms the $49/mo, the 3 deliverables, the **form link** (`/onboard/<id>`), and the same
+  expectation as the page: "your first report lands **one week after you submit the form** — so don't sit on it."
 
 ## 4. The intake form (`/onboard/<id>`)
 A branded page on adchad.ai (not a third-party form) that POSTs to `/api/onboard` → stores responses
@@ -126,7 +134,8 @@ your current ads — every week."
 - [ ] A buyer who just paid $5/$12 can click "Hire Chad now for $49/mo" and get charged **without
       re-entering a card** (US card, no SCA) — a $49/mo subscription appears in Stripe.
 - [ ] On success the thank-you page hides the video + Yes/No and shows the "Great choice…" copy + form CTA.
-- [ ] They receive an email with the form link + the 1-week expectation.
+- [ ] They receive a confirmation email — to the email **Stripe already captured** (no re-ask) — with
+      the form link + the 1-week expectation.
 - [ ] `/onboard/<id>` collects the 10 answers, stores them, and confirms "first report by <+7 days>".
 - [ ] No saved card / SCA required → graceful fallback to the hosted $49 Checkout (no dead end).
 - [ ] Double-click / refresh can't create two subscriptions.
