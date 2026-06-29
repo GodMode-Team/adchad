@@ -11,8 +11,8 @@ const DEFAULT: Deps = { fix: realFix, send: realSend }
 
 /** Fulfill one paid order: generate the fix (once), email it, record delivery. Idempotent + spend-safe. */
 export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAULT): Promise<'delivered' | 'skipped'> {
-  const [o] = await sql<any[]>`select id, prospect_id, buyer_email, status from orders where id=${orderId}`
-  if (!o || o.status !== 'paid' || !o.buyer_email) return 'skipped'
+  const [o] = await sql<any[]>`select id, prospect_id, buyer_email, status, tier from orders where id=${orderId}`
+  if (!o || o.status !== 'paid' || !o.buyer_email || o.tier !== 5) return 'skipped' // auto-fulfill only the $5 single fix ($12/$49 are different products)
 
   const [prior] = await sql<any[]>`select headline, body, cta, image_url, delivered_at from fixes where order_id=${o.id}`
   if (prior?.delivered_at) return 'skipped' // already delivered
@@ -51,7 +51,7 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
 /** Drain every unfulfilled paid order. Single worker → sequential → no double-send. Returns count delivered. */
 export async function fulfillPaidOrders(deps: Deps = DEFAULT): Promise<number> {
   const orders = await sql<any[]>`select o.id from orders o
-    where o.status='paid' and not exists (select 1 from fixes fx where fx.order_id=o.id and fx.delivered_at is not null)
+    where o.status='paid' and o.tier=5 and not exists (select 1 from fixes fx where fx.order_id=o.id and fx.delivered_at is not null)
     order by o.created_at asc`
   let n = 0
   for (const o of orders) {
