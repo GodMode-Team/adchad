@@ -15,13 +15,18 @@ const PAGE = { width: '100%', maxWidth: 1080, margin: '0 auto' } as const
 const ROW = { display: 'flex', flexWrap: 'wrap', gap: 30, alignItems: 'flex-start' } as const
 const COL = { flex: '1 1 340px', minWidth: 0 } as const
 
-// Black scrolling marquee — two copies of the text translate -50% on loop (keyframe `mq`).
+// Black scrolling marquee — two identical halves translate -50% on loop (keyframe `mq`).
+// ponytail: each half is the phrase ×REP so one half always exceeds the viewport (4× ≈ 2.4–3.6k px covers up to ~5K
+// displays) — otherwise a phrase sized for a phone leaves a blank gap on the right of a wide screen. Duration scales
+// with REP to keep the pixels-per-second the designer tuned. Bump REP if an ultrawide ever gaps.
+const REP = 4
 function Marquee({ text, color, seconds = 13 }: { text: string; color: string; seconds?: number }) {
+  const half = text.repeat(REP)
   return (
     <div style={{ height: 38, flex: 'none', background: 'var(--ink)', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
-      <div style={{ display: 'flex', whiteSpace: 'nowrap', fontFamily: 'var(--f-bungee)', fontSize: 14, color, animation: `mq ${seconds}s linear infinite` }}>
-        <span>{text}</span>
-        <span>{text}</span>
+      <div style={{ display: 'flex', whiteSpace: 'nowrap', fontFamily: 'var(--f-bungee)', fontSize: 14, color, animation: `mq ${seconds * REP}s linear infinite` }}>
+        <span>{half}</span>
+        <span>{half}</span>
       </div>
     </div>
   )
@@ -153,50 +158,48 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
               I ALREADY <span style={{ background: 'var(--yellow)', padding: '0 8px', border: '3px solid var(--ink)', boxShadow: '4px 4px 0 var(--ink)' }}>FIXED IT.</span>
             </div>
 
-            <div style={{ ...ROW, marginTop: 24 }}>
-              {/* LEFT — before → after */}
-              <div style={{ ...COL, display: 'flex', alignItems: 'stretch', gap: 10 }}>
-                <div style={{ flex: 1, opacity: 0.85 }}>
-                  <div style={{ fontFamily: 'var(--f-mono)', fontSize: 9, color: '#7a6c00', marginBottom: 5 }}>YOURS · {score != null ? score : '??'}</div>
-                  <div style={{ border: '2px solid var(--ink)', borderRadius: 8, height: 140, overflow: 'hidden', background: '#fff' }}><Creative url={creative} /></div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', fontFamily: 'var(--f-bungee)', color: 'var(--ink)', fontSize: 18 }}>→</div>
-                <div style={{ flex: 1, position: 'relative' }}>
-                  <div style={{ fontFamily: 'var(--f-mono)', fontSize: 9, color: '#1f9c3a', marginBottom: 5 }}>THE FIX · 🔒</div>
-                  <div style={{ position: 'relative', border: '2px solid var(--ink)', borderRadius: 8, height: 140, overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', inset: 0, filter: 'blur(9px)' }}>
-                      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 70% 25%, #ffd36e, transparent 55%), linear-gradient(150deg,#13131a 0%,#3a0f24 50%,#ff2d6f 120%)' }} />
-                      <div style={{ position: 'absolute', right: -10, bottom: -14, width: 78, height: 96, borderRadius: '50% 50% 44% 44%', background: 'linear-gradient(160deg,#f6c89a,#caa074)' }} />
-                      <div style={{ position: 'absolute', left: 9, top: 12, width: 30, height: 8, borderRadius: 4, background: 'var(--yellow)' }} />
-                      <div style={{ position: 'absolute', left: 9, top: 26, width: 62, height: 13, borderRadius: 3, background: '#fff' }} />
-                      <div style={{ position: 'absolute', left: 9, top: 44, width: 48, height: 13, borderRadius: 3, background: '#fff' }} />
-                      <div style={{ position: 'absolute', left: 9, bottom: 12, width: 54, height: 16, borderRadius: 8, background: 'var(--green)' }} />
-                    </div>
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                      <div style={{ fontSize: 26 }}>🔒</div>
-                      <div style={{ fontFamily: 'var(--f-mono)', fontSize: 9, color: '#fff', background: 'var(--ink)', padding: '3px 8px', borderRadius: 20 }}>unlock for $5</div>
-                    </div>
+            {/* before → after — FULL WIDTH, the centerpiece */}
+            <div style={{ marginTop: 24, display: 'flex', alignItems: 'stretch', gap: 14 }}>
+              <div style={{ flex: 1, minWidth: 0, opacity: 0.85 }}>
+                <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: '#7a6c00', marginBottom: 6 }}>YOURS · {score != null ? score : '??'}</div>
+                <div style={{ border: '2px solid var(--ink)', borderRadius: 10, height: 'clamp(150px, 34vw, 330px)', overflow: 'hidden', background: '#fff' }}><Creative url={creative} /></div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', fontFamily: 'var(--f-bungee)', color: 'var(--ink)', fontSize: 22 }}>→</div>
+              <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+                <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: '#1f9c3a', marginBottom: 6 }}>THE FIX · 🔒</div>
+                <div style={{ position: 'relative', border: '2px solid var(--ink)', borderRadius: 10, height: 'clamp(150px, 34vw, 330px)', overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', inset: 0, filter: 'blur(11px)' }}>
+                    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 70% 25%, #ffd36e, transparent 55%), linear-gradient(150deg,#13131a 0%,#3a0f24 50%,#ff2d6f 120%)' }} />
+                    <div style={{ position: 'absolute', right: '-8%', bottom: '-12%', width: '46%', height: '64%', borderRadius: '50% 50% 44% 44%', background: 'linear-gradient(160deg,#f6c89a,#caa074)' }} />
+                    <div style={{ position: 'absolute', left: '6%', top: '10%', width: '22%', height: 9, borderRadius: 4, background: 'var(--yellow)' }} />
+                    <div style={{ position: 'absolute', left: '6%', top: '20%', width: '46%', height: 14, borderRadius: 3, background: '#fff' }} />
+                    <div style={{ position: 'absolute', left: '6%', top: '32%', width: '36%', height: 14, borderRadius: 3, background: '#fff' }} />
+                    <div style={{ position: 'absolute', left: '6%', bottom: '10%', width: '40%', height: 18, borderRadius: 8, background: 'var(--green)' }} />
+                  </div>
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <div style={{ fontSize: 30 }}>🔒</div>
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: '#fff', background: 'var(--ink)', padding: '4px 10px', borderRadius: 20 }}>unlock for $5</div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* RIGHT — what you get + order bump */}
-              <div style={{ ...COL }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-                  <div style={{ alignSelf: 'flex-start', transform: 'rotate(-1.5deg)', background: 'var(--yellow)', border: '3px solid var(--ink)', boxShadow: '3px 3px 0 var(--ink)', padding: '7px 11px', fontWeight: 700, fontSize: 13, color: 'var(--ink)' }}>✓ new headline, body &amp; CTA</div>
-                  <div style={{ alignSelf: 'flex-start', transform: 'rotate(1deg)', background: '#fff', border: '3px solid var(--ink)', boxShadow: '3px 3px 0 var(--pink)', padding: '7px 11px', fontWeight: 700, fontSize: 13, color: 'var(--ink)' }}>✓ a ready-to-use HD generated ad image</div>
-                  <div style={{ alignSelf: 'flex-start', transform: 'rotate(-1deg)', background: 'var(--pink)', border: '3px solid var(--ink)', boxShadow: '3px 3px 0 var(--ink)', padding: '7px 11px', fontWeight: 700, fontSize: 13, color: '#fff' }}>✓ in your inbox in 60 seconds</div>
-                </div>
-                <button onClick={() => setBump((b) => !b)} style={{ width: '100%', textAlign: 'left', marginTop: 18, cursor: 'pointer', border: '2px dashed var(--ink)', borderRadius: 12, padding: 12, display: 'flex', gap: 11, alignItems: 'center', background: '#fff19a' }}>
-                  <div style={{ width: 24, height: 24, borderRadius: 6, border: '2px solid var(--ink)', flex: 'none', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {bump && <span style={{ color: '#1f9c3a', fontWeight: 900, fontSize: 17 }}>✓</span>}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: 'var(--f-heavy)', fontSize: 13, color: 'var(--ink)' }}>Add 2 MORE to A/B test <span style={{ color: '#1f9c3a' }}>+$7</span></div>
-                    <div style={{ fontSize: 11, color: '#6b6e00' }}>3 images total. Find your winner faster.</div>
-                  </div>
-                </button>
+            {/* what you get → the A/B bump sits RIGHT UNDER the value props (never a separate column) */}
+            <div style={{ marginTop: 26, maxWidth: 560 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 9, alignItems: 'flex-start' }}>
+                <div style={{ transform: 'rotate(-1.5deg)', background: 'var(--yellow)', border: '3px solid var(--ink)', boxShadow: '3px 3px 0 var(--ink)', padding: '7px 11px', fontWeight: 700, fontSize: 13, color: 'var(--ink)' }}>✓ new headline, body &amp; CTA</div>
+                <div style={{ transform: 'rotate(1deg)', background: '#fff', border: '3px solid var(--ink)', boxShadow: '3px 3px 0 var(--pink)', padding: '7px 11px', fontWeight: 700, fontSize: 13, color: 'var(--ink)' }}>✓ a ready-to-use HD generated ad image</div>
+                <div style={{ transform: 'rotate(-1deg)', background: 'var(--pink)', border: '3px solid var(--ink)', boxShadow: '3px 3px 0 var(--ink)', padding: '7px 11px', fontWeight: 700, fontSize: 13, color: '#fff' }}>✓ ready in ~2 minutes</div>
               </div>
+              <button onClick={() => setBump((b) => !b)} style={{ width: '100%', textAlign: 'left', marginTop: 16, cursor: 'pointer', border: '2px dashed var(--ink)', borderRadius: 12, padding: 14, display: 'flex', gap: 11, alignItems: 'center', background: '#fff19a' }}>
+                <div style={{ width: 24, height: 24, borderRadius: 6, border: '2px solid var(--ink)', flex: 'none', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {bump && <span style={{ color: '#1f9c3a', fontWeight: 900, fontSize: 17 }}>✓</span>}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: 'var(--f-heavy)', fontSize: 13, color: 'var(--ink)' }}>Add 2 MORE to A/B test <span style={{ color: '#1f9c3a' }}>+$7</span></div>
+                  <div style={{ fontSize: 11, color: '#6b6e00' }}>3 images total. Find your winner faster.</div>
+                </div>
+              </button>
             </div>
           </div>
         </div>
@@ -221,7 +224,7 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
             <div style={{ ...COL }}>
               <div style={{ fontFamily: 'var(--f-display)', fontSize: 48, lineHeight: 0.92, color: 'var(--ink)' }}>PAYMENT<br />RECEIVED.</div>
               <div style={{ marginTop: 12, fontSize: 16, lineHeight: 1.45, fontWeight: 600, color: '#04210d' }}>
-                Your fix is generating right now. It lands in your inbox in ~2 minutes — fresh headline, body, CTA and a ready-to-run ad image.
+                Your fix is generating right now — you&apos;ll have it in ~2 minutes: a fresh headline, body, CTA and a ready-to-run ad creative.
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 0' }}>
                 <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: '#0a3d16' }}>score</div>
@@ -231,17 +234,25 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
               </div>
             </div>
 
-            {/* RIGHT — their current ad */}
+            {/* RIGHT — their OLD ad, marked for death */}
             <div style={{ ...COL }}>
-              <div style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', border: '3px solid var(--ink)', boxShadow: '6px 6px 0 var(--ink)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px' }}>
-                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#ff2d6f,#ffe600)', flex: 'none' }} />
-                  <div style={{ lineHeight: 1.2 }}>
-                    <div style={{ fontWeight: 700, fontSize: 13, color: '#222' }}>{name}</div>
-                    <div style={{ fontSize: 11, color: '#8a8d91' }}>your current ad</div>
+              <div style={{ position: 'relative' }}>
+                <div style={{ filter: 'grayscale(1) contrast(.95) brightness(.93)', background: '#fff', borderRadius: 12, overflow: 'hidden', border: '3px solid var(--ink)', boxShadow: '6px 6px 0 var(--ink)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px' }}>
+                    <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#ff2d6f,#ffe600)', flex: 'none' }} />
+                    <div style={{ lineHeight: 1.2 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13, color: '#222' }}>{name}</div>
+                      <div style={{ fontSize: 11, color: '#8a8d91' }}>your old ad</div>
+                    </div>
                   </div>
+                  <Creative url={creative} />
                 </div>
-                <Creative url={creative} />
+                {/* big red X — outside the grayscale filter so it stays vivid */}
+                <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+                  <div style={{ position: 'absolute', top: '50%', left: '-3%', width: '106%', height: 16, background: '#ff1414', transform: 'translateY(-50%) rotate(26deg)', boxShadow: '0 0 0 3px #fff' }} />
+                  <div style={{ position: 'absolute', top: '50%', left: '-3%', width: '106%', height: 16, background: '#ff1414', transform: 'translateY(-50%) rotate(-26deg)', boxShadow: '0 0 0 3px #fff' }} />
+                </div>
+                <div style={{ position: 'absolute', top: -18, right: -6, transform: 'rotate(8deg)', fontFamily: 'var(--f-marker)', color: '#ff1414', fontSize: 26 }}>RIP 🪦</div>
               </div>
             </div>
           </div>

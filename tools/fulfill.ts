@@ -1,5 +1,5 @@
 import { sql } from '../lib/db'
-import { fix as realFix } from './fix'
+import { fix as realFix, type FixResult } from './fix'
 import { send as realSend } from './email'
 import { xpost as realXpost } from './xpost'
 
@@ -23,9 +23,9 @@ const DEFAULT: Deps = {
 /** Fulfill one paid order: generate the fix (once), deliver it (X reply else email), record it. Idempotent + spend-safe. */
 export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAULT): Promise<'delivered' | 'skipped'> {
   const [o] = await sql<any[]>`select id, prospect_id, buyer_email, status, tier from orders where id=${orderId}`
-  if (!o || o.status !== 'paid' || o.tier !== 5) return 'skipped' // auto-fulfill only the $5 single fix ($12/$49 are different products)
+  if (!o || o.status !== 'paid' || (o.tier !== 5 && o.tier !== 12)) return 'skipped' // auto-fulfill the $5 single fix + $12 A/B pack ($49 membership is a different product)
 
-  const [prior] = await sql<any[]>`select headline, body, cta, image_url, delivered_at from fixes where order_id=${o.id}`
+  const [prior] = await sql<any[]>`select headline, body, cta, image_url, variants, delivered_at from fixes where order_id=${o.id}`
   if (prior?.delivered_at) return 'skipped' // already delivered
 
   const [p] = await sql<any[]>`select name, x_handle from prospects where id=${o.prospect_id}`
@@ -36,37 +36,46 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
   const viaX = !!roastTweetId && !(await deps.paused())
   if (!viaX && !o.buyer_email) throw new Error(`fulfill ${o.id}: no X roast tweet to reply to and no buyer_email — nowhere to deliver`)
 
-  let r: { imageUrl: string; headline: string; body: string; cta: string; fixed: string[] }
+  let r: FixResult
   if (prior?.image_url) {
     // a previous run generated but delivery failed — reuse it, do NOT pay for gpt-image-2 again
-    r = { imageUrl: prior.image_url, headline: prior.headline, body: prior.body, cta: prior.cta, fixed: [] }
+    const imgs: string[] = prior.variants?.images?.length ? prior.variants.images : [prior.image_url]
+    r = { imageUrl: prior.image_url, imageUrls: imgs, headline: prior.headline, body: prior.body, cta: prior.cta, fixed: [] }
   } else {
     const [ad] = await sql<any[]>`select creative_url from ads where brand_id=${o.prospect_id} and creative_url is not null order by created_at desc limit 1`
     const [roast] = await sql<any[]>`select text from interactions where prospect_id=${o.prospect_id} and channel in ('roast','x') and direction='out' order by created_at desc limit 1`
     if (!ad?.creative_url) throw new Error(`fulfill ${o.id}: no ad creative_url for prospect ${o.prospect_id}`)
-    r = await deps.fix({ image: ad.creative_url, brand: p?.name || 'your brand', roast: roast?.text ?? null })
+    const variants = o.tier === 12 ? 3 : 1 // $12 A/B pack = 3 distinct creatives; $5 = 1
+    r = await deps.fix({ image: ad.creative_url, brand: p?.name || 'your brand', roast: roast?.text ?? null, variants })
     // persist the generation + book the cost ONCE, before delivery — so a retry reuses this and never re-spends
-    await sql`insert into fixes (order_id, headline, body, cta, image_url) values (${o.id}, ${r.headline}, ${r.body}, ${r.cta}, ${r.imageUrl})
-              on conflict (order_id) do update set headline=excluded.headline, body=excluded.body, cta=excluded.cta, image_url=excluded.image_url`
-    await sql`insert into ledger (kind, amount_cents, note) values ('cost', 6, ${'creative fix order ' + o.id + ' (est)'})` // revenue is the webhook's
+    await sql`insert into fixes (order_id, headline, body, cta, image_url, variants)
+              values (${o.id}, ${r.headline}, ${r.body}, ${r.cta}, ${r.imageUrls[0]}, ${sql.json({ images: r.imageUrls })})
+              on conflict (order_id) do update set headline=excluded.headline, body=excluded.body, cta=excluded.cta, image_url=excluded.image_url, variants=excluded.variants`
+    await sql`insert into ledger (kind, amount_cents, note) values ('cost', ${6 * r.imageUrls.length}, ${'creative fix order ' + o.id + ' (est)'})` // ~6¢/image; revenue is the webhook's
   }
 
   // DELIVER — public X reply into the roast thread, else email. (Persist-before-deliver above keeps retries free.)
   if (viaX) {
-    const caption = `${r.headline} — ${r.cta}. your $5 fix, live 👇`
-    const posted = await deps.xreply({ text: caption, imageUrl: r.imageUrl, replyToTweetId: roastTweetId!, handle: p?.x_handle ?? null })
-    console.log(`[fulfill] order ${o.id} → fix replied on X: ${posted.url}`)
+    const ctaNote = r.cta ? ` Set your Meta CTA button to "${r.cta}".` : ''
+    const multi = r.imageUrls.length > 1
+    const lead = multi ? `${r.headline} — ${r.imageUrls.length} variants to A/B test.` : r.headline
+    const caption = `${lead}${ctaNote} ${multi ? 'your A/B pack' : 'your $5 fix'}, live 👇`
+    const posted = await deps.xreply({ text: caption, imageUrls: r.imageUrls, replyToTweetId: roastTweetId!, handle: p?.x_handle ?? null })
+    console.log(`[fulfill] order ${o.id} → fix replied on X (${r.imageUrls.length} img): ${posted.url}`)
   } else {
+    const imgsBlock = r.imageUrls.length > 1
+      ? `READY-TO-RUN CREATIVES (A/B test these):\n${r.imageUrls.join('\n')}`
+      : `READY-TO-RUN CREATIVE:\n${r.imageUrls[0]}`
     const body =
       `Your fixed ad is ready. The creative goes in Meta's image slot; the copy below goes in the native fields (don't paste it onto the image too).\n\n` +
-      `HEADLINE\n${r.headline}\n\nPRIMARY TEXT\n${r.body}\n\nCTA\n${r.cta}\n\nREADY-TO-RUN CREATIVE:\n${r.imageUrl}\n\n` +
+      `HEADLINE\n${r.headline}\n\nPRIMARY TEXT\n${r.body}\n\nCTA (pick this label in Meta's button dropdown)\n${r.cta}\n\n${imgsBlock}\n\n` +
       (r.fixed.length ? `What I fixed:\n- ${r.fixed.join('\n- ')}\n\n` : '') + `— Chad`
     await deps.send({ to: o.buyer_email, subject: 'Your fixed ad is ready', body })
   }
 
   await sql`update fixes set delivered_at=now() where order_id=${o.id}` // mark delivered right after → a later hiccup can't re-deliver
   await sql`insert into interactions (prospect_id, channel, direction, ref, text)
-            values (${o.prospect_id}, 'fix', 'out', ${r.imageUrl}, ${r.headline + ' — ' + r.cta})` // ref=image keeps the /live thumbnail
+            values (${o.prospect_id}, 'fix', 'out', ${r.imageUrls[0]}, ${r.headline + ' — ' + r.cta})` // ref=image keeps the /live thumbnail
   await sql`update prospects set stage='customer' where id=${o.prospect_id}`
   return 'delivered'
 }
@@ -74,7 +83,7 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
 /** Drain every unfulfilled paid order. Single worker → sequential → no double-send. Returns count delivered. */
 export async function fulfillPaidOrders(deps: Deps = DEFAULT): Promise<number> {
   const orders = await sql<any[]>`select o.id from orders o
-    where o.status='paid' and o.tier=5 and not exists (select 1 from fixes fx where fx.order_id=o.id and fx.delivered_at is not null)
+    where o.status='paid' and o.tier in (5, 12) and not exists (select 1 from fixes fx where fx.order_id=o.id and fx.delivered_at is not null)
     order by o.created_at asc`
   let n = 0
   for (const o of orders) {
