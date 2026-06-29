@@ -74,6 +74,8 @@ create table if not exists control (
 alter table prospects add column if not exists email_source text;  -- scraped | guessed
 alter table prospects add column if not exists stage text default 'new';  -- new→roasted→contacted→replied→customer
 alter table fixes add column if not exists image_url text;          -- generated ad creative
+-- one fix per order = the fulfillment idempotency key (deterministic worker upserts on it)
+create unique index if not exists fixes_order_id_uniq on fixes (order_id);
 
 -- every inbound/outbound touch (X post, reply, DM, email) — the agent's CRM history
 create table if not exists interactions (
