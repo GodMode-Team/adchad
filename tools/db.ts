@@ -17,6 +17,8 @@ export function interactionEvent(i: any): any | null {
     return { ts: i.created_at, kind: 'email', icon: '📧', title: `Emailed ${who}` }
   if (i.channel === 'fix') // image is viewer-fetched — require https to block http tracking / mixed content
     return { ts: i.created_at, kind: 'fix', icon: '✅', title: `Delivered fix to ${who}`, image: i.ref && String(i.ref).startsWith('https://') ? i.ref : undefined, link: i.link_url ? String(i.link_url) : undefined }
+  if (i.channel === 'retainer' && i.direction === 'out') // $49/mo retainer signed (only live-mode rows are ever written)
+    return { ts: i.created_at, kind: 'hired', icon: '💼', title: `${who} put Chad on retainer — $49/mo` }
   return null // channel='note'/out (internal reasoning) and anything else: not shown
 }
 
@@ -30,12 +32,12 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
         (select count(*) from prospects where stage='contacted')::int  as contacted,
         (select count(*) from prospects where stage='replied')::int    as replied,
         (select count(*) from prospects where stage='customer')::int   as customers,
-        (select count(*) from orders where status='paid')::int         as orders_paid,
-        (select coalesce(sum(amount),0) from orders where status='paid')::int as revenue_cents`
+        (select count(*) from orders where status='paid' and coalesce(livemode,true))::int         as orders_paid,
+        (select coalesce(sum(amount),0) from orders where status='paid' and coalesce(livemode,true))::int as revenue_cents`
       return m
     }
     case 'ledger': {
-      const [rev] = await sql`select coalesce(sum(amount_cents),0)::int c from ledger where kind='revenue'`
+      const [rev] = await sql`select coalesce(sum(amount_cents),0)::int c from ledger where kind='revenue' and coalesce(livemode,true)`
       const [cost] = await sql`select coalesce(sum(amount_cents),0)::int c from ledger where kind='cost'`
       return { revenue_cents: rev.c, cost_cents: cost.c, margin_cents: rev.c - cost.c }
     }
@@ -186,7 +188,7 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
             (select total from scores s where s.ad_id = i.ad_id order by s.created_at desc limit 1) as score
           from interactions i left join prospects p on p.id = i.prospect_id
           order by i.created_at desc limit 50`,
-        sql<any[]>`select created_at, kind, amount_cents, note from ledger order by created_at desc limit 50`,
+        sql<any[]>`select created_at, kind, amount_cents, note from ledger where coalesce(livemode,true) order by created_at desc limit 50`,
         run('metrics', {}),
         run('ledger', {}),
       ])

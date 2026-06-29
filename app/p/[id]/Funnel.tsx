@@ -81,8 +81,24 @@ export default function Funnel({ data, paid, id, initialStep }: { data: any; pai
   const tier = bump ? 12 : 5
   const checkoutHref = `/api/checkout?p=${encodeURIComponent(id)}&tier=${tier}`
 
-  // Thank-you page state: the $49 upsell decline + this order's fix status (polled → swaps the placeholder for the tweet).
+  // Thank-you page state: the $49 upsell decline/hire + this order's fix status (polled → swaps the placeholder for the tweet).
   const [declined, setDeclined] = useState(false)
+  const [hired, setHired] = useState(false)
+  const [hiring, setHiring] = useState(false)
+  // hosted-Checkout fallback returns to ?hired=1 — land them straight on the "great choice" state.
+  useEffect(() => { if (new URLSearchParams(window.location.search).get('hired') === '1') setHired(true) }, [])
+  // One-click hire: charge the saved card; if there's no usable card / SCA, Stripe Checkout takes over.
+  async function hireChadNow() {
+    if (hiring) return
+    setHiring(true)
+    try {
+      const r = await fetch(`/api/upsell?p=${encodeURIComponent(id)}`, { method: 'POST' })
+      const d = await r.json()
+      if (d?.status === 'subscribed' || d?.status === 'already') setHired(true)
+      else if (d?.url) window.location.assign(d.url)
+      else setHiring(false)
+    } catch { setHiring(false) }
+  }
   const [fix, setFix] = useState<{ delivered: boolean; tweetUrl?: string | null; image?: string | null; headline?: string | null; body?: string | null; cta?: string | null; name?: string | null }>({ delivered: false })
   const tweetId = fix.tweetUrl ? fix.tweetUrl.match(/status\/(\d+)/)?.[1] ?? null : null
 
@@ -250,39 +266,54 @@ export default function Funnel({ data, paid, id, initialStep }: { data: any; pai
   }
 
   // ============================ DONE (paid=1) ============================
-  const upsellHref = `/api/checkout?p=${encodeURIComponent(id)}&tier=49`
   return (
     <Shell>
       <div style={{ flex: 1, overflowY: 'auto', background: 'var(--yellow)' }}>
 
-        {/* A — payment + upsell video (green) */}
+        {/* A — payment + upsell video (green). Once hired, the video goes away. */}
         <Band bg="var(--green)">
           <div style={{ fontFamily: 'var(--f-display)', fontSize: 40, lineHeight: 0.9, color: 'var(--ink)' }}>PAYMENT RECEIVED.</div>
-          <video
-            src="https://teaser-page-virid.vercel.app/adchad-upsell.mp4"
-            controls autoPlay muted playsInline
-            style={{ width: '100%', display: 'block', borderRadius: 14, border: '3px solid var(--ink)', boxShadow: '6px 6px 0 var(--ink)', background: '#000' }}
-          />
+          {!hired && (
+            <video
+              src="https://teaser-page-virid.vercel.app/adchad-upsell.mp4"
+              controls autoPlay muted playsInline
+              style={{ width: '100%', display: 'block', borderRadius: 14, border: '3px solid var(--ink)', boxShadow: '6px 6px 0 var(--ink)', background: '#000' }}
+            />
+          )}
         </Band>
 
-        {/* B — the pitch + Yes/No (pink) */}
+        {/* B — the pitch + Yes/No (pink). Hire → "great choice" + the intake form. */}
         <Band bg="var(--pink)">
-          <div style={{ fontFamily: 'var(--f-heavy)', fontSize: 19, lineHeight: 1.2, color: '#fff' }}>
-            By the time you finish watching this video, your ad will be ready.
-          </div>
-          {declined ? (
-            <a href={upsellHref} style={{ fontFamily: 'var(--f-mono)', fontSize: 13, fontWeight: 700, color: '#fff' }}>
-              💀 enjoy the losses — changed your mind? Hire Chad, $49/mo →
-            </a>
-          ) : (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-              <a href={upsellHref} style={{ flex: '1 1 240px', textAlign: 'center', background: 'var(--yellow)', border: '4px solid var(--ink)', borderRadius: 14, padding: '15px 16px', boxShadow: '4px 4px 0 var(--ink)', fontFamily: 'var(--f-bungee)', fontSize: 17, color: 'var(--ink)' }}>
-                Hire Chad now for $49/mo
+          {hired ? (
+            <>
+              <div style={{ fontFamily: 'var(--f-display)', fontSize: 34, lineHeight: 0.92, color: '#fff' }}>GREAT CHOICE.</div>
+              <div style={{ fontFamily: 'var(--f-heavy)', fontSize: 18, lineHeight: 1.3, color: '#fff' }}>
+                Fill out this form and I&apos;ll get started. You can expect your first report a week from filling out the form.
+              </div>
+              <a href={`/onboard/${encodeURIComponent(id)}`} style={{ display: 'inline-block', textAlign: 'center', background: 'var(--yellow)', border: '4px solid var(--ink)', borderRadius: 14, padding: '15px 22px', boxShadow: '4px 4px 0 var(--ink)', fontFamily: 'var(--f-bungee)', fontSize: 18, color: 'var(--ink)' }}>
+                FILL OUT THE FORM →
               </a>
-              <button onClick={() => setDeclined(true)} style={{ flex: '1 1 240px', cursor: 'pointer', textAlign: 'center', background: 'transparent', border: '3px solid #fff', borderRadius: 14, padding: '15px 16px', fontFamily: 'var(--f-mono)', fontWeight: 700, fontSize: 14, color: '#fff' }}>
-                No thanks, I enjoy losing money
-              </button>
-            </div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontFamily: 'var(--f-heavy)', fontSize: 19, lineHeight: 1.2, color: '#fff' }}>
+                By the time you finish watching this video, your ad will be ready.
+              </div>
+              {declined ? (
+                <button onClick={hireChadNow} disabled={hiring} style={{ cursor: hiring ? 'wait' : 'pointer', background: 'none', border: 0, padding: 0, fontFamily: 'var(--f-mono)', fontSize: 13, fontWeight: 700, color: '#fff', textAlign: 'left' }}>
+                  💀 enjoy the losses — changed your mind? Hire Chad, $49/mo →
+                </button>
+              ) : (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                  <button onClick={hireChadNow} disabled={hiring} style={{ flex: '1 1 240px', cursor: hiring ? 'wait' : 'pointer', textAlign: 'center', background: 'var(--yellow)', border: '4px solid var(--ink)', borderRadius: 14, padding: '15px 16px', boxShadow: '4px 4px 0 var(--ink)', fontFamily: 'var(--f-bungee)', fontSize: 17, color: 'var(--ink)' }}>
+                    {hiring ? 'one sec…' : 'Hire Chad now for $49/mo'}
+                  </button>
+                  <button onClick={() => setDeclined(true)} style={{ flex: '1 1 240px', cursor: 'pointer', textAlign: 'center', background: 'transparent', border: '3px solid #fff', borderRadius: 14, padding: '15px 16px', fontFamily: 'var(--f-mono)', fontWeight: 700, fontSize: 14, color: '#fff' }}>
+                    No thanks, I enjoy losing money
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </Band>
 
