@@ -230,6 +230,11 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
                 <div style={{ fontFamily: 'var(--f-bungee)', color: 'var(--ink)' }}>→</div>
                 <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, fontWeight: 700, color: 'var(--ink)' }}>your fix is cooking…</div>
               </div>
+              {/* watch the order get worked on, live */}
+              <a href="https://adchad.ai/live" style={{ display: 'inline-flex', alignItems: 'center', gap: 9, marginTop: 22, background: 'var(--ink)', border: '3px solid var(--green)', borderRadius: 12, padding: '12px 16px', boxShadow: '4px 4px 0 var(--green)' }}>
+                <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#ff5a5a', flex: 'none', animation: 'livedot 1.2s ease-in-out infinite' }} />
+                <span style={{ fontFamily: 'var(--f-bungee)', fontSize: 14, color: 'var(--yellow)' }}>WATCH CHAD BUILD IT — LIVE →</span>
+              </a>
             </div>
 
             {/* RIGHT — their OLD ad, marked for death */}
