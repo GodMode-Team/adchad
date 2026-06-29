@@ -5,14 +5,14 @@ import { fulfillOrder } from '../../tools/fulfill'
 // Live DB, no mocks (house style). fix()/send() are injected stubs so the money-path tests neither spend on
 // gpt-image-2 nor send real email. We drive fulfillOrder(id) directly (not the global drain) so the live suite
 // can't accidentally stub-fulfill a real pending order.
-async function seed(pid: string) {
+async function seed(pid: string, tier = 5) {
   await migrate()
   await sql`insert into prospects (id, name, email, stage) values (${pid}, 'Test Co', 'buyer@example.com', 'web') on conflict (id) do nothing`
   await sql`insert into ads (id, brand_id, creative_url) values (${pid + '-ad'}, ${pid}, 'https://example.com/orig.png') on conflict (id) do nothing`
   await sql`insert into interactions (prospect_id, channel, direction, text) values (${pid}, 'roast', 'out', 'brutal roast text')`
   const [o] = await sql<any[]>`insert into orders (prospect_id, tier, stripe_id, buyer_email, amount, status)
-    values (${pid}, 5, ${'sess_' + pid}, 'buyer@example.com', 500, 'paid') returning id`
-  await sql`insert into ledger (kind, amount_cents, note) values ('revenue', 500, ${'order sess_' + pid})` // webhook books revenue
+    values (${pid}, ${tier}, ${'sess_' + pid}, 'buyer@example.com', ${tier * 100}, 'paid') returning id`
+  await sql`insert into ledger (kind, amount_cents, note) values ('revenue', ${tier * 100}, ${'order sess_' + pid})` // webhook books revenue
   return o.id as number
 }
 async function cleanup(pid: string, orderId: number) {
@@ -75,5 +75,24 @@ describe('fulfill — a failed send does not re-pay for generation', () => {
     expect(cost.length).toBe(1) // cost booked once
     const [fx] = await sql<any[]>`select delivered_at from fixes where order_id=${orderId}`
     expect(fx.delivered_at).toBeTruthy()
+  })
+})
+
+describe('fulfill — only the $5 single fix is auto-fulfilled', () => {
+  const pid = 'test-fulfill-49-' + Date.now()
+  let orderId: number
+  let sendCalled = false
+  const stub: any = {
+    fix: async () => ({ imageUrl: '', headline: '', body: '', cta: '', fixed: [] }),
+    send: async () => { sendCalled = true; return { id: 'x' } },
+  }
+  beforeAll(async () => { orderId = await seed(pid, 49) }, 30_000) // a $49 subscription order
+  afterAll(async () => { await cleanup(pid, orderId) })
+
+  it('skips a $49 subscription order — no fix, no email', async () => {
+    expect(await fulfillOrder(orderId, stub)).toBe('skipped')
+    expect(sendCalled).toBe(false)
+    const fx = await sql<any[]>`select * from fixes where order_id=${orderId}`
+    expect(fx.length).toBe(0)
   })
 })

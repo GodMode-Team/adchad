@@ -154,6 +154,33 @@ export default async function Home() {
         </div>
       </div>
 
+      {/* ===== CHAD ON RETAINER ($49/mo) ===== */}
+      <div style={{ background: INK, borderBottom: `4px solid ${INK}` }}>
+        <div style={{ ...wrap, padding: '60px 22px', display: 'flex', gap: 34, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 300 }}>
+            <div style={{ display: 'inline-block', transform: 'rotate(-2deg)', background: GREEN, color: INK, fontFamily: F_MONO, fontWeight: 700, fontSize: 12, letterSpacing: 1, padding: '5px 12px', marginBottom: 16 }}>{"FOR WHEN ONE FIX ISN'T ENOUGH"}</div>
+            <div style={{ fontFamily: F_DISPLAY, fontSize: 54, color: '#fff', lineHeight: 0.9 }}>CHAD ON <span style={{ color: GREEN }}>RETAINER.</span></div>
+            <div style={{ fontFamily: F_SANS, fontSize: 16, color: '#9fb0a0', marginTop: 12, maxWidth: 430 }}>I don&apos;t hand you weekly creative. I watch your money — and your competitors.</div>
+          </div>
+          <div style={{ flex: 'none', width: 360, background: 'var(--card)', border: '4px solid #fff', boxShadow: `7px 7px 0 ${GREEN}`, borderRadius: 16, padding: 22 }}>
+            <div style={{ fontFamily: F_BUNGEE, fontSize: 40, color: '#fff' }}>$49<span style={{ fontFamily: F_MONO, fontSize: 14, color: '#9fb0a0' }}>/mo</span></div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
+              {([
+                ['🛡️', 'Spend protection', 'I watch your ads so you stop lighting money on fire.'],
+                ['🔭', 'Competitor intel', 'Who you’re up against, and exactly where they’re weak.'],
+                ['💰', 'Money saved', 'Monthly receipts on what I kept in your pocket.'],
+              ] as [string, string, string][]).map(([icon, t, d]) => (
+                <div key={t} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: 18, lineHeight: 1.2 }}>{icon}</span>
+                  <div style={{ fontFamily: F_SANS, fontSize: 13.5, lineHeight: 1.35 }}><b style={{ color: '#fff' }}>{t}</b> <span style={{ color: '#9fb0a0' }}>{d}</span></div>
+                </div>
+              ))}
+            </div>
+            <a className="ac-price-cta" href="/api/checkout?tier=49" style={{ display: 'block', textAlign: 'center', marginTop: 18, fontFamily: F_BUNGEE, fontSize: 16, color: INK, background: GREEN, border: '3px solid #fff', boxShadow: `4px 4px 0 ${INK}`, padding: '13px 18px' }}>PUT CHAD ON RETAINER →</a>
+          </div>
+        </div>
+      </div>
+
       {/* ===== FINAL CTA ===== */}
       <div style={{ background: PINK, borderBottom: `4px solid ${INK}`, position: 'relative', overflow: 'hidden' }}>
         <div style={{ ...wrap, padding: '70px 22px', textAlign: 'center', position: 'relative' }}>
