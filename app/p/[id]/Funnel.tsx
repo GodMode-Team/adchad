@@ -46,22 +46,10 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
   const tier = bump ? 12 : 5
   const checkoutHref = `/api/checkout?p=${encodeURIComponent(id)}&tier=${tier}`
 
-  const shell = {
-    maxWidth: 440,
-    margin: '0 auto',
-    minHeight: '100dvh',
-    display: 'flex',
-    flexDirection: 'column',
-    background: 'var(--green)',
-    color: 'var(--ink)',
-    position: 'relative',
-    overflow: 'hidden',
-  } as const
-
   // ============================ ROAST ============================
   if (step === 'roast') {
     return (
-      <main style={shell}>
+      <main className="fnl-shell">
         <Marquee color="var(--pink)" text={` EXHIBIT A ● I PULLED ${name.toUpperCase()}'S LIVE AD ● IT'S BAD ● ${scoreStr} ● `} />
         <div style={{ flex: 1, padding: '22px 20px 24px' }}>
           <div
@@ -150,7 +138,7 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
   // ============================ PAYWALL ============================
   if (step === 'paywall') {
     return (
-      <main style={shell}>
+      <main className="fnl-shell">
         <Marquee color="var(--yellow)" seconds={12} text=" THE FIX ● I ALREADY FIXED IT ● UNLOCK $5 ● NEW HEADLINE + CREATIVE ● " />
         <div style={{ flex: 1, overflowY: 'auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 18px 0' }}>
@@ -231,7 +219,7 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
 
   // ============================ DONE (paid=1) ============================
   return (
-    <main style={shell}>
+    <main className="fnl-shell">
       <div style={{ height: 44, flex: 'none', background: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--f-bungee)', fontSize: 18, color: 'var(--yellow)' }}>
         FIX DEPLOYED 💪
       </div>

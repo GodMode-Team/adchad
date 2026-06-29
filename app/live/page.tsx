@@ -87,7 +87,7 @@ export default function Live() {
 
   return (
     <div style={{ minHeight: '100vh', width: '100%', background: 'radial-gradient(circle at 50% -8%, #16271b, #0a0c0a 68%)', display: 'flex', justifyContent: 'center', padding: '14px 12px 60px', fontFamily: 'var(--f-sans)' }}>
-      <div style={{ width: '100%', maxWidth: 474, display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className="live-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
         {/* ===== HEADER ===== */}
         <div style={{ border: '2px solid #1f2a1f', borderRadius: 20, overflow: 'hidden', background: '#0f140f' }}>
