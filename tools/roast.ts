@@ -1,5 +1,5 @@
-// The roast voice = Caleb's prompt, VERBATIM. Nothing added. Grok isn't multimodal on OpenRouter, so we SEE the
-// ad with the vision model and hand Grok the screenshot's contents — savage AND truthful, no extra rules.
+// The savage roast voice = Caleb's prompt, VERBATIM; a second voice coaches genuinely-good ads (feedback + another
+// angle). Grok isn't multimodal on OpenRouter, so we SEE the ad with vision and hand Grok the screenshot's contents.
 import { describe, type AdLook } from './vision'
 
 const MODEL = process.env.MODEL_ROAST || 'x-ai/grok-4.3'
@@ -23,6 +23,33 @@ Output format for every roast:
 3. **Body:**
 
 Stay in character at all times. Be meaner when the ad deserves it.`
+
+const GOOD_AD = 70 // vision score at/above which the ad is genuinely strong → coach it, don't fake-roast it
+
+const SYSTEM_GOODAD = `You are AdChad — a brutally direct, zero-fucks jacked ad expert. THIS ad is actually good, so do NOT roast it (faking a takedown on a solid ad makes you look like a clueless hater). Respect the work, then make it sharper.
+
+Rules you follow every time:
+- Open by naming what genuinely WORKS about THIS specific ad — the hook, the proof, the offer, the clarity (be specific, not generic praise).
+- Give ONE real, expert improvement that would lift it further.
+- Then pitch "here's another angle" — a concrete alternative hook or creative direction worth testing.
+- Stay in Chad's confident voice: the expert who can always find an edge, never a hater.
+- No insults or hating — this ad earned genuine respect.
+- End every X post with "Want Chad to build you that angle? $5."
+
+Output format for every reply:
+1. **X Post:** (ready to copy-paste with the ad)
+2. **Email subject:**
+3. **Body:**
+
+Stay in character. Confident, generous, sharp.`
+
+/** Caleb's rule: don't fake-roast a good ad. Pick the voice from the ad's quality — a weak ad (score < 70) gets
+ *  the savage roast; a genuinely strong one gets respect + one real improvement + another angle to test. */
+export function roastBrief(look: AdLook): { system: string; instruction: string } {
+  return look.score >= GOOD_AD
+    ? { system: SYSTEM_GOODAD, instruction: `This ad is genuinely strong (${look.score}/100). Don't roast it — respect what works, give one real improvement, then pitch another angle to test.` }
+    : { system: SYSTEM, instruction: 'Roast this ad.' }
+}
 
 export type Roast = { xPost: string; emailSubject: string; emailBody: string; raw: string; score: number; verdict: string }
 
@@ -54,10 +81,11 @@ export async function roast(opts: { image: string; handle?: string | null; brand
     `- Social proof: ${look.social_proof ?? 'none visible'}\n` +
     `- Visual: ${look.visual ?? '—'}\n` +
     `- Real weaknesses: ${(look.real_flaws ?? []).join('; ') || '—'}`
+  const brief = roastBrief(look)
   const ctx =
     `Business: ${opts.brand || 'this business'}.` +
     (opts.handle ? ` Their X handle is @${opts.handle}.` : ` They have no public X handle — open with a savage descriptor instead of an @handle.`) +
-    `\n\n${ad}\n\nRoast this ad.`
+    `\n\n${ad}\n\n${brief.instruction}`
 
   const t1 = Date.now()
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -67,7 +95,7 @@ export async function roast(opts: { image: string; handle?: string | null; brand
       model: MODEL,
       temperature: 0.9,
       messages: [
-        { role: 'system', content: SYSTEM },
+        { role: 'system', content: brief.system },
         { role: 'user', content: ctx },
       ],
     }),
