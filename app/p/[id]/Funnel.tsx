@@ -84,9 +84,64 @@ function AdCard({ name, copy, creative, controls = false }: { name: string; copy
   )
 }
 
-export default function Funnel({ data, paid, id }: { data: any; paid: boolean; id: string }) {
+// The crude meme cast Chad has "unfucked" — drawn as inline SVG so the jank is the brand (a polished portrait would be
+// the slop he roasts). Each lives inside a pink avatar disc so the testimonial cards read like real review profiles.
+type MemeKind = 'wojak' | 'soyjak' | 'npc'
+function MemeFace({ kind }: { kind: MemeKind }) {
+  const faces: Record<MemeKind, ReactNode> = {
+    // the Virgin / Wojak — melancholic, bald, simple frown
+    wojak: (
+      <>
+        <path d="M13 22 q19 -13 38 0" fill="none" stroke="#111" strokeWidth="2.4" strokeLinecap="round" />
+        <ellipse cx="32" cy="35" rx="20" ry="24" fill="#efe0d2" stroke="#111" strokeWidth="2.4" />
+        <circle cx="24" cy="31" r="2.3" fill="#111" />
+        <circle cx="40" cy="31" r="2.3" fill="#111" />
+        <path d="M32 33 l-2 9 q2 2 4 0" fill="none" stroke="#111" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M24 49 q8 5 16 0" fill="none" stroke="#111" strokeWidth="2.4" strokeLinecap="round" />
+      </>
+    ),
+    // the Soyjak — round glasses, gaping excited mouth, patchy scruff
+    soyjak: (
+      <>
+        <ellipse cx="32" cy="34" rx="20" ry="24" fill="#f0ddc9" stroke="#111" strokeWidth="2.4" />
+        <circle cx="24" cy="30" r="6" fill="#fff" stroke="#111" strokeWidth="2" />
+        <circle cx="40" cy="30" r="6" fill="#fff" stroke="#111" strokeWidth="2" />
+        <line x1="30" y1="30" x2="34" y2="30" stroke="#111" strokeWidth="2" />
+        <circle cx="24" cy="30" r="1.6" fill="#111" />
+        <circle cx="40" cy="30" r="1.6" fill="#111" />
+        <ellipse cx="32" cy="46" rx="5" ry="6.5" fill="#7a2233" stroke="#111" strokeWidth="2" />
+        <path d="M19 41 q13 11 26 0" fill="none" stroke="#111" strokeWidth="1" strokeDasharray="1.5 3" />
+      </>
+    ),
+    // the NPC — featureless gray blockhead, dead-flat mouth
+    npc: (
+      <>
+        <rect x="13" y="11" width="38" height="44" rx="9" fill="#b9bdc2" stroke="#111" strokeWidth="2.4" />
+        <circle cx="25" cy="30" r="2.3" fill="#111" />
+        <circle cx="39" cy="30" r="2.3" fill="#111" />
+        <line x1="25" y1="43" x2="39" y2="43" stroke="#111" strokeWidth="2.4" strokeLinecap="round" />
+      </>
+    ),
+  }
+  return (
+    <div style={{ width: 50, height: 50, flex: 'none', borderRadius: '50%', background: 'var(--pink)', border: '2.5px solid var(--ink)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg viewBox="0 0 64 64" width="44" height="44" aria-hidden="true">{faces[kind]}</svg>
+    </div>
+  )
+}
+
+// Obviously-fake testimonials — the joke is that they're transparently fake (names, specifics, the looping NPC).
+// Real social proof at the payment moment, played as a bit. Earnest-dumb customers contrast with Chad's deadpan.
+const TESTIMONIALS: { kind: MemeKind; quote: string; name: string; tag: string }[] = [
+  { kind: 'wojak', quote: 'chad called my ad dogshit, then made it not dogshit. my wife came back.', name: 'Greg', tag: 'definitely a real plumber' },
+  { kind: 'soyjak', quote: 'BEST FIVE DOLLARS IVE EVER SPENT AND I SPEND A LOT OF FIVE DOLLARS', name: 'a verified buyer', tag: '(probably)' },
+  { kind: 'npc', quote: '5 stars. i have no other thoughts. i have no other thoughts. i have no oth', name: 'NPC #4417', tag: 'left a review' },
+]
+
+export default function Funnel({ data, paid, id, initialStep }: { data: any; paid: boolean; id: string; initialStep?: Step }) {
   // If they're back from Stripe (?paid=1), drop them straight on the celebration screen.
-  const [step, setStep] = useState<Step>(paid ? 'done' : 'roast')
+  // initialStep lets a preview route land directly on any step.
+  const [step, setStep] = useState<Step>(initialStep ?? (paid ? 'done' : 'roast'))
   const [bump, setBump] = useState(false)
 
   const score: number | null = data.score ?? null
@@ -195,69 +250,141 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
     )
   }
 
-  // ============================ PAYWALL ============================
+  // ============================ PAYWALL (the checkout) ============================
   if (step === 'paywall') {
+    // Itemized so it reads like a register: the bump adds a real line + ticks the total.
+    const lineItems: [string, string][] = [['the $5 unfuck', '$5.00']]
+    if (bump) lineItems.push(['+2 A/B variants', '$7.00'])
+    const checks = ['new headline, body & CTA', 'a ready-to-use HD generated ad image', 'ready in ~2 minutes']
     return (
       <Shell>
         <Marquee color="var(--yellow)" seconds={12} text=" THE FIX ● I ALREADY FIXED IT ● UNLOCK $5 ● NEW HEADLINE + CREATIVE ● " />
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg)' }}>{/* black scroll bg so the dark band reads to the very bottom on tall screens; the band also carries the mobile CTA-bar clearance */}
+          <div style={{ background: 'var(--green)' }}>{/* the green upper page; the dark before/after band sits below it */}
           <div style={{ ...PAGE, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px 0' }}>
             <button onClick={() => setStep('roast')} style={{ border: 0, background: 'none', cursor: 'pointer', fontFamily: 'var(--f-mono)', fontSize: 12, color: '#04210d', fontWeight: 700 }}>‹ back to roast</button>
             <div style={{ fontFamily: 'var(--f-heavy)', fontSize: 13, color: '#0a5c22' }}>ADCHAD</div>
           </div>
 
-          <div style={{ ...PAGE, padding: '12px 20px 28px' }}>
-            <div style={{ fontFamily: 'var(--f-display)', fontSize: 50, lineHeight: 0.9, color: 'var(--ink)' }}>
-              I ALREADY <span style={{ background: 'var(--yellow)', padding: '0 8px', border: '3px solid var(--ink)', boxShadow: '4px 4px 0 var(--ink)' }}>FIXED IT.</span>
+          <div style={{ ...PAGE, padding: '14px 20px 30px' }}>
+            <div style={{ ...ROW, gap: 24, alignItems: 'stretch' }}>
+              {/* LEFT — THE CHECKOUT (the star; the only big headline lives here now — no duplicate up top) */}
+              <div style={{ flex: '1.45 1 380px', minWidth: 0 }}>
+                <div style={{ background: '#fff', border: '3px solid var(--ink)', borderRadius: 18, boxShadow: '7px 7px 0 var(--ink)', padding: '24px 24px 22px' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px 14px', fontFamily: 'var(--f-display)', fontSize: 'clamp(36px, 5vw, 50px)', lineHeight: 1, color: 'var(--ink)' }}>
+                    <span>THE</span>
+                    <span style={{ background: 'var(--yellow)', padding: '7px 14px 9px', border: '3px solid var(--ink)', boxShadow: '4px 4px 0 var(--ink)' }}>$5 UNFUCK</span>
+                  </div>
+                  <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12.5, color: '#5a5d61', marginTop: 13 }}>
+                    one rebuilt ad: new copy, a new hook &amp; a fresh creative. delivered instantly.
+                  </div>
+
+                  {/* what you get */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, margin: '20px 0 2px' }}>
+                    {checks.map((t) => (
+                      <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ width: 21, height: 21, flex: 'none', borderRadius: 6, background: 'var(--green)', border: '2px solid var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 12, color: 'var(--ink)' }}>✓</span>
+                        <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--ink)' }}>{t}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* order bump */}
+                  <button onClick={() => setBump((b) => !b)} style={{ width: '100%', textAlign: 'left', marginTop: 18, cursor: 'pointer', border: '2px dashed var(--ink)', borderRadius: 12, padding: 14, display: 'flex', gap: 11, alignItems: 'center', background: bump ? '#fff19a' : '#fffdf2' }}>
+                    <div style={{ width: 24, height: 24, borderRadius: 6, border: '2px solid var(--ink)', flex: 'none', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {bump && <span style={{ color: '#1f9c3a', fontWeight: 900, fontSize: 17 }}>✓</span>}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontFamily: 'var(--f-heavy)', fontSize: 13, color: 'var(--ink)' }}>Add 2 MORE to A/B test <span style={{ color: '#1f9c3a' }}>+$7</span></div>
+                      <div style={{ fontSize: 11, color: '#6b6e00' }}>3 images total. Find your winner faster.</div>
+                    </div>
+                  </button>
+
+                  {/* itemized total — the bit that turns a button into a register */}
+                  <div style={{ borderTop: '2px dashed #cfd3d8', marginTop: 18, paddingTop: 13, display: 'flex', flexDirection: 'column', gap: 7 }}>
+                    {lineItems.map(([label, amt]) => (
+                      <div key={label} style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--f-mono)', fontSize: 13, color: '#3a3d41' }}>
+                        <span>{label}</span><span>{amt}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ borderTop: '2px solid var(--ink)', marginTop: 10, paddingTop: 11, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <span style={{ fontFamily: 'var(--f-heavy)', fontSize: 15, color: 'var(--ink)' }}>TOTAL</span>
+                    <span style={{ fontFamily: 'var(--f-display)', fontSize: 32, color: 'var(--ink)', lineHeight: 1 }}>${tier}.00</span>
+                  </div>
+
+                  <a href={checkoutHref} style={{ display: 'block', textAlign: 'center', marginTop: 16, background: 'var(--yellow)', border: '4px solid var(--ink)', borderRadius: 14, padding: '16px 14px', boxShadow: '5px 5px 0 var(--ink)', fontFamily: 'var(--f-bungee)', fontSize: 24, color: 'var(--ink)', animation: 'throb 2.4s ease-in-out infinite' }}>
+                    TAKE MY ${tier} →
+                  </a>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '3px 10px', marginTop: 12, fontFamily: 'var(--f-mono)', fontSize: 10.5, color: '#5a5d61' }}>
+                    <span>🔒 secured by Stripe</span><span>·</span><span>a % of every sale → Stripe Climate 🌍</span><span>·</span><span>instant, no account</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* RIGHT — testimonials, with Chad peeking up at the bottom to fill the rail + vouch for his (fake) crew */}
+              <div style={{ flex: '1 1 320px', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ fontFamily: 'var(--f-marker)', fontSize: 20, color: 'var(--ink)', transform: 'rotate(-1deg)' }}>people chad has unfucked</div>
+                <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: '#0a5c22', marginTop: 3, marginBottom: 16 }}>★ obviously real reviews from definitely real people ★</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {TESTIMONIALS.map((t) => (
+                    <div key={t.name} style={{ background: '#fff', border: '2px solid var(--ink)', borderRadius: 12, boxShadow: '4px 4px 0 var(--ink)', padding: '15px 16px', display: 'flex', alignItems: 'center', gap: 13 }}>
+                      <MemeFace kind={t.kind} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ color: '#f2b705', fontSize: 12.5, letterSpacing: 1.5 }}>★★★★★</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)', lineHeight: 1.4, marginTop: 3 }}>&ldquo;{t.quote}&rdquo;</div>
+                        <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: '#8a8d91', marginTop: 6 }}><b style={{ color: '#555' }}>{t.name}</b> · {t.tag}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Chad peeking up — fills the rail's dead-space + deadpan vouch for the (obviously fake) reviewers */}
+                <div style={{ marginTop: 'auto', paddingTop: 18, display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', gap: 4, overflow: 'hidden' }}>
+                  <div style={{ fontFamily: 'var(--f-marker)', fontSize: 15, color: 'var(--ink)', transform: 'rotate(-4deg)', paddingBottom: 30, textAlign: 'right', lineHeight: 1.1 }}>↑ real ones.<br />trust me.</div>
+                  <img src="/chad-cutout.png" alt="" style={{ width: 152, flex: 'none', marginBottom: -4, transformOrigin: 'bottom center', animation: 'wobble 3.6s ease-in-out infinite' }} />
+                </div>
+              </div>
             </div>
 
-            {/* before → after — FULL WIDTH, the centerpiece */}
-            <div style={{ marginTop: 24, display: 'flex', alignItems: 'stretch', gap: 14 }}>
-              <div style={{ flex: 1, minWidth: 0, opacity: 0.85 }}>
-                <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: '#7a6c00', marginBottom: 6 }}>YOURS · {score != null ? score : '??'}</div>
-                <div style={{ border: '2px solid var(--ink)', borderRadius: 10, height: 'clamp(150px, 34vw, 330px)', overflow: 'hidden', background: '#fff' }}><Creative url={creative} /></div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', fontFamily: 'var(--f-bungee)', color: 'var(--ink)', fontSize: 22 }}>→</div>
-              <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-                <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: '#1f9c3a', marginBottom: 6 }}>THE FIX · 🔒</div>
-                <div style={{ position: 'relative', border: '2px solid var(--ink)', borderRadius: 10, height: 'clamp(150px, 34vw, 330px)', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', inset: 0, filter: 'blur(11px)' }}>
-                    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 70% 25%, #ffd36e, transparent 55%), linear-gradient(150deg,#13131a 0%,#3a0f24 50%,#ff2d6f 120%)' }} />
-                    <div style={{ position: 'absolute', right: '-8%', bottom: '-12%', width: '46%', height: '64%', borderRadius: '50% 50% 44% 44%', background: 'linear-gradient(160deg,#f6c89a,#caa074)' }} />
-                    <div style={{ position: 'absolute', left: '6%', top: '10%', width: '22%', height: 9, borderRadius: 4, background: 'var(--yellow)' }} />
-                    <div style={{ position: 'absolute', left: '6%', top: '20%', width: '46%', height: 14, borderRadius: 3, background: '#fff' }} />
-                    <div style={{ position: 'absolute', left: '6%', top: '32%', width: '36%', height: 14, borderRadius: 3, background: '#fff' }} />
-                    <div style={{ position: 'absolute', left: '6%', bottom: '10%', width: '40%', height: 18, borderRadius: 8, background: 'var(--green)' }} />
-                  </div>
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <div style={{ fontSize: 30 }}>🔒</div>
-                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: '#fff', background: 'var(--ink)', padding: '4px 10px', borderRadius: 20 }}>unlock for $5</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          </div>{/* end the two-column area */}
+          </div>{/* end the green upper page */}
 
-            {/* what you get → the A/B bump sits RIGHT UNDER the value props (never a separate column) */}
-            <div style={{ marginTop: 26, maxWidth: 560 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 9, alignItems: 'flex-start' }}>
-                <div style={{ transform: 'rotate(-1.5deg)', background: 'var(--yellow)', border: '3px solid var(--ink)', boxShadow: '3px 3px 0 var(--ink)', padding: '7px 11px', fontWeight: 700, fontSize: 13, color: 'var(--ink)' }}>✓ new headline, body &amp; CTA</div>
-                <div style={{ transform: 'rotate(1deg)', background: '#fff', border: '3px solid var(--ink)', boxShadow: '3px 3px 0 var(--pink)', padding: '7px 11px', fontWeight: 700, fontSize: 13, color: 'var(--ink)' }}>✓ a ready-to-use HD generated ad image</div>
-                <div style={{ transform: 'rotate(-1deg)', background: 'var(--pink)', border: '3px solid var(--ink)', boxShadow: '3px 3px 0 var(--ink)', padding: '7px 11px', fontWeight: 700, fontSize: 13, color: '#fff' }}>✓ ready in ~2 minutes</div>
+          {/* BLOCK 2 — full-bleed dark band for contrast: your ad, before → after (coral BAD → green CHAD) */}
+          <div style={{ background: 'var(--bg)' }}>
+            <div style={{ ...PAGE, padding: '38px 20px 90px' }}>
+              <div style={{ fontFamily: 'var(--f-marker)', fontSize: 20, color: '#FFF7E7', transform: 'rotate(-0.6deg)', marginBottom: 4 }}>your ad: before &amp; after</div>
+              <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: '#8a9088', marginBottom: 18 }}>I scored it {score != null ? score : '??'}/100 — then I fixed it. here&apos;s the swap.</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'stretch' }}>
+                {/* BEFORE — their real ad (coral frame = the bad one) */}
+                <div style={{ flex: '1 1 300px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, fontWeight: 700, color: '#ff6f5e' }}>BEFORE · {score != null ? score : '??'}/100</div>
+                  <div style={{ border: '3px solid #ff6f5e', borderRadius: 12, boxShadow: '0 0 22px rgba(255,111,94,.30)', height: 'clamp(180px, 30vw, 280px)', overflow: 'hidden', background: '#fff' }}><Creative url={creative} /></div>
+                </div>
+                {/* AFTER — the locked fix (green frame = chad's fix); the whole panel is the CTA */}
+                <div style={{ flex: '1 1 300px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, fontWeight: 700, color: 'var(--green)' }}>AFTER · THE FIX 🔒</div>
+                  <a href={checkoutHref} style={{ position: 'relative', display: 'block', border: '3px solid var(--green)', borderRadius: 12, boxShadow: '0 0 22px rgba(60,232,74,.30)', height: 'clamp(180px, 30vw, 280px)', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', inset: 0, filter: 'blur(13px)' }}>
+                      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 70% 25%, #ffd36e, transparent 55%), linear-gradient(150deg,#13131a 0%,#3a0f24 50%,#ff2d6f 120%)' }} />
+                      <div style={{ position: 'absolute', right: '-8%', bottom: '-12%', width: '46%', height: '64%', borderRadius: '50% 50% 44% 44%', background: 'linear-gradient(160deg,#f6c89a,#caa074)' }} />
+                      <div style={{ position: 'absolute', left: '6%', top: '12%', width: '24%', height: 10, borderRadius: 4, background: 'var(--yellow)' }} />
+                      <div style={{ position: 'absolute', left: '6%', top: '24%', width: '50%', height: 15, borderRadius: 3, background: '#fff' }} />
+                      <div style={{ position: 'absolute', left: '6%', top: '36%', width: '38%', height: 15, borderRadius: 3, background: '#fff' }} />
+                      <div style={{ position: 'absolute', left: '6%', bottom: '12%', width: '42%', height: 20, borderRadius: 8, background: 'var(--green)' }} />
+                    </div>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                      <div style={{ fontSize: 30 }}>🔒</div>
+                      <div style={{ fontFamily: 'var(--f-bungee)', fontSize: 13, color: 'var(--ink)', background: 'var(--yellow)', border: '3px solid var(--ink)', boxShadow: '3px 3px 0 var(--ink)', padding: '8px 14px', borderRadius: 10 }}>UNLOCK FOR ${tier}</div>
+                    </div>
+                  </a>
+                </div>
               </div>
-              <button onClick={() => setBump((b) => !b)} style={{ width: '100%', textAlign: 'left', marginTop: 16, cursor: 'pointer', border: '2px dashed var(--ink)', borderRadius: 12, padding: 14, display: 'flex', gap: 11, alignItems: 'center', background: '#fff19a' }}>
-                <div style={{ width: 24, height: 24, borderRadius: 6, border: '2px solid var(--ink)', flex: 'none', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {bump && <span style={{ color: '#1f9c3a', fontWeight: 900, fontSize: 17 }}>✓</span>}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: 'var(--f-heavy)', fontSize: 13, color: 'var(--ink)' }}>Add 2 MORE to A/B test <span style={{ color: '#1f9c3a' }}>+$7</span></div>
-                  <div style={{ fontSize: 11, color: '#6b6e00' }}>3 images total. Find your winner faster.</div>
-                </div>
-              </button>
             </div>
           </div>
         </div>
 
-        <CtaBar as="a" href={checkoutHref}>
+        {/* mobile only — a pinned pay bar for when the order card scrolls away (the card's own button covers desktop) */}
+        <CtaBar as="a" href={checkoutHref} className="paywall-ctabar">
           <div style={{ background: 'var(--yellow)', border: '4px solid #fff', borderRadius: 14, padding: 14, textAlign: 'center', boxShadow: '0 0 0 4px var(--ink)', transform: 'rotate(-1deg)', animation: 'throb 2.4s ease-in-out infinite' }}>
             <span style={{ fontFamily: 'var(--f-bungee)', fontSize: 23, color: 'var(--ink)' }}>TAKE MY ${tier}</span>
           </div>
