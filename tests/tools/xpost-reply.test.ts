@@ -18,9 +18,16 @@ describe('xpost — reply + payload assembly', () => {
     expect(buildTweet({ text: 'hi' }, 'media99').media).toEqual({ media_ids: ['media99'] })
   })
 
-  it('truncates over-long text so it fits (handle + link reserved)', () => {
-    const p = buildTweet({ text: 'x'.repeat(400), handle: 'foo', link: 'https://adchad.vercel.app/p/abc' })
-    expect(p.text).toMatch(/…/)
+  it('keeps a full roast intact (Premium long-form, no 280 cut-off)', () => {
+    const p = buildTweet({ text: 'x'.repeat(600), handle: 'foo', link: 'https://adchad.ai/p/abc' })
+    expect(p.text).not.toMatch(/…/) // not truncated
+    expect(p.text).toContain('x'.repeat(600)) // whole roast present
     expect(p.text.startsWith('@foo ')).toBe(true)
+  })
+
+  it('still caps absurdly long text at the Premium limit', () => {
+    const p = buildTweet({ text: 'x'.repeat(26_000) })
+    expect(p.text.length).toBeLessThanOrEqual(25_000)
+    expect(p.text).toMatch(/…/)
   })
 })

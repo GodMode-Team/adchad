@@ -19,7 +19,7 @@ type PostOpts = {
 export function buildTweet(opts: Omit<PostOpts, 'imageUrl'>, mediaId?: string) {
   const tag = opts.handle ? `@${opts.handle} ` : ''
   const link = opts.link ? `\n${opts.link}` : ''
-  const room = 280 - tag.length - 24 // t.co wraps any URL to ~23 chars
+  const room = 25_000 - tag.length - 24 // X Premium long-form (verified @adchadofficial); t.co wraps URLs to ~23 chars — never truncate a normal roast
   const body = opts.text.length > room ? opts.text.slice(0, room - 1).trimEnd() + '…' : opts.text
   return {
     text: `${tag}${body}${link}`,
