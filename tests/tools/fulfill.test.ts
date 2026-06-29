@@ -31,7 +31,7 @@ describe('fulfill — idempotent delivery (run twice → exactly once)', () => {
   let orderId: number
   const sendCalls: any[] = []
   const stub: any = {
-    fix: async () => ({ imageUrl: 'https://example.com/fixed.png', imageUrls: ['https://example.com/fixed.png'], headline: 'H', body: 'B', cta: 'C', fixed: ['x'] }),
+    fix: async () => ({ imageUrl: 'https://example.com/fixed.png', imageUrls: ['https://example.com/fixed.png'], headline: 'H', body: 'B', cta: 'C', fixed: ['x'], cost: 0.06 }),
     send: async (o: any) => { sendCalls.push(o); return { id: 'stub-' + sendCalls.length } },
     ...noX,
   }
@@ -62,7 +62,7 @@ describe('fulfill — a failed send does not re-pay for generation', () => {
   let okSends = 0
   let failOnce = true
   const stub: any = {
-    fix: async () => { fixCalls++; return { imageUrl: 'https://example.com/fixed.png', imageUrls: ['https://example.com/fixed.png'], headline: 'H', body: 'B', cta: 'C', fixed: [] } },
+    fix: async () => { fixCalls++; return { imageUrl: 'https://example.com/fixed.png', imageUrls: ['https://example.com/fixed.png'], headline: 'H', body: 'B', cta: 'C', fixed: [], cost: 0.06 } },
     send: async () => { if (failOnce) { failOnce = false; throw new Error('resend down') } okSends++; return { id: 'ok' } },
     ...noX,
   }
@@ -87,7 +87,7 @@ describe('fulfill — only the $5 single fix is auto-fulfilled', () => {
   let orderId: number
   let sendCalled = false
   const stub: any = {
-    fix: async () => ({ imageUrl: '', imageUrls: [], headline: '', body: '', cta: '', fixed: [] }),
+    fix: async () => ({ imageUrl: '', imageUrls: [], headline: '', body: '', cta: '', fixed: [], cost: 0 }),
     send: async () => { sendCalled = true; return { id: 'x' } },
     ...noX,
   }
@@ -108,7 +108,7 @@ describe('fulfill — delivers via a public X reply when there is a roast tweet'
   const xreplyCalls: any[] = []
   let sendCalls = 0
   const stub: any = {
-    fix: async () => ({ imageUrl: 'https://example.com/fixed.png', imageUrls: ['https://example.com/fixed.png'], headline: 'New Hook', body: 'B', cta: 'See It', fixed: [] }),
+    fix: async () => ({ imageUrl: 'https://example.com/fixed.png', imageUrls: ['https://example.com/fixed.png'], headline: 'New Hook', body: 'B', cta: 'See It', fixed: [], cost: 0.06 }),
     send: async () => { sendCalls++; return { id: 'x' } },
     xreply: async (o: any) => { xreplyCalls.push(o); return { tweetId: 'reply99', url: 'https://x.com/adchadofficial/status/reply99' } },
     paused: async () => false,
@@ -133,7 +133,7 @@ describe('fulfill — kill-switch on → email fallback, no public post', () => 
   let xreplyCalls = 0
   let sendCalls = 0
   const stub: any = {
-    fix: async () => ({ imageUrl: 'https://example.com/fixed.png', imageUrls: ['https://example.com/fixed.png'], headline: 'H', body: 'B', cta: 'C', fixed: [] }),
+    fix: async () => ({ imageUrl: 'https://example.com/fixed.png', imageUrls: ['https://example.com/fixed.png'], headline: 'H', body: 'B', cta: 'C', fixed: [], cost: 0.06 }),
     send: async () => { sendCalls++; return { id: 'x' } },
     xreply: async () => { xreplyCalls++; return { tweetId: 'r', url: 'u' } },
     paused: async () => true,
@@ -155,7 +155,7 @@ describe('fulfill — $12 A/B pack generates + delivers 3 variants in one reply'
   const xreplyCalls: any[] = []
   const imageUrls = ['https://example.com/v1.png', 'https://example.com/v2.png', 'https://example.com/v3.png']
   const stub: any = {
-    fix: async (o: any) => { fixVariants = o.variants; return { imageUrl: imageUrls[0], imageUrls, headline: 'H', body: 'B', cta: 'Call Now', fixed: [] } },
+    fix: async (o: any) => { fixVariants = o.variants; return { imageUrl: imageUrls[0], imageUrls, headline: 'H', body: 'B', cta: 'Call Now', fixed: [], cost: 0.18 } },
     send: async () => ({ id: 'x' }),
     xreply: async (o: any) => { xreplyCalls.push(o); return { tweetId: 'r', url: 'u' } },
     paused: async () => false,

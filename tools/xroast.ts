@@ -2,6 +2,7 @@ import { TwitterApi } from 'twitter-api-v2'
 import { sql } from '../lib/db'
 import { roast } from './roast'
 import { xpost } from './xpost'
+import { bookCost } from './cost'
 
 // Roast an X tweet's ad PUBLICLY: read the tweet's image, roast it, reply in-thread with the roast + the $5
 // sales link, and persist the prospect + the roast reply's tweet id — so the paid fix can reply into the thread.
@@ -49,6 +50,7 @@ export async function xroast(opts: { tweet: string }): Promise<{ prospectId: str
   await sql`insert into ads (id, brand_id, advertiser, creative_url) values (${adId}, ${prospectId}, ${author}, ${imageUrl}) on conflict (id) do nothing`
   await sql`insert into prospects (id, name, x_handle, segment, stage) values (${prospectId}, ${author}, ${author}, ${'public'}, ${'roasted'}) on conflict (id) do nothing`
   await sql`insert into scores (ad_id, prospect_id, total) values (${adId}, ${prospectId}, ${r.score})`
+  await bookCost(r.cost, `roast prospect ${prospectId}`) // real P&L: vision + grok cost of this roast
 
   // 4. reply publicly with the roast + the per-prospect sales page (re-sells, then Stripe — never a raw link)
   const salesUrl = `${process.env.APP_URL || 'https://adchad.vercel.app'}/p/${prospectId}`

@@ -2,6 +2,24 @@ import { sql } from '../lib/db'
 
 type F = Record<string, string | number | boolean> // CLI passes string|boolean; programmatic callers (routes, tests) may pass numbers
 
+/** Map one CRM interaction to a public feed event (or null = not shown). Pure → unit-tested. The webhook's PAID
+ *  note (channel='note', direction='in') reads as a "generating…" working state, NOT a reply — so the feed never
+ *  claims "<who> replied" ~90s before the fix actually posts. */
+export function interactionEvent(i: any): any | null {
+  const who = i.prospect_name ?? 'a brand'
+  if (i.channel === 'x' && i.direction === 'out') // public roast — text is already public on X
+    return { ts: i.created_at, kind: 'roast', icon: '🔥', title: `Roasted ${who}`, detail: i.text ? String(i.text).slice(0, 240) : undefined, link: i.ref ? `https://x.com/i/status/${i.ref}` : undefined, score: i.score != null ? Number(i.score) : undefined }
+  if (i.channel === 'note' && i.direction === 'in') // webhook PAID marker → the fix is generating now (NOT a reply)
+    return { ts: i.created_at, kind: 'paid', icon: '⏳', title: `${who} paid — fix generating…` }
+  if (i.direction === 'in') // a genuine inbound reply/DM — show that it happened, never the private body
+    return { ts: i.created_at, kind: 'reply', icon: '💬', title: `${who} replied` }
+  if (i.channel === 'email' && i.direction === 'out')
+    return { ts: i.created_at, kind: 'email', icon: '📧', title: `Emailed ${who}` }
+  if (i.channel === 'fix') // image is viewer-fetched — require https to block http tracking / mixed content
+    return { ts: i.created_at, kind: 'fix', icon: '✅', title: `Delivered fix to ${who}`, image: i.ref && String(i.ref).startsWith('https://') ? i.ref : undefined }
+  return null // channel='note'/out (internal reasoning) and anything else: not shown
+}
+
 /** The agent's CRM + ledger. Named ops only — no raw SQL from the model. */
 export async function run(sub: string | undefined, f: F): Promise<unknown> {
   switch (sub) {
@@ -123,16 +141,8 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
       const events: any[] = []
       for (const p of pros) events.push({ ts: p.created_at, kind: 'prospect', icon: '🔍', title: `New target: ${p.name ?? 'unknown'}`, score: p.score != null ? Number(p.score) : undefined })
       for (const i of inter) {
-        const who = i.prospect_name ?? 'a brand'
-        if (i.channel === 'x' && i.direction === 'out') // public roast — text is already public on X
-          events.push({ ts: i.created_at, kind: 'roast', icon: '🔥', title: `Roasted ${who}`, detail: i.text ? String(i.text).slice(0, 240) : undefined, link: i.ref ? `https://x.com/i/status/${i.ref}` : undefined, score: i.score != null ? Number(i.score) : undefined })
-        else if (i.direction === 'in') // reply/DM — show that it happened, never the private body
-          events.push({ ts: i.created_at, kind: 'reply', icon: '💬', title: `${who} replied` })
-        else if (i.channel === 'email' && i.direction === 'out')
-          events.push({ ts: i.created_at, kind: 'email', icon: '📧', title: `Emailed ${who}` })
-        else if (i.channel === 'fix') // image is viewer-fetched — require https to block http tracking / mixed content
-          events.push({ ts: i.created_at, kind: 'fix', icon: '✅', title: `Delivered fix to ${who}`, image: i.ref && String(i.ref).startsWith('https://') ? i.ref : undefined })
-        // channel='note' (internal reasoning) and anything else: not shown
+        const e = interactionEvent(i)
+        if (e) events.push(e)
       }
       for (const l of led) {
         const amt = `$${(Math.abs(l.amount_cents ?? 0) / 100).toFixed(2)}`

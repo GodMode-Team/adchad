@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 // Real feed shape (see tools/db.ts `feed` op). PII is stripped server-side; this is a pure read view.
 type Ev = {
   ts: string
-  kind: 'prospect' | 'roast' | 'reply' | 'email' | 'fix' | 'money'
+  kind: 'prospect' | 'roast' | 'reply' | 'email' | 'fix' | 'money' | 'paid'
   icon: string
   title: string
   detail?: string
@@ -43,6 +43,7 @@ const accentFor = (e: Ev): string => {
     case 'prospect': return '#ffe600'
     case 'roast': return '#ff2d6f'
     case 'reply': return '#ffe600'
+    case 'paid': return '#ffe600' // payment in, fix generating — "working" yellow
     case 'email': return '#3ce84a'
     case 'fix': return '#3ce84a'
     case 'money': return e.title.startsWith('+') ? '#3ce84a' : '#ff5a7a'

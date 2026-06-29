@@ -1,10 +1,11 @@
 import { describe } from './vision'
 import { generate } from './creative'
+import { costUsdOf } from './cost'
 
 // Fix copy is written by a strong model from the ad's REAL flaws; the image is gpt-image-2 (in tools/creative).
 const MODEL = process.env.MODEL_COPY || 'x-ai/grok-4.3'
 
-export type FixResult = { imageUrl: string; imageUrls: string[]; headline: string; body: string; cta: string; fixed: string[] }
+export type FixResult = { imageUrl: string; imageUrls: string[]; headline: string; body: string; cta: string; fixed: string[]; cost: number }
 
 // Meta's CTA button is a FIXED dropdown — you pick a label, you can't restyle it. The fix's `cta` must be one of these.
 const META_CTAS = 'Book Now, Call Now, Contact Us, Learn More, Sign Up, Shop Now, Get Quote, Apply Now, Get Offer, Subscribe, Download, Send Message, Get Started'
@@ -31,10 +32,11 @@ export async function fix(opts: { image: string; brand?: string | null; roast?: 
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, messages: [{ role: 'user', content: prompt }], response_format: { type: 'json_object' } }),
+    body: JSON.stringify({ model: MODEL, messages: [{ role: 'user', content: prompt }], response_format: { type: 'json_object' }, usage: { include: true } }),
   })
   if (!res.ok) throw new Error(`fix copy ${res.status}: ${(await res.text()).slice(0, 200)}`)
   const j: any = await res.json()
+  const copyUsd = costUsdOf(j)
   const out: string = (j.choices?.[0]?.message?.content ?? '{}').replace(/<think>[\s\S]*?<\/think>/g, '')
   const copy = JSON.parse((out.match(/\{[\s\S]*\}/) || ['{}'])[0])
   const headline = String(copy.headline ?? '').trim()
@@ -49,6 +51,9 @@ export async function fix(opts: { image: string; brand?: string | null; roast?: 
   const dirs = n === 1
     ? [baseDir || null]
     : ANGLES.slice(0, n).map((a) => `${baseDir ? baseDir + '. ' : ''}Render this variant as ${a}.`)
-  const imageUrls = (await Promise.all(dirs.map((d) => generate({ headline, body, cta, creativeDirection: d }, brand)))).map((g) => g.imageUrl)
-  return { imageUrl: imageUrls[0], imageUrls, headline, body: body ?? '', cta: cta ?? '', fixed: look.real_flaws ?? [] }
+  const gens = await Promise.all(dirs.map((d) => generate({ headline, body, cta, creativeDirection: d }, brand)))
+  const imageUrls = gens.map((g) => g.imageUrl)
+  // real cost of the whole fix = vision + copy + every image generated
+  const cost = (look.costUsd ?? 0) + copyUsd + gens.reduce((s, g) => s + g.costUsd, 0)
+  return { imageUrl: imageUrls[0], imageUrls, headline, body: body ?? '', cta: cta ?? '', fixed: look.real_flaws ?? [], cost }
 }

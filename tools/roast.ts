@@ -1,6 +1,7 @@
 // The savage roast voice = the team's prompt, VERBATIM; a second voice coaches genuinely-good ads (feedback + another
 // angle). Grok isn't multimodal on OpenRouter, so we SEE the ad with vision and hand Grok the screenshot's contents.
 import { describe, type AdLook } from './vision'
+import { costUsdOf } from './cost'
 
 const MODEL = process.env.MODEL_ROAST || 'x-ai/grok-4.3'
 
@@ -59,7 +60,7 @@ export function roastBrief(look: AdLook): { system: string; instruction: string 
     : { system: SYSTEM, instruction: 'Roast this ad.' }
 }
 
-export type Roast = { xPost: string; emailSubject: string; emailBody: string; raw: string; score: number; verdict: string }
+export type Roast = { xPost: string; emailSubject: string; emailBody: string; raw: string; score: number; verdict: string; cost: number }
 
 // pull a labelled section out of the team's "1. X Post: … 2. Email subject: … 3. Body: …" format
 function section(txt: string, start: RegExp, end: RegExp | null): string {
@@ -106,6 +107,7 @@ export async function roast(opts: { image: string; handle?: string | null; brand
         { role: 'system', content: brief.system },
         { role: 'user', content: ctx },
       ],
+      usage: { include: true }, // real USD cost for the P&L
     }),
   })
   if (!res.ok) throw new Error(`roast ${res.status}: ${(await res.text()).slice(0, 200)}`)
@@ -120,6 +122,9 @@ export async function roast(opts: { image: string; handle?: string | null; brand
     await run('score', { ad_id: opts.adId, prospect_id: opts.prospectId, total: look.score }).catch(() => {})
   }
 
+  // real cost of this roast = grok completion + the vision call (only if WE ran it; if the caller passed look, they paid)
+  const cost = costUsdOf(j) + (opts.look ? 0 : look.costUsd ?? 0)
+
   return {
     xPost: section(raw, /\**\s*\d?\.?\s*\**X Post\**\s*:?/i, /\**\s*\d?\.?\s*\**Email subject/i),
     emailSubject: section(raw, /\**\s*\d?\.?\s*\**Email subject\**\s*:?/i, /\**\s*\d?\.?\s*\**Body/i),
@@ -127,5 +132,6 @@ export async function roast(opts: { image: string; handle?: string | null; brand
     raw,
     score: look.score,
     verdict: look.verdict,
+    cost,
   }
 }
