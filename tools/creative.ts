@@ -7,16 +7,24 @@ const MODEL = process.env.MODEL_IMAGE || 'openai/gpt-image-2'
 
 type Fix = { headline: string; body?: string | null; cta?: string | null; creativeDirection?: string | null }
 
-/** Generate a finished, drop-in-ready static ad — the model renders the headline + CTA text in-image (crisp). */
-export async function generate(fix: Fix, _brand?: string | null): Promise<{ imageUrl: string }> {
-  const prompt =
-    `Design ONE finished, scroll-stopping static Meta ad image, ready to run.\n` +
-    `Render this text EXACTLY as written, perfectly spelled, large and legible:\n` +
-    `• Bold headline: "${fix.headline}"\n` +
-    (fix.body ? `• Smaller support / offer line: "${fix.body}"\n` : '') +
-    (fix.cta ? `• A rounded CTA button labeled: "${fix.cta}"\n` : '') +
-    `Style: ${fix.creativeDirection || 'clean, modern, premium, high-contrast, professional photography'}.\n` +
-    `NO brand name, NO logo, NO watermark. A real, finished ad — not a mockup or template.`
+/** The image is the CREATIVE; the ad's copy (headline/body/CTA) goes in Meta's native fields. Infographics and
+ *  data-viz ARE great creatives — the only things we must not bake in are the marketing headline-banner and a
+ *  CTA button (those duplicate the native fields, and a drawn button isn't clickable). */
+export function buildPrompt(fix: Fix, brand?: string | null): string {
+  const concept = fix.creativeDirection?.trim() || `a bold, premium product visual for ${brand || 'the brand'}`
+  return (
+    `Design ONE scroll-stopping 1:1 Meta ad CREATIVE. Concept: ${concept}.\n` +
+    `Infographic / data-viz is welcome where it proves the point — before/after charts, comparisons, diagrams, ` +
+    `and their own structural labels and stat callouts ("BEFORE"/"AFTER", axis labels, a key number) are good.\n` +
+    `Do NOT render the ad's marketing copy: no big headline banner, no paragraph of body copy, and NO ` +
+    `call-to-action button — that copy lives in Meta's native fields and a drawn button isn't clickable.\n` +
+    `No brand name, no logo, no watermark. Finished and high-end, ready to run.`
+  )
+}
+
+/** Generate a drop-in-ready VISUAL ad creative (the copy goes in Meta's native fields, not the image). */
+export async function generate(fix: Fix, brand?: string | null): Promise<{ imageUrl: string }> {
+  const prompt = buildPrompt(fix, brand)
 
   const res = await fetch('https://openrouter.ai/api/v1/images', {
     method: 'POST',
