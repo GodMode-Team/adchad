@@ -33,7 +33,11 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
     }
     case 'xpost': {
       const { xpost } = await import('../tools/xpost')
-      return xpost({ text: S('text'), imageUrl: f.image ? S('image') : null, link: f.link ? S('link') : null, handle: f.handle ? S('handle') : null })
+      return xpost({ text: S('text'), imageUrl: f.image ? S('image') : null, link: f.link ? S('link') : null, handle: f.handle ? S('handle') : null, replyToTweetId: f.reply ? S('reply') : null })
+    }
+    case 'xroast': {
+      const { xroast } = await import('../tools/xroast')
+      return xroast({ tweet: S('tweet') })
     }
     case 'xread': {
       const { mentions } = await import('../tools/xread')
@@ -72,8 +76,8 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
       // skills and pattern-completes `tool prospect`. Redirect instead of dead-ending — a wasted round-trip is ~10-140s here.
       const SKILLS = ['prospect', 'roast', 'engage', 'fulfill', 'report', 'evolve', 'copy', 'synthcheck', 'adchad']
       if (SKILLS.includes(name))
-        throw new Error(`'${name}' is a SKILL you're already running, not a tool — don't call \`tool ${name}\`. Follow the skill's steps using the real tools: foreplay enrich vision roast fix xpost xread email creative stripe db`)
-      throw new Error(`unknown tool '${name}'. tools: foreplay enrich vision roast fix xpost xread email creative stripe db`)
+        throw new Error(`'${name}' is a SKILL you're already running, not a tool — don't call \`tool ${name}\`. Follow the skill's steps using the real tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db`)
+      throw new Error(`unknown tool '${name}'. tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db`)
     }
   }
 }

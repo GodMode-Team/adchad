@@ -18,6 +18,7 @@ metadata:
 
 ## Route FIRST (don't skip this)
 
+- **Handed an X TWEET to roast publicly** (a tweet link/URL, and they want it roasted *on X*)? → ONE deterministic call: `cd "$PROJECT_DIR" && pnpm -s tool xroast --tweet "<tweet url>"`. It reads the tweet's ad image, roasts it, **replies in-thread** with the roast + the `$5` `/p/<id>` link, and creates the prospect + records the roast reply's tweet id — so when they pay, the fix worker **replies the fixed ad into the same thread** (no email; the whole transaction is public). Kill-switch must be OFF (`db status`). Returns `{prospectId, roastTweetId, salesUrl}`. **STOP — done.**
 - **The operator attached an image, OR named/pasted an ad URL?** → that IS the ad. Go to **Direct roast** below. **DO NOT** `web_search`, **DO NOT** `foreplay scan`, **DO NOT** `/prospect`, **DO NOT** loop. You already have the ad — roast it.
 - **No image and no target given?** → only then `/prospect` to find one, then come back here.
 
