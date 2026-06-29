@@ -31,7 +31,7 @@ describe('fulfill — idempotent delivery (run twice → exactly once)', () => {
   let orderId: number
   const sendCalls: any[] = []
   const stub: any = {
-    fix: async () => ({ imageUrl: 'https://example.com/fixed.png', headline: 'H', body: 'B', cta: 'C', fixed: ['x'] }),
+    fix: async () => ({ imageUrl: 'https://example.com/fixed.png', imageUrls: ['https://example.com/fixed.png'], headline: 'H', body: 'B', cta: 'C', fixed: ['x'] }),
     send: async (o: any) => { sendCalls.push(o); return { id: 'stub-' + sendCalls.length } },
     ...noX,
   }
@@ -62,7 +62,7 @@ describe('fulfill — a failed send does not re-pay for generation', () => {
   let okSends = 0
   let failOnce = true
   const stub: any = {
-    fix: async () => { fixCalls++; return { imageUrl: 'https://example.com/fixed.png', headline: 'H', body: 'B', cta: 'C', fixed: [] } },
+    fix: async () => { fixCalls++; return { imageUrl: 'https://example.com/fixed.png', imageUrls: ['https://example.com/fixed.png'], headline: 'H', body: 'B', cta: 'C', fixed: [] } },
     send: async () => { if (failOnce) { failOnce = false; throw new Error('resend down') } okSends++; return { id: 'ok' } },
     ...noX,
   }
@@ -87,7 +87,7 @@ describe('fulfill — only the $5 single fix is auto-fulfilled', () => {
   let orderId: number
   let sendCalled = false
   const stub: any = {
-    fix: async () => ({ imageUrl: '', headline: '', body: '', cta: '', fixed: [] }),
+    fix: async () => ({ imageUrl: '', imageUrls: [], headline: '', body: '', cta: '', fixed: [] }),
     send: async () => { sendCalled = true; return { id: 'x' } },
     ...noX,
   }
@@ -108,7 +108,7 @@ describe('fulfill — delivers via a public X reply when there is a roast tweet'
   const xreplyCalls: any[] = []
   let sendCalls = 0
   const stub: any = {
-    fix: async () => ({ imageUrl: 'https://example.com/fixed.png', headline: 'New Hook', body: 'B', cta: 'See It', fixed: [] }),
+    fix: async () => ({ imageUrl: 'https://example.com/fixed.png', imageUrls: ['https://example.com/fixed.png'], headline: 'New Hook', body: 'B', cta: 'See It', fixed: [] }),
     send: async () => { sendCalls++; return { id: 'x' } },
     xreply: async (o: any) => { xreplyCalls.push(o); return { tweetId: 'reply99', url: 'https://x.com/adchadofficial/status/reply99' } },
     paused: async () => false,
@@ -121,7 +121,7 @@ describe('fulfill — delivers via a public X reply when there is a roast tweet'
     expect(sendCalls).toBe(0)                                        // no email
     expect(xreplyCalls.length).toBe(1)                               // one public reply
     expect(xreplyCalls[0].replyToTweetId).toBe('roast_tweet_123')    // into the roast thread
-    expect(xreplyCalls[0].imageUrl).toBe('https://example.com/fixed.png') // with the new creative
+    expect(xreplyCalls[0].imageUrls).toEqual(['https://example.com/fixed.png']) // with the new creative
     const [fx] = await sql<any[]>`select delivered_at from fixes where order_id=${orderId}`
     expect(fx.delivered_at).toBeTruthy()
   })
@@ -133,7 +133,7 @@ describe('fulfill — kill-switch on → email fallback, no public post', () => 
   let xreplyCalls = 0
   let sendCalls = 0
   const stub: any = {
-    fix: async () => ({ imageUrl: 'https://example.com/fixed.png', headline: 'H', body: 'B', cta: 'C', fixed: [] }),
+    fix: async () => ({ imageUrl: 'https://example.com/fixed.png', imageUrls: ['https://example.com/fixed.png'], headline: 'H', body: 'B', cta: 'C', fixed: [] }),
     send: async () => { sendCalls++; return { id: 'x' } },
     xreply: async () => { xreplyCalls++; return { tweetId: 'r', url: 'u' } },
     paused: async () => true,
@@ -145,5 +145,36 @@ describe('fulfill — kill-switch on → email fallback, no public post', () => 
     expect(await fulfillOrder(orderId, stub)).toBe('delivered')
     expect(xreplyCalls).toBe(0) // no public post while paused
     expect(sendCalls).toBe(1)   // delivered privately by email instead
+  })
+})
+
+describe('fulfill — $12 A/B pack generates + delivers 3 variants in one reply', () => {
+  const pid = 'test-fulfill-ab-' + Date.now()
+  let orderId: number
+  let fixVariants = 0
+  const xreplyCalls: any[] = []
+  const imageUrls = ['https://example.com/v1.png', 'https://example.com/v2.png', 'https://example.com/v3.png']
+  const stub: any = {
+    fix: async (o: any) => { fixVariants = o.variants; return { imageUrl: imageUrls[0], imageUrls, headline: 'H', body: 'B', cta: 'Call Now', fixed: [] } },
+    send: async () => ({ id: 'x' }),
+    xreply: async (o: any) => { xreplyCalls.push(o); return { tweetId: 'r', url: 'u' } },
+    paused: async () => false,
+  }
+  beforeAll(async () => { orderId = await seed(pid, 12, 'roast_tweet_ab') }, 30_000) // a $12 A/B-pack order
+  afterAll(async () => { await cleanup(pid, orderId) })
+
+  it('asks fix for 3 variants, replies all 3 in ONE tweet, books cost once, idempotent', async () => {
+    expect(await fulfillOrder(orderId, stub)).toBe('delivered')
+    expect(fixVariants).toBe(3)                            // tier 12 → 3 variants
+    expect(xreplyCalls.length).toBe(1)                     // a single public reply…
+    expect(xreplyCalls[0].imageUrls).toEqual(imageUrls)    // …carrying all 3 creatives
+    const [fx] = await sql<any[]>`select image_url, variants, delivered_at from fixes where order_id=${orderId}`
+    expect(fx.image_url).toBe(imageUrls[0])                // primary image kept for the /live thumbnail
+    expect(fx.variants.images).toEqual(imageUrls)          // all 3 persisted for retry-reuse
+    expect(fx.delivered_at).toBeTruthy()
+    const cost = await sql<any[]>`select amount_cents from ledger where kind='cost' and note like ${'%order ' + orderId + '%'}`
+    expect(cost.length).toBe(1)                            // one cost row…
+    expect(cost[0].amount_cents).toBe(18)                  // …= 3 images × 6¢
+    expect(await fulfillOrder(orderId, stub)).toBe('skipped') // second run is a no-op
   })
 })

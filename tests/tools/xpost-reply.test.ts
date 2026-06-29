@@ -15,7 +15,15 @@ describe('xpost — reply + payload assembly', () => {
   })
 
   it('attaches media when a mediaId is given', () => {
-    expect(buildTweet({ text: 'hi' }, 'media99').media).toEqual({ media_ids: ['media99'] })
+    expect(buildTweet({ text: 'hi' }, ['media99']).media).toEqual({ media_ids: ['media99'] })
+  })
+
+  it('attaches up to 4 media_ids for an A/B variant pack', () => {
+    expect(buildTweet({ text: 'hi' }, ['a', 'b', 'c']).media).toEqual({ media_ids: ['a', 'b', 'c'] })
+  })
+
+  it('omits media when the id list is empty', () => {
+    expect(buildTweet({ text: 'hi' }, []).media).toBeUndefined()
   })
 
   it('keeps a full roast intact (Premium long-form, no 280 cut-off)', () => {

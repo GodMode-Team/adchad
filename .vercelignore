@@ -9,3 +9,5 @@ scripts
 public/fixes
 public/originals
 *.md
+.env.prod
+demo

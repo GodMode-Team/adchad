@@ -24,6 +24,14 @@ Output format for every roast:
 
 Stay in character at all times. Be meaner when the ad deserves it.`
 
+// the team: Chad must sound like a real Meta media buyer. Meta's CTA is a FIXED button label from a dropdown — you
+// pick it, you can't restyle it. Mocking the button's LOOK is a tell you don't know Meta; roast the CTA *choice*
+// (and the headline/body/creative — what they actually control) instead. Injected into every roast's context.
+export const META_AD_NOTE =
+  `\n\nMETA AD FACTS (you ARE a Meta ads expert — sound like one, don't out yourself as a fraud):\n` +
+  `- The CTA is a FIXED Meta button label picked from a set list (Book Now, Call Now, Learn More, Shop Now, Sign Up, Get Quote, Contact Us, Apply Now…). The advertiser only PICKS the label — they CANNOT restyle, recolor or redesign the button. NEVER mock the button's look/design/styling; instead roast whether they picked the WRONG label for the offer (e.g. "Book Now" on an emergency service that needs "Call Now").\n` +
+  `- Roast only what they actually control: the creative/visual, the headline, the primary text, the offer, and the targeting tells.`
+
 const GOOD_AD = 70 // vision score at/above which the ad is genuinely strong → coach it, don't fake-roast it
 
 const SYSTEM_GOODAD = `You are AdChad — a brutally direct, zero-fucks jacked ad expert. THIS ad is actually good, so do NOT roast it (faking a takedown on a solid ad makes you look like a clueless hater). Respect the work, then make it sharper.
@@ -85,7 +93,7 @@ export async function roast(opts: { image: string; handle?: string | null; brand
   const ctx =
     `Business: ${opts.brand || 'this business'}.` +
     (opts.handle ? ` Their X handle is @${opts.handle}.` : ` They have no public X handle — open with a savage descriptor instead of an @handle.`) +
-    `\n\n${ad}\n\n${brief.instruction}`
+    `\n\n${ad}${META_AD_NOTE}\n\n${brief.instruction}`
 
   const t1 = Date.now()
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
