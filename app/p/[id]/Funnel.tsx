@@ -12,6 +12,15 @@ const isVideo = (u?: string | null) => !!u && /\.(mp4|webm|mov)$/i.test(u)
 function Shell({ children }: { children: ReactNode }) {
   return <main className="fnl-shell">{children}</main>
 }
+
+// Full-bleed section band (home-page style): a background color + ink divider, content centered in a max-width column.
+function Band({ bg, children, last, gap = 20 }: { bg: string; children: ReactNode; last?: boolean; gap?: number }) {
+  return (
+    <div style={{ background: bg, borderBottom: last ? undefined : '4px solid var(--ink)' }}>
+      <div style={{ width: '100%', maxWidth: 680, margin: '0 auto', padding: '28px 18px', display: 'flex', flexDirection: 'column', gap }}>{children}</div>
+    </div>
+  )
+}
 const PAGE = { width: '100%', maxWidth: 1080, margin: '0 auto' } as const
 const ROW = { display: 'flex', flexWrap: 'wrap', gap: 30, alignItems: 'flex-start' } as const
 const COL = { flex: '1 1 340px', minWidth: 0 } as const
@@ -262,24 +271,25 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
   return (
     <Shell>
       <div style={{ height: 44, flex: 'none', background: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--f-bungee)', fontSize: 18, color: 'var(--yellow)' }}>FIX DEPLOYED 💪</div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '26px 18px 48px' }}>
-        <div style={{ width: '100%', maxWidth: 680, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ flex: 1, overflowY: 'auto', background: 'var(--yellow)' }}>
 
+        {/* A — payment + upsell video (green) */}
+        <Band bg="var(--green)">
           <div style={{ fontFamily: 'var(--f-display)', fontSize: 40, lineHeight: 0.9, color: 'var(--ink)' }}>PAYMENT RECEIVED.</div>
-
-          {/* 1 — upsell video */}
           <video
             src="https://teaser-page-virid.vercel.app/adchad-upsell.mp4"
             controls autoPlay muted playsInline
             style={{ width: '100%', display: 'block', borderRadius: 14, border: '3px solid var(--ink)', boxShadow: '6px 6px 0 var(--ink)', background: '#000' }}
           />
+        </Band>
 
-          {/* 2 — pitch + Yes/No */}
-          <div style={{ fontFamily: 'var(--f-heavy)', fontSize: 19, lineHeight: 1.2, color: 'var(--ink)' }}>
+        {/* B — the pitch + Yes/No (pink) */}
+        <Band bg="var(--pink)">
+          <div style={{ fontFamily: 'var(--f-heavy)', fontSize: 19, lineHeight: 1.2, color: '#fff' }}>
             By the time you finish watching this video, your ad will be ready.
           </div>
           {declined ? (
-            <a href={upsellHref} style={{ fontFamily: 'var(--f-mono)', fontSize: 13, fontWeight: 700, color: '#0a3d16' }}>
+            <a href={upsellHref} style={{ fontFamily: 'var(--f-mono)', fontSize: 13, fontWeight: 700, color: '#fff' }}>
               💀 enjoy the losses — changed your mind? Hire Chad, $49/mo →
             </a>
           ) : (
@@ -287,16 +297,16 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
               <a href={upsellHref} style={{ flex: '1 1 240px', textAlign: 'center', background: 'var(--yellow)', border: '4px solid var(--ink)', borderRadius: 14, padding: '15px 16px', boxShadow: '4px 4px 0 var(--ink)', fontFamily: 'var(--f-bungee)', fontSize: 17, color: 'var(--ink)' }}>
                 Hire Chad now for $49/mo
               </a>
-              <button onClick={() => setDeclined(true)} style={{ flex: '1 1 240px', cursor: 'pointer', textAlign: 'center', background: 'transparent', border: '3px solid var(--ink)', borderRadius: 14, padding: '15px 16px', fontFamily: 'var(--f-mono)', fontWeight: 700, fontSize: 14, color: '#0a3d16' }}>
+              <button onClick={() => setDeclined(true)} style={{ flex: '1 1 240px', cursor: 'pointer', textAlign: 'center', background: 'transparent', border: '3px solid #fff', borderRadius: 14, padding: '15px 16px', fontFamily: 'var(--f-mono)', fontWeight: 700, fontSize: 14, color: '#fff' }}>
                 No thanks, I enjoy losing money
               </button>
             </div>
           )}
+        </Band>
 
-          {/* 3 — watch chad work */}
-          <div style={{ fontFamily: 'var(--f-display)', fontSize: 30, color: 'var(--ink)', marginTop: 8 }}>WATCH CHAD WORK</div>
-
-          {/* 4 — the fix lands here: placeholder → live embedded tweet */}
+        {/* C — watch chad work / your ad is ready + tweet + feed (dark) */}
+        <Band bg="var(--bg)">
+          <div style={{ fontFamily: 'var(--f-display)', fontSize: 30, color: tweetId ? 'var(--green)' : '#fff' }}>{tweetId ? 'YOUR AD IS READY 🎉' : 'WATCH CHAD WORK'}</div>
           <div style={{ borderRadius: 16, border: '2px solid #1c241c', background: '#0f140f', overflow: 'hidden' }}>
             {tweetId ? (
               <div style={{ padding: 8 }}>
@@ -312,12 +322,13 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
               </div>
             )}
           </div>
-
-          {/* 5 — the live feed */}
           <LiveFeed max={12} />
+        </Band>
 
-          {/* 6 — the dead ad, all the way at the bottom */}
-          <div style={{ position: 'relative', width: '100%', maxWidth: 360, margin: '6px auto 0' }}>
+        {/* D — the dead ad, all the way at the bottom (yellow) */}
+        <Band bg="var(--yellow)" last>
+          <div style={{ fontFamily: 'var(--f-marker)', fontSize: 18, color: 'var(--ink)', transform: 'rotate(-1.5deg)' }}>the one I&apos;m replacing 👇</div>
+          <div style={{ position: 'relative', width: '100%', maxWidth: 360, margin: '0 auto' }}>
             <div style={{ filter: 'grayscale(1) contrast(.95) brightness(.93)', background: '#fff', borderRadius: 12, overflow: 'hidden', border: '3px solid var(--ink)', boxShadow: '6px 6px 0 var(--ink)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px' }}>
                 <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#ff2d6f,#ffe600)', flex: 'none' }} />
@@ -334,7 +345,7 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
             </div>
             <div style={{ position: 'absolute', top: -18, right: -6, transform: 'rotate(8deg)', fontFamily: 'var(--f-marker)', color: '#ff1414', fontSize: 26 }}>RIP 🪦</div>
           </div>
-        </div>
+        </Band>
       </div>
     </Shell>
   )
