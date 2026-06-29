@@ -35,7 +35,6 @@ export default function Halls({ shame, fame }: { shame: Shame[]; fame: Fame[] })
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'inline-block', transform: 'rotate(-2deg)', background: '#ff2d6f', color: '#fff', fontFamily: 'var(--f-bungee)', fontSize: 13, padding: '5px 14px', border: '3px solid #111' }}>💀 HALL OF SHAME</div>
             <div style={{ fontFamily: 'var(--f-display)', fontSize: 52, color: '#fff', lineHeight: 0.9, marginTop: 14 }}>THE WORST ADS<br />I&apos;VE EVER <span style={{ color: '#ff2d6f' }}>SEEN.</span></div>
-            <div style={{ fontFamily: 'var(--f-mono)', fontSize: 13, color: '#5f6b5f', marginTop: 10 }}>lowest scores on record. the ad, then the roast. no mercy.</div>
           </div>
           <div style={{ display: 'flex', gap: 16, marginTop: 34, flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'center' }}>
             {shame.length === 0
@@ -57,8 +56,10 @@ export default function Halls({ shame, fame }: { shame: Shame[]; fame: Fame[] })
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '62px 22px' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'inline-block', transform: 'rotate(2deg)', background: '#111', color: '#ffe600', fontFamily: 'var(--f-bungee)', fontSize: 13, padding: '5px 14px', border: '3px solid #fff', boxShadow: '3px 3px 0 #111' }}>🏆 HALL OF FAME</div>
-            <div style={{ fontFamily: 'var(--f-display)', fontSize: 52, color: '#111', lineHeight: 0.9, marginTop: 14 }}>AND THE ONES I<br /><span style={{ background: '#3ce84a', padding: '0 10px', border: '3px solid #111' }}>FIXED CLEAN.</span></div>
-            <div style={{ fontFamily: 'var(--f-mono)', fontSize: 13, color: '#7a6c00', marginTop: 10 }}>same businesses, after the $5 fix. highest scores on record.</div>
+            <div style={{ fontFamily: 'var(--f-display)', fontSize: 52, color: '#111', lineHeight: 0.95, marginTop: 14 }}>
+              <div>AND THE ONES I</div>
+              <div style={{ marginTop: 8 }}><span style={{ display: 'inline-block', background: '#3ce84a', padding: '3px 10px', border: '3px solid #111', lineHeight: 1 }}>FIXED CLEAN.</span></div>
+            </div>
           </div>
           <div style={{ display: 'flex', gap: 16, marginTop: 34, flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'center' }}>
             {fame.length === 0
