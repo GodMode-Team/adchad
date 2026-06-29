@@ -66,9 +66,10 @@ function Creative({ url, controls = false }: { url?: string | null; controls?: b
     : <img src={url} alt="your ad" style={{ width: '100%', display: 'block' }} />
 }
 
-export default function Funnel({ data, paid, id }: { data: any; paid: boolean; id: string }) {
+export default function Funnel({ data, paid, id, initialStep }: { data: any; paid: boolean; id: string; initialStep?: Step }) {
   // If they're back from Stripe (?paid=1), drop them straight on the celebration screen.
-  const [step, setStep] = useState<Step>(paid ? 'done' : 'roast')
+  // initialStep lets a preview route land directly on any step.
+  const [step, setStep] = useState<Step>(initialStep ?? (paid ? 'done' : 'roast'))
   const [bump, setBump] = useState(false)
 
   const score: number | null = data.score ?? null
