@@ -38,10 +38,10 @@ Single-purpose CLIs, each emits JSON, each independently tested live. They hold 
 
 ## 7. Web app (Next.js/Vercel) — the funnel + delivery
 The roast links to a per-prospect **sales page** that re-sells, then hands to Stripe-hosted checkout (never a raw Stripe link — sessions expire + you lose the re-sell):
-`tweet/email → /p/<id> (their ad + critique + "UNFUCK IT — $5") → /api/checkout (FRESH Stripe session) → pay → /api/stripe/webhook → agent /fulfill → fixed-ad email`
+`tweet/email → /p/<id> (their ad + critique + "UNFUCK IT — $5") → /api/checkout (FRESH Stripe session) → pay → /api/stripe/webhook → agent /fulfill → public X reply into the roast thread`
 - `/` homepage (brand). **`/p/<id>`** sales page — renders the stored ad `creative_url` + the roast + one CTA; mobile-first.
 - `/api/checkout?p=<id>&tier=5` mints a fresh session. `/api/stripe/webhook` → order paid → ledger → queue fulfill.
-- `?paid=1` → "fix generating — inbox in ~2 min" (gen takes time). Delivery = the fix **email** (Stripe collected the address); optional `/fix/<order>` view. `/report` = live numbers.
+- `?paid=1` → "fix generating — inbox in ~2 min" (gen takes time). Delivery = a **public X reply into the roast thread** (the new creative + a short caption); email fallback for web-uploaded prospects with no X tweet (or when the kill-switch is on). Optional `/fix/<order>` view. `/report` = live numbers.
 No run button, no dashboard — the agent runs itself.
 
 ## 8. Guardrails (it has money + a public account)
