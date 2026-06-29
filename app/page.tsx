@@ -173,6 +173,9 @@ export default async function Home() {
         </div>
       </div>
 
+      {/* ===== HALL OF SHAME + HALL OF FAME (live tweet embeds) ===== */}
+      <Halls shame={halls.shame ?? []} fame={halls.fame ?? []} />
+
       {/* ===== CHAD ON RETAINER ($49/mo) ===== */}
       <div style={{ background: INK, borderBottom: `4px solid ${INK}` }}>
         <div style={{ ...wrap, padding: '60px 22px', display: 'flex', gap: 34, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -199,9 +202,6 @@ export default async function Home() {
           </div>
         </div>
       </div>
-
-      {/* ===== HALL OF SHAME + HALL OF FAME (live tweet embeds) ===== */}
-      <Halls shame={halls.shame ?? []} fame={halls.fame ?? []} />
 
       {/* ===== FINAL CTA ===== */}
       <div style={{ background: PINK, borderBottom: `4px solid ${INK}`, position: 'relative', overflow: 'hidden' }}>

@@ -32,10 +32,10 @@ export default function Halls({ shame, fame }: { shame: Shame[]; fame: Fame[] })
     <>
       {/* ===== HALL OF SHAME ===== */}
       <div id="shame" style={{ background: '#0a0c0a', borderBottom: '4px solid #111' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '62px 22px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(56px,7vw,90px) 22px' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ display: 'inline-block', transform: 'rotate(-2deg)', background: '#ff2d6f', color: '#fff', fontFamily: 'var(--f-bungee)', fontSize: 13, padding: '5px 14px', border: '3px solid #111' }}>💀 HALL OF SHAME</div>
-            <div style={{ fontFamily: 'var(--f-display)', fontSize: 52, color: '#fff', lineHeight: 0.9, marginTop: 14 }}>THE WORST ADS<br />I&apos;VE EVER <span style={{ color: '#ff2d6f' }}>SEEN.</span></div>
+            <div style={{ display: 'inline-block', transform: 'rotate(-2deg)', background: '#ff2d6f', color: '#fff', fontFamily: 'var(--f-bungee)', fontSize: 'clamp(15px,2vw,20px)', padding: '10px 24px', border: '3px solid #111', boxShadow: '5px 5px 0 #111' }}>💀 HALL OF SHAME</div>
+            <div style={{ fontFamily: 'var(--f-display)', fontSize: 'clamp(54px,8.5vw,104px)', color: '#fff', lineHeight: 0.88, marginTop: 22, letterSpacing: -1.5 }}>THE WORST ADS<br />I&apos;VE EVER <span style={{ color: '#ff2d6f' }}>SEEN.</span></div>
           </div>
           <div style={{ display: 'flex', gap: 16, marginTop: 34, flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'center' }}>
             {shame.length === 0
@@ -54,12 +54,12 @@ export default function Halls({ shame, fame }: { shame: Shame[]; fame: Fame[] })
 
       {/* ===== HALL OF FAME ===== */}
       <div id="fame" style={{ background: '#ffe600', borderBottom: '4px solid #111' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '62px 22px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(56px,7vw,90px) 22px' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ display: 'inline-block', transform: 'rotate(2deg)', background: '#111', color: '#ffe600', fontFamily: 'var(--f-bungee)', fontSize: 13, padding: '5px 14px', border: '3px solid #fff', boxShadow: '3px 3px 0 #111' }}>🏆 HALL OF FAME</div>
-            <div style={{ fontFamily: 'var(--f-display)', fontSize: 52, color: '#111', lineHeight: 0.95, marginTop: 14 }}>
+            <div style={{ display: 'inline-block', transform: 'rotate(2deg)', background: '#111', color: '#ffe600', fontFamily: 'var(--f-bungee)', fontSize: 'clamp(15px,2vw,20px)', padding: '10px 24px', border: '3px solid #fff', boxShadow: '5px 5px 0 #111' }}>🏆 HALL OF FAME</div>
+            <div style={{ fontFamily: 'var(--f-display)', fontSize: 'clamp(54px,8.5vw,104px)', color: '#111', lineHeight: 0.92, marginTop: 22, letterSpacing: -1.5 }}>
               <div>AND THE ONES I</div>
-              <div style={{ marginTop: 8 }}><span style={{ display: 'inline-block', background: '#3ce84a', padding: '3px 10px', border: '3px solid #111', lineHeight: 1 }}>FIXED CLEAN.</span></div>
+              <div style={{ marginTop: 14 }}><span style={{ display: 'inline-block', background: '#3ce84a', padding: '4px 18px', border: '4px solid #111', lineHeight: 1, boxShadow: '6px 6px 0 #111' }}>FIXED CLEAN.</span></div>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 16, marginTop: 34, flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'center' }}>
