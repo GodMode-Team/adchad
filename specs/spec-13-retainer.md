@@ -14,6 +14,8 @@ friction, then gather info and set one clear expectation: first report 1 week af
      `session.customer` to `prospects.stripe_customer`. Needs a reusable $49/mo Price (`STRIPE_PRICE_RETAINER`).
    - Idempotent (one active sub per prospect). SCA/`requires_action` or no saved card → fall back to the
      hosted $49 Checkout (`tools/stripe.ts checkout({tier:49})`) — never a dead end.
+   - **Book it:** the off-session sub fires `invoice.paid`, **not** our `checkout.session.completed` webhook
+     — record the tier-49 order + revenue on that event so the P&L / Live feed stay correct.
 2. **Thank-you page swaps state** (`Funnel.tsx` done step, `hired` flag): the **video + Yes/No disappear**,
    replaced by — *"Great choice. Fill out this form and I'll get started. You can expect your first report
    a week from filling out the form."* + a **[FILL OUT THE FORM →]** button (`/onboard/<id>`).
