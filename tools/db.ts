@@ -56,10 +56,19 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
       const [sc] = await sql<any[]>`select total from scores where ad_id=${r?.ad_id ?? null} or prospect_id=${id} order by created_at desc limit 1`
       return { found: true, name: p.name, segment: p.segment, ad: ad ?? null, roast_text: r?.text ?? null, score: sc ? Number(sc.total) : null }
     }
-    case 'fixstatus': { // thank-you page polls this: is THIS prospect's fix delivered yet, and what's the tweet to embed?
+    case 'fixstatus': { // thank-you page polls this: is THIS prospect's fix delivered, plus the tweet + Meta-ad fields to render it (live tweet on the left, rendered Meta card on the right)
       const [r] = await sql<any[]>`select ref as image, link_url as tweet_url, created_at from interactions
         where prospect_id=${String(f.id)} and channel='fix' and direction='out' order by created_at desc limit 1`
-      return { delivered: !!r, image: r?.image ?? null, tweetUrl: r?.tweet_url ?? null }
+      if (!r) return { delivered: false, image: null, tweetUrl: null, headline: null, body: null, cta: null, name: null }
+      const [fx] = await sql<any[]>`select fx.headline, fx.body, fx.cta, fx.image_url, p.name
+        from fixes fx join orders o on o.id=fx.order_id join prospects p on p.id=o.prospect_id
+        where o.prospect_id=${String(f.id)} and fx.delivered_at is not null order by fx.delivered_at desc limit 1`
+      return {
+        delivered: true,
+        image: r.image ?? fx?.image_url ?? null,
+        tweetUrl: r.tweet_url ?? null,
+        headline: fx?.headline ?? null, body: fx?.body ?? null, cta: fx?.cta ?? null, name: fx?.name ?? null,
+      }
     }
     case 'halls': { // home page: Hall of Shame = lowest-scored public roasts (their tweet); Hall of Fame = delivered fixes (their X reply)
       // ONE entry per business (distinct prospect) so two fixes of the same ad can't fill both slots; then rank.
@@ -70,16 +79,33 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
           where i.channel='x' and i.direction='out' and i.ref is not null
           order by i.prospect_id, i.created_at desc
         ) q order by score asc nulls last, created_at desc limit 3`
-      const fame = await sql<any[]>`select tweet_url from (
-          select distinct on (prospect_id) link_url as tweet_url, created_at
-          from interactions
-          where channel='fix' and direction='out' and link_url is not null
-          order by prospect_id, created_at desc
-        ) q order by created_at desc limit 3`
+      // Fame returns the FULL Meta-ad fields (not just the tweet) so the home page renders a real ad card — the public
+      // X reply (tweet_url) becomes a "see it live ↗" link. lateral join → public fixes only (one per business).
+      const fame = await sql<any[]>`select image_url, headline, body, cta, name, tweet_url from (
+          select distinct on (o.prospect_id)
+            fx.image_url, fx.headline, fx.body, fx.cta, p.name, i.link_url as tweet_url, fx.delivered_at
+          from fixes fx
+          join orders o on o.id = fx.order_id
+          join prospects p on p.id = o.prospect_id
+          join lateral (
+            select link_url from interactions
+            where prospect_id = o.prospect_id and channel='fix' and direction='out' and link_url is not null
+            order by created_at desc limit 1
+          ) i on true
+          where fx.delivered_at is not null
+          order by o.prospect_id, fx.delivered_at desc
+        ) q order by delivered_at desc limit 3`
       return {
         // ad_id is `xad-<originalTweetId>` (from xroast) → the original ad tweet so the Hall of Shame shows ad + roast
         shame: shame.map((r) => ({ tweetId: String(r.tweet_id), adTweetId: /^xad-\d+$/.test(String(r.ad_id)) ? String(r.ad_id).slice(4) : null, score: r.score != null ? Number(r.score) : null })),
-        fame: fame.map((r) => ({ tweetUrl: String(r.tweet_url) })),
+        fame: fame.map((r) => ({
+          image: r.image_url ? String(r.image_url) : null,
+          headline: r.headline ? String(r.headline) : null,
+          body: r.body ? String(r.body) : null,
+          cta: r.cta ? String(r.cta) : null,
+          name: r.name ? String(r.name) : null,
+          tweetUrl: r.tweet_url ? String(r.tweet_url) : null,
+        })),
       }
     }
     case 'orders': { // unfulfilled paid orders, for the fulfill heartbeat
