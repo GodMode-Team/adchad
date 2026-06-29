@@ -99,4 +99,23 @@ create table if not exists ledger (
 alter table interactions add column if not exists ad_id text;  -- the SPECIFIC ad a roast/fix targets (not just the brand)
 alter table interactions add column if not exists link_url text;  -- public link for the event (e.g. the fix's X reply) — safe to surface in the feed
 
+-- $49/mo retainer ("Hire Chad"): one-click off-session upsell + intake form. test (local) and live (prod) Stripe
+-- share ONE db, and Stripe ids are mode-scoped — so the mode is tracked and test-mode money stays off public surfaces.
+alter table prospects add column if not exists stripe_customer text;    -- reusable Stripe customer (saved on first $5/$12 checkout)
+alter table prospects add column if not exists stripe_sub text;         -- active retainer subscription id (idempotency + "hired")
+alter table prospects add column if not exists stripe_livemode boolean; -- mode the saved customer/sub belong to (test vs live)
+alter table orders add column if not exists livemode boolean default true;  -- false = test-mode order → excluded from public P&L/feed
+alter table ledger add column if not exists livemode boolean default true;  -- false = test-mode money  → excluded from public P&L/feed
+create table if not exists onboarding (
+  id bigserial primary key,
+  prospect_id text references prospects(id),
+  answers jsonb,                       -- the intake form responses (static curated questions)
+  submitted_at timestamptz default now()  -- the 1-week "first report" clock starts here
+);
+-- idempotency: one order per Stripe id (webhook retries / the dual invoice.paid+payment_succeeded events can't double-book).
+-- non-partial: Postgres treats NULL stripe_ids as distinct, so legacy null rows are unaffected and `on conflict` infers it.
+create unique index if not exists orders_stripe_id_uniq on orders (stripe_id);
+-- one intake row per prospect (the form upserts; blocks unbounded spam inserts)
+create unique index if not exists onboarding_prospect_uniq on onboarding (prospect_id);
+
 insert into control (id, paused) values (1, false) on conflict (id) do nothing;

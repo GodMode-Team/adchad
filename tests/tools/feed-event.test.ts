@@ -31,6 +31,12 @@ describe('feed — interaction → event mapping', () => {
     expect(e.link).toContain('123')
   })
 
+  it('maps a $49/mo retainer hire to a "hired" event', () => {
+    const e = interactionEvent({ ...base, channel: 'retainer', direction: 'out', text: 'hired Chad — $49/mo' })
+    expect(e.kind).toBe('hired')
+    expect(e.title).toMatch(/retainer/i)
+  })
+
   it('returns null for internal note/out (not shown)', () => {
     expect(interactionEvent({ ...base, channel: 'note', direction: 'out', text: 'thinking' })).toBeNull()
   })

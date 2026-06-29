@@ -23,8 +23,9 @@ const DEFAULT: Deps = {
 
 /** Fulfill one paid order: generate the fix (once), deliver it (X reply else email), record it. Idempotent + spend-safe. */
 export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAULT): Promise<'delivered' | 'skipped'> {
-  const [o] = await sql<any[]>`select id, prospect_id, buyer_email, status, tier from orders where id=${orderId}`
+  const [o] = await sql<any[]>`select id, prospect_id, buyer_email, status, tier, livemode from orders where id=${orderId}`
   if (!o || o.status !== 'paid' || (o.tier !== 5 && o.tier !== 12)) return 'skipped' // auto-fulfill the $5 single fix + $12 A/B pack ($49 membership is a different product)
+  if (o.livemode === false) return 'skipped' // a test-mode order in the shared DB must never trigger a real fix + public X post from the live worker
 
   const [prior] = await sql<any[]>`select headline, body, cta, image_url, variants, delivered_at from fixes where order_id=${o.id}`
   if (prior?.delivered_at) return 'skipped' // already delivered
@@ -86,7 +87,8 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
 /** Drain every unfulfilled paid order. Single worker → sequential → no double-send. Returns count delivered. */
 export async function fulfillPaidOrders(deps: Deps = DEFAULT): Promise<number> {
   const orders = await sql<any[]>`select o.id from orders o
-    where o.status='paid' and o.tier in (5, 12) and not exists (select 1 from fixes fx where fx.order_id=o.id and fx.delivered_at is not null)
+    where o.status='paid' and o.tier in (5, 12) and coalesce(o.livemode, true)
+      and not exists (select 1 from fixes fx where fx.order_id=o.id and fx.delivered_at is not null)
     order by o.created_at asc`
   let n = 0
   for (const o of orders) {
