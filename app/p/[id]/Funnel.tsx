@@ -270,7 +270,6 @@ export default function Funnel({ data, paid, id }: { data: any; paid: boolean; i
   const upsellHref = `/api/checkout?p=${encodeURIComponent(id)}&tier=49`
   return (
     <Shell>
-      <div style={{ height: 44, flex: 'none', background: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--f-bungee)', fontSize: 18, color: 'var(--yellow)' }}>FIX DEPLOYED 💪</div>
       <div style={{ flex: 1, overflowY: 'auto', background: 'var(--yellow)' }}>
 
         {/* A — payment + upsell video (green) */}
