@@ -61,6 +61,26 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
         where prospect_id=${String(f.id)} and channel='fix' and direction='out' order by created_at desc limit 1`
       return { delivered: !!r, image: r?.image ?? null, tweetUrl: r?.tweet_url ?? null }
     }
+    case 'halls': { // home page: Hall of Shame = lowest-scored public roasts (their tweet); Hall of Fame = delivered fixes (their X reply)
+      // distinct on the tweet so a re-recorded roast/fix never shows twice; then rank (shame = worst, fame = newest).
+      const shame = await sql<any[]>`select tweet_id, score from (
+          select distinct on (i.ref) i.ref as tweet_id, i.created_at,
+            (select total from scores s where s.ad_id = i.ad_id order by s.created_at desc limit 1) as score
+          from interactions i
+          where i.channel='x' and i.direction='out' and i.ref is not null
+          order by i.ref, i.created_at desc
+        ) q order by score asc nulls last, created_at desc limit 3`
+      const fame = await sql<any[]>`select tweet_url from (
+          select distinct on (link_url) link_url as tweet_url, created_at
+          from interactions
+          where channel='fix' and direction='out' and link_url is not null
+          order by link_url, created_at desc
+        ) q order by created_at desc limit 3`
+      return {
+        shame: shame.map((r) => ({ tweetId: String(r.tweet_id), score: r.score != null ? Number(r.score) : null })),
+        fame: fame.map((r) => ({ tweetUrl: String(r.tweet_url) })),
+      }
+    }
     case 'orders': { // unfulfilled paid orders, for the fulfill heartbeat
       const rows = await sql<any[]>`select o.id, o.prospect_id, o.tier, o.amount, o.buyer_email, o.status
         from orders o where o.status='paid'
