@@ -1,5 +1,5 @@
 import { run } from '../tools/db'
-import RoastBox from './RoastBox'
+import RoastModal from './RoastModal'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,11 +37,14 @@ export default async function Home() {
         .ac-final-cta:hover{background:var(--green)}
         .ac-foot-link{transition:color .12s ease}
         .ac-foot-link:hover{color:#fff}
+        .nav-chad{animation:navbob 2.6s ease-in-out infinite;transform-origin:50% 92%}
+        .nav-logo:hover .nav-chad{animation-duration:.5s}
+        @keyframes navbob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-3px) rotate(3deg)}}
       `}</style>
 
       {/* ===== TOP TICKER ===== */}
       <div style={{ height: 38, background: PINK, borderBottom: `3px solid ${INK}`, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
-        <div style={{ display: 'flex', whiteSpace: 'nowrap', fontFamily: F_BUNGEE, fontSize: 14, color: INK, animation: 'mq 18s linear infinite' }}>
+        <div style={{ display: 'flex', whiteSpace: 'nowrap', fontFamily: F_BUNGEE, fontSize: 14, color: INK, animation: 'mq 60s linear infinite' }}>
           <span>{tick.repeat(4)}</span><span>{tick.repeat(4)}</span>
         </div>
       </div>
@@ -49,7 +52,10 @@ export default async function Home() {
       {/* ===== NAV ===== */}
       <div style={{ position: 'sticky', top: 0, zIndex: 50, background: BG, borderBottom: '2px solid var(--line)' }}>
         <div style={{ ...wrap, padding: '12px 22px', display: 'flex', alignItems: 'center', gap: 18 }}>
-          <div style={{ fontFamily: F_HEAVY, fontSize: 24, letterSpacing: -1, color: '#fff' }}>ADCHAD</div>
+          <div className="nav-logo" style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+            <img className="nav-chad" src="/chad-cutout.png" alt="" style={{ height: 38, width: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,.45))' }} />
+            <span style={{ fontFamily: F_HEAVY, fontSize: 24, letterSpacing: -1, color: '#fff' }}>ADCHAD</span>
+          </div>
           <div style={{ display: 'flex', gap: 22, marginLeft: 14 }}>
             <a className="ac-link" href="#how" style={{ fontFamily: F_MONO, fontSize: 13, color: '#9fb0a0' }}>how it works</a>
             <a className="ac-link" href="/live" style={{ fontFamily: F_MONO, fontSize: 13, color: '#9fb0a0' }}>live feed</a>
@@ -59,23 +65,33 @@ export default async function Home() {
       </div>
 
       {/* ===== HERO ===== */}
-      <div id="hero" style={{ background: GREEN, borderBottom: `4px solid ${INK}`, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ ...wrap, padding: '62px 22px 70px', display: 'flex', gap: 30, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 330 }}>
-            <div style={{ display: 'inline-block', transform: 'rotate(-2deg)', background: INK, color: GREEN, fontFamily: F_MONO, fontWeight: 700, fontSize: 12, letterSpacing: 1, padding: '5px 12px', marginBottom: 18 }}>AN AI AD AGENCY THAT PROSPECTS FOR ITSELF</div>
-            <div style={{ fontFamily: F_DISPLAY, fontSize: 84, lineHeight: 0.86, color: INK, letterSpacing: -1 }}>
-              YOUR ADS<br />ARE <span style={{ color: '#fff', WebkitTextStroke: `3px ${INK}`, textShadow: `5px 5px 0 ${PINK}` }}>COOKED.</span>
-            </div>
-            <div style={{ fontFamily: F_SANS, fontSize: 18, color: '#0a3d16', fontWeight: 500, marginTop: 18, maxWidth: 480 }}>
-              I find small businesses running weak ads, roast them in public, then sell the fix for $5. You&apos;re probably one of them. Let&apos;s find out.
-            </div>
-            <RoastBox />
+      <div id="hero" style={{ background: YELLOW, borderBottom: `4px solid ${INK}`, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ maxWidth: 880, margin: '0 auto', padding: 'clamp(22px,3vw,38px) 22px clamp(30px,4vw,48px)', textAlign: 'center' }}>
+          <div style={{ fontFamily: F_DISPLAY, fontSize: 'clamp(44px,8.5vw,84px)', lineHeight: 0.94, color: INK, letterSpacing: -1 }}>
+            YOUR AD IS <span style={{ color: '#fff', WebkitTextStroke: `3px ${INK}`, textShadow: `5px 5px 0 ${PINK}` }}>COOKED.</span>
           </div>
-          <div style={{ flex: 'none', width: 300, position: 'relative', alignSelf: 'stretch', minHeight: 340 }}>
-            <img src="/chad-cutout.png" alt="Chad, the AI ad agency mascot" style={{ position: 'absolute', bottom: -70, left: '50%', transform: 'translateX(-50%)', width: 430, filter: 'drop-shadow(0 14px 14px rgba(0,0,0,.3))' }} />
-            <div style={{ position: 'absolute', top: 10, right: -6, transform: 'rotate(9deg)', background: INK, color: YELLOW, fontFamily: F_BUNGEE, fontSize: 14, padding: '7px 11px', boxShadow: `4px 4px 0 ${PINK}`, animation: 'floaty 4s ease-in-out infinite' }}>23/100<br /><span style={{ fontSize: 9, color: '#fff' }}>avg. before me</span></div>
-            <div style={{ position: 'absolute', bottom: 90, left: -18, transform: 'rotate(-8deg)', background: YELLOW, color: INK, fontFamily: F_MARKER, fontSize: 18, padding: '6px 12px', border: `3px solid ${INK}` }}>skill issue 💀</div>
+          <div style={{ fontFamily: F_SANS, fontSize: 'clamp(15px,1.9vw,17px)', color: INK, fontWeight: 500, margin: '12px auto 0', maxWidth: 660, lineHeight: 1.45 }}>
+            I&apos;m an AI that&apos;s seen ten thousand bad ads — and yours is one of them. I roast it in public, then unfuck it for $5.
           </div>
+
+          {/* THE FEATURE — Chad's 2-minute roast reel, now the biggest thing on screen */}
+          <div style={{ position: 'relative', maxWidth: 780, margin: 'clamp(18px,2.6vw,26px) auto 0' }}>
+            <video
+              controls
+              playsInline
+              preload="metadata"
+              poster="https://teaser-page-virid.vercel.app/poster.jpg"
+              style={{ display: 'block', width: '100%', aspectRatio: '16 / 9', background: '#000', border: `4px solid ${INK}`, borderRadius: 14, boxShadow: `8px 8px 0 ${INK}` }}
+            >
+              <source src="https://teaser-page-virid.vercel.app/adchad-2min.mp4" type="video/mp4" />
+            </video>
+          </div>
+
+          {/* ONE CTA — opens the drop-your-ad modal */}
+          <div style={{ marginTop: 'clamp(20px,3vw,30px)' }}>
+            <RoastModal />
+          </div>
+          <div style={{ marginTop: 16, fontFamily: F_MARKER, fontSize: 19, color: INK, transform: 'rotate(-1deg)' }}>Real roasts. Real fixes. Running right now.</div>
         </div>
       </div>
 
@@ -100,7 +116,7 @@ export default async function Home() {
                   <div style={{ lineHeight: 1.2 }}><div style={{ fontWeight: 700, fontSize: 13, color: '#222' }}>Bella Vista Med Spa</div><div style={{ fontSize: 11, color: '#8a8d91' }}>Sponsored · 🌐</div></div>
                 </div>
                 <div style={{ padding: '0 13px 10px', fontSize: 13, color: '#222' }}>✨We Do Botox &amp; More!✨ Call us TODAY!!! 💉🔥</div>
-                <div style={{ height: 150, background: 'repeating-linear-gradient(45deg,#e9ebee,#e9ebee 11px,#dfe2e6 11px,#dfe2e6 22px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontFamily: F_MONO, fontSize: 10, color: '#9aa0a6', background: '#ffffff88', padding: '3px 8px', borderRadius: 4 }}>stock photo · woman touching face</span></div>
+                <img src="/medspa-stock.png" alt="" style={{ display: 'block', width: '100%', height: 150, objectFit: 'cover', objectPosition: 'center 35%' }} />
                 <div style={{ background: '#f0f2f5', padding: '11px 13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ lineHeight: 1.25 }}><div style={{ fontSize: 10, color: '#8a8d91', letterSpacing: 0.5 }}>BELLAVISTAMEDSPA.COM</div><div style={{ fontWeight: 700, fontSize: 13, color: '#222' }}>We Do Botox &amp; More!</div></div>
                   <div style={{ background: '#dadde1', color: '#222', fontSize: 12, fontWeight: 600, padding: '7px 12px', borderRadius: 6 }}>Learn More</div>

@@ -1,5 +1,5 @@
 'use client'
-import { useRef, useState } from 'react'
+import { useRef, useState, type DragEvent } from 'react'
 
 // The REAL on-demand roast - replaces the mockup's fake URL→roast box.
 // Uploads a screenshot + email to /api/roast, then reveals the score card.
@@ -11,6 +11,8 @@ const isEmail = (s: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s)
 
 export default function RoastBox() {
   const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+  const [dragging, setDragging] = useState(false)
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
   const [result, setResult] = useState<RoastResult | null>(null)
@@ -18,6 +20,20 @@ export default function RoastBox() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const ready = !!file && isEmail(email) && status !== 'loading'
+
+  // accept a dropped/picked file — images only, with a live thumbnail preview
+  function acceptFile(f: File | null) {
+    if (!f) return
+    if (!f.type.startsWith('image/')) {
+      setError('PNG or JPG only — that’s not an ad Chad can roast'); setStatus('error'); return
+    }
+    setPreview((prev) => { if (prev) URL.revokeObjectURL(prev); return URL.createObjectURL(f) })
+    setFile(f); setStatus('idle'); setError('')
+  }
+
+  const onDragOver = (e: DragEvent<HTMLLabelElement>) => { e.preventDefault(); if (!dragging) setDragging(true) }
+  const onDragLeave = (e: DragEvent<HTMLLabelElement>) => { e.preventDefault(); setDragging(false) }
+  const onDrop = (e: DragEvent<HTMLLabelElement>) => { e.preventDefault(); setDragging(false); acceptFile(e.dataTransfer.files?.[0] ?? null) }
 
   async function roastMe() {
     if (!file || !isEmail(email) || status === 'loading') return
@@ -50,24 +66,38 @@ export default function RoastBox() {
 
       {/* the input box - white brutalist card, matches the mockup's hero box */}
       <div style={{ background: '#fff', border: `4px solid ${INK}`, borderRadius: 14, padding: 10, boxShadow: `6px 6px 0 ${INK}` }}>
-        {/* file drop zone */}
+        {/* file drop zone — big, obvious, drag-and-drop */}
         <label
-          className="rb-drop"
+          className={`rb-drop${dragging ? ' rb-drop-on' : ''}`}
+          onDragOver={onDragOver}
+          onDragEnter={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
           style={{
-            display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
-            border: `2px dashed ${file ? GREEN : '#bbb'}`, borderRadius: 10, padding: '12px 14px',
-            fontFamily: F_MONO, fontSize: 13, color: file ? '#0a3d16' : '#555', background: '#fff',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            gap: 8, cursor: 'pointer', textAlign: 'center',
+            border: `3px dashed ${dragging ? PINK : file ? GREEN : '#c4c4c4'}`,
+            borderRadius: 12, padding: '30px 18px', minHeight: 156,
+            fontFamily: F_MONO, color: file ? '#0a3d16' : '#555',
+            background: dragging ? '#fff5f8' : '#fff',
           }}
         >
-          <span style={{ fontSize: 20, lineHeight: 1 }}>{file ? '✅' : '📸'}</span>
-          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {file ? file.name : 'drop a screenshot of your ad'}
+          {preview ? (
+            <img src={preview} alt="your ad" style={{ pointerEvents: 'none', maxHeight: 116, maxWidth: '100%', borderRadius: 8, border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}` }} />
+          ) : (
+            <span style={{ pointerEvents: 'none', fontSize: 46, lineHeight: 1 }}>{dragging ? '🔥' : '📸'}</span>
+          )}
+          <span style={{ pointerEvents: 'none', fontFamily: F_BUNGEE, fontSize: 16, color: file ? '#0a3d16' : INK, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {dragging ? 'DROP IT' : file ? file.name : 'DROP YOUR AD HERE'}
+          </span>
+          <span style={{ pointerEvents: 'none', fontFamily: F_MONO, fontSize: 12, color: '#8a8d91' }}>
+            {file ? 'click to swap · PNG or JPG' : 'drag a screenshot in, or click to browse · PNG or JPG'}
           </span>
           <input
             ref={fileRef}
             type="file"
-            accept="image/*"
-            onChange={(e) => { setFile(e.target.files?.[0] ?? null); setStatus('idle'); setError('') }}
+            accept="image/png,image/jpeg,image/webp"
+            onChange={(e) => acceptFile(e.target.files?.[0] ?? null)}
             style={{ display: 'none' }}
           />
         </label>
