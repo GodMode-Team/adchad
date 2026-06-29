@@ -1,6 +1,7 @@
 // See the ad. Foreplay's `copy` field is the caption (often null for DCO ads) — the real copy is IN the image,
 // so we audit the creative with a vision model. Roasts MUST be grounded in what's actually visible.
 import { readFileSync, existsSync } from 'node:fs'
+import { costUsdOf } from './cost'
 
 const MODEL = process.env.MODEL_VISION || 'google/gemini-2.5-flash'
 
@@ -42,6 +43,7 @@ export type AdLook = {
   real_flaws: string[]
   score: number   // 0–100 creative quality, lower = worse
   verdict: string // one brutal line
+  costUsd?: number // real USD cost of this vision call (OpenRouter usage.cost) — for P&L
 }
 
 /** Look at an ad image and report ONLY what's actually visible (text, social proof, real flaws). */
@@ -63,12 +65,14 @@ export async function describe(imageUrl: string): Promise<AdLook> {
       model: MODEL,
       messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: toImageUrl(imageUrl) } }] }],
       response_format: { type: 'json_object' },
+      usage: { include: true }, // return the real USD cost so the P&L is exact, not estimated
     }),
   })
   if (!res.ok) throw new Error(`vision ${res.status}: ${(await res.text()).slice(0, 200)}`)
   const j: any = await res.json()
   const txt: string = j.choices?.[0]?.message?.content ?? '{}'
   const look = parseJsonObject(txt) as AdLook
+  look.costUsd = costUsdOf(j)
   // normalize the two scored fields so callers can rely on them
   const n = Number((look as any).score)
   look.score = Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : 30

@@ -2,6 +2,7 @@ import { sql } from '../lib/db'
 import { fix as realFix, type FixResult } from './fix'
 import { send as realSend } from './email'
 import { xpost as realXpost } from './xpost'
+import { bookCost } from './cost'
 
 // Deterministic fulfillment — NO agent brain. Webhook records a paid order; the worker (scripts/fulfill-worker.ts)
 // polls and drains here. Delivery is a PUBLIC X reply into the roast thread when one exists (the funny, public proof);
@@ -40,7 +41,7 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
   if (prior?.image_url) {
     // a previous run generated but delivery failed — reuse it, do NOT pay for gpt-image-2 again
     const imgs: string[] = prior.variants?.images?.length ? prior.variants.images : [prior.image_url]
-    r = { imageUrl: prior.image_url, imageUrls: imgs, headline: prior.headline, body: prior.body, cta: prior.cta, fixed: [] }
+    r = { imageUrl: prior.image_url, imageUrls: imgs, headline: prior.headline, body: prior.body, cta: prior.cta, fixed: [], cost: 0 } // cost already booked on first gen
   } else {
     const [ad] = await sql<any[]>`select creative_url from ads where brand_id=${o.prospect_id} and creative_url is not null order by created_at desc limit 1`
     const [roast] = await sql<any[]>`select text from interactions where prospect_id=${o.prospect_id} and channel in ('roast','x') and direction='out' order by created_at desc limit 1`
@@ -51,7 +52,7 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
     await sql`insert into fixes (order_id, headline, body, cta, image_url, variants)
               values (${o.id}, ${r.headline}, ${r.body}, ${r.cta}, ${r.imageUrls[0]}, ${sql.json({ images: r.imageUrls })})
               on conflict (order_id) do update set headline=excluded.headline, body=excluded.body, cta=excluded.cta, image_url=excluded.image_url, variants=excluded.variants`
-    await sql`insert into ledger (kind, amount_cents, note) values ('cost', ${6 * r.imageUrls.length}, ${'creative fix order ' + o.id + ' (est)'})` // ~6¢/image; revenue is the webhook's
+    await bookCost(r.cost, `creative fix order ${o.id}`) // real cost: vision + copy + N images (revenue is the webhook's)
   }
 
   // DELIVER — public X reply into the roast thread, else email. (Persist-before-deliver above keeps retries free.)
