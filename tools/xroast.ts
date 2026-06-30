@@ -1,6 +1,6 @@
 import { TwitterApi } from 'twitter-api-v2'
 import { sql } from '../lib/db'
-import { roast } from './roast'
+import { roast, salesLink } from './roast'
 import { xpost } from './xpost'
 import { bookCost } from './cost'
 
@@ -53,7 +53,7 @@ export async function xroast(opts: { tweet: string }): Promise<{ prospectId: str
   await bookCost(r.cost, `roast prospect ${prospectId}`) // real P&L: vision + grok cost of this roast
 
   // 4. reply publicly with the roast + the per-prospect sales page (re-sells, then Stripe — never a raw link)
-  const salesUrl = `${process.env.APP_URL || 'https://adchad.ai'}/p/${prospectId}`
+  const salesUrl = salesLink(prospectId)
   const posted = await xpost({ text: r.xPost, link: salesUrl, replyToTweetId: id })
 
   // 5. record the roast reply tweet id — the row tools/fulfill.ts reads to reply the fix into the thread

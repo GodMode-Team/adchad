@@ -56,8 +56,14 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
       return describe(S('image'))
     }
     case 'roast': {
-      const { roast } = await import('../tools/roast')
-      return roast({ image: S('image'), handle: f.handle ? S('handle') : null, brand: f.brand ? S('brand') : null, adId: f['ad-id'] ? S('ad-id') : null, prospectId: f['prospect-id'] ? S('prospect-id') : null })
+      const { roast, salesLink } = await import('../tools/roast')
+      const pid = f['prospect-id'] ? S('prospect-id') : null
+      const r = await roast({ image: S('image'), handle: f.handle ? S('handle') : null, brand: f.brand ? S('brand') : null, adId: f['ad-id'] ? S('ad-id') : null, prospectId: pid })
+      // xroast attaches the real /p/<id> link via xpost AFTER it knows the prospect id; this standalone tool just
+      // returns text a human/agent pastes (e.g. into Slack), so attach our REAL adchad.ai link here too — never
+      // ship a roast without it (roast() already stripped any URL the model hallucinated, e.g. "chadfix.com/5").
+      const url = salesLink(pid)
+      return { ...r, xPost: `${r.xPost}\n${url}`, salesUrl: url }
     }
     case 'fix': {
       const { fix } = await import('../tools/fix')
