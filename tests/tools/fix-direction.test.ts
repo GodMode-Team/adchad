@@ -13,8 +13,27 @@ describe('fix — stops the before/after one-trick-pony, keeps it simple', () =>
     expect(p).toMatch(/before.?after/i) // it names the pattern it's banning
     expect(p).toMatch(/simple|uncluttered|one .{0,10}idea|not a busy|not.{0,20}dashboard/i)
   })
-  it('the A/B angle rotation is varied — not every angle is a before/after', () => {
+  // The $12 A/B pack must test different REASONS to click (message angles), not three looks of one message.
+  it('FIX_ANGLES are distinct MESSAGE angles (different reasons to click), none a before/after', () => {
     expect(FIX_ANGLES.length).toBeGreaterThanOrEqual(3)
-    expect(FIX_ANGLES.filter((a) => /before.?after/i.test(a)).length).toBeLessThanOrEqual(1)
+    for (const a of FIX_ANGLES) { expect(a.key).toBeTruthy(); expect(a.brief).toBeTruthy() }
+    expect(new Set(FIX_ANGLES.map((a) => a.key)).size).toBe(FIX_ANGLES.length) // distinct
+    expect(FIX_ANGLES.filter((a) => /before.?after/i.test(a.brief)).length).toBe(0)
+  })
+
+  it('buildFixCopyPrompt injects the chosen message angle into the variant', () => {
+    expect(buildFixCopyPrompt(look, 'Acme', null, FIX_ANGLES[0])).toContain(FIX_ANGLES[0].brief)
+  })
+
+  // Aim Grok AT a great ad, grounded in brand/taste/ADCHAD-TASTE-PACK.md + the marketingskills ad-creative/copywriting
+  // skills: one big idea, a headline formula, concrete proof, Meta char limits, and the corporate-slop filler to ban.
+  it('encodes the positive ad-craft rubric (grounded, with headline formulas + Meta limits)', () => {
+    const p = buildFixCopyPrompt(look, 'Acme', 'this ad is generic garbage')
+    expect(p).toMatch(/one big idea|single .{0,20}promise/i)
+    expect(p).toMatch(/proof/i)
+    expect(p).toMatch(/elevate|unlock|seamless|streamline|optimize/i)  // names the slop filler to avoid
+    expect(p).toMatch(/125|front-load|≤ ?40|character/i)               // Meta field limits + front-load the hook
+    expect(p).toMatch(/without|never .* again|category.{0,6}for/i)     // a proven headline formula
+    expect(p).toMatch(/marketingskills/i)                              // cited source
   })
 })

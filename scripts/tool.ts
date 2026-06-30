@@ -78,7 +78,7 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
     }
     case 'fix': {
       const { fix } = await import('../tools/fix')
-      return fix({ image: S('image'), brand: f.brand ? S('brand') : null, roast: f.roast ? S('roast') : null })
+      return fix({ image: S('image'), brand: f.brand ? S('brand') : null, roast: f.roast ? S('roast') : null, variants: f.variants ? Number(S('variants')) : undefined })
     }
     case 'stripe': {
       const { checkout } = await import('../tools/stripe')

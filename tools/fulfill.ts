@@ -21,6 +21,23 @@ const DEFAULT: Deps = {
   paused: async () => { const [c] = await sql<any[]>`select paused from control where id=1`; return !!c?.paused },
 }
 
+/** The customer-facing email body (pure, testable). One creative for the $5 fix; one per ANGLE for the $12 A/B pack
+ *  (each variant has its OWN copy, so each renders its angle + headline/body/cta + creative). */
+export function fixEmailBody(r: FixResult): string {
+  const fixedBlock = r.fixed?.length ? `What I fixed:\n- ${r.fixed.join('\n- ')}\n\n` : ''
+  const vs = r.variants ?? []
+  if (vs.length > 1) {
+    const blocks = vs.map((v, i) =>
+      `── VARIANT ${i + 1} · ${v.angle.toUpperCase()} ANGLE ──\nHEADLINE\n${v.headline}\n\nPRIMARY TEXT\n${v.body}\n\nCTA (Meta button label)\n${v.cta}\n\nCREATIVE\n${v.imageUrl}`,
+    ).join('\n\n')
+    return `Your A/B pack is ready — ${vs.length} ready-to-run ads, each testing a different angle. Drop each creative in Meta's image slot and put its copy in the native fields (don't paste copy onto the image).\n\n${blocks}\n\n${fixedBlock}— Chad`
+  }
+  const imgsBlock = r.imageUrls.length > 1
+    ? `READY-TO-RUN CREATIVES (A/B test these):\n${r.imageUrls.join('\n')}`
+    : `READY-TO-RUN CREATIVE:\n${r.imageUrls[0]}`
+  return `Your fixed ad is ready. The creative goes in Meta's image slot; the copy below goes in the native fields (don't paste it onto the image too).\n\nHEADLINE\n${r.headline}\n\nPRIMARY TEXT\n${r.body}\n\nCTA (pick this label in Meta's button dropdown)\n${r.cta}\n\n${imgsBlock}\n\n${fixedBlock}— Chad`
+}
+
 /** Fulfill one paid order: generate the fix (once), deliver it (X reply else email), record it. Idempotent + spend-safe. */
 export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAULT): Promise<'delivered' | 'skipped'> {
   const [o] = await sql<any[]>`select id, prospect_id, buyer_email, status, tier, livemode from orders where id=${orderId}`
@@ -42,7 +59,7 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
   if (prior?.image_url) {
     // a previous run generated but delivery failed — reuse it, do NOT pay for gpt-image-2 again
     const imgs: string[] = prior.variants?.images?.length ? prior.variants.images : [prior.image_url]
-    r = { imageUrl: prior.image_url, imageUrls: imgs, headline: prior.headline, body: prior.body, cta: prior.cta, fixed: [], cost: 0 } // cost already booked on first gen
+    r = { imageUrl: prior.image_url, imageUrls: imgs, headline: prior.headline, body: prior.body, cta: prior.cta, variants: prior.variants?.variants ?? undefined, fixed: [], cost: 0 } // cost already booked on first gen
   } else {
     const [ad] = await sql<any[]>`select creative_url from ads where brand_id=${o.prospect_id} and creative_url is not null order by created_at desc limit 1`
     const [roast] = await sql<any[]>`select text from interactions where prospect_id=${o.prospect_id} and channel in ('roast','x') and direction='out' order by created_at desc limit 1`
@@ -51,7 +68,7 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
     r = await deps.fix({ image: ad.creative_url, brand: p?.name || 'your brand', roast: roast?.text ?? null, variants })
     // persist the generation + book the cost ONCE, before delivery — so a retry reuses this and never re-spends
     await sql`insert into fixes (order_id, headline, body, cta, image_url, variants)
-              values (${o.id}, ${r.headline}, ${r.body}, ${r.cta}, ${r.imageUrls[0]}, ${sql.json({ images: r.imageUrls })})
+              values (${o.id}, ${r.headline}, ${r.body}, ${r.cta}, ${r.imageUrls[0]}, ${sql.json({ images: r.imageUrls, variants: r.variants ?? null })})
               on conflict (order_id) do update set headline=excluded.headline, body=excluded.body, cta=excluded.cta, image_url=excluded.image_url, variants=excluded.variants`
     await bookCost(r.cost, `creative fix order ${o.id}`) // real cost: vision + copy + N images (revenue is the webhook's)
   }
@@ -67,14 +84,8 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
     fixLink = posted.url
     console.log(`[fulfill] order ${o.id} → fix replied on X (${r.imageUrls.length} img): ${posted.url}`)
   } else {
-    const imgsBlock = r.imageUrls.length > 1
-      ? `READY-TO-RUN CREATIVES (A/B test these):\n${r.imageUrls.join('\n')}`
-      : `READY-TO-RUN CREATIVE:\n${r.imageUrls[0]}`
-    const body =
-      `Your fixed ad is ready. The creative goes in Meta's image slot; the copy below goes in the native fields (don't paste it onto the image too).\n\n` +
-      `HEADLINE\n${r.headline}\n\nPRIMARY TEXT\n${r.body}\n\nCTA (pick this label in Meta's button dropdown)\n${r.cta}\n\n${imgsBlock}\n\n` +
-      (r.fixed.length ? `What I fixed:\n- ${r.fixed.join('\n- ')}\n\n` : '') + `— Chad`
-    await deps.send({ to: o.buyer_email, subject: 'Your fixed ad is ready', body })
+    const subject = (r.variants?.length ?? 0) > 1 ? 'Your A/B ad pack is ready' : 'Your fixed ad is ready'
+    await deps.send({ to: o.buyer_email, subject, body: fixEmailBody(r) })
   }
 
   await sql`update fixes set delivered_at=now() where order_id=${o.id}` // mark delivered right after → a later hiccup can't re-deliver
