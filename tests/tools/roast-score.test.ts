@@ -8,7 +8,7 @@ import type { AdLook } from '../../tools/vision'
 const uniq = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 const adId = `rs-ad-${uniq}`
 const pid = `rs-${uniq}`
-const LOOK: AdLook = { headline: 'x', body: null, offer: null, cta: null, social_proof: null, visual: null, real_flaws: ['generic'], score: 42, verdict: 'weak' }
+const LOOK: AdLook = { headline: 'x', body: null, offer: null, cta: null, social_proof: null, visual: null, real_flaws: ['generic'], is_video: false, score: 42, verdict: 'weak' }
 
 vitestDescribe('roast tool — persists the creative score on the agent path', () => {
   beforeAll(async () => {

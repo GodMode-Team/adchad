@@ -41,6 +41,7 @@ export type AdLook = {
   social_proof: string | null
   visual: string | null
   real_flaws: string[]
+  is_video: boolean // video ad (play button/thumbnail visible) → burned-in text is a caption, not printed-on-object
   score: number   // 0–100 creative quality, lower = worse
   verdict: string // one brutal line
   costUsd?: number // real USD cost of this vision call (OpenRouter usage.cost) — for P&L
@@ -51,10 +52,11 @@ export type AdLook = {
 export const VISION_PROMPT =
   `You are auditing a Meta ad IMAGE. Report ONLY what is actually visible — never invent or assume. ` +
   `Read ALL on-image text. ` +
-  `If the ad is a VIDEO (e.g. a play button is visible), any text burned into the frame is a CAPTION/SUBTITLE overlay — ` +
-  `read it as caption text, do NOT describe it as printed on a person's clothing/shirt, a sign, or any object, and do NOT roast it as a deliberate design choice. ` +
+  `If the ad is a VIDEO (e.g. a play button or video thumbnail is visible), any text burned into the frame is a CAPTION/SUBTITLE overlay — ` +
+  `read it as caption text, do NOT describe it as printed on a person's clothing/shirt, hands, body, a sign, or any object, and do NOT roast it as a deliberate design choice. ` +
   `Return ONLY minified JSON: ` +
-  `{"headline","body","offer","cta","social_proof","visual","real_flaws","score","verdict"}. ` +
+  `{"headline","body","offer","cta","social_proof","visual","real_flaws","is_video","score","verdict"}. ` +
+  `is_video = true if a play button or video thumbnail is visible (the creative is a video, not a static image), else false. ` +
   `social_proof = any visible star ratings, reviews, testimonials, or credibility claims (else null). ` +
   `real_flaws = an array of the 2-3 biggest GENUINE weaknesses of THIS specific ad (only true ones). ` +
   `score = an INTEGER 0-100 for THIS ad's creative quality, judged by a RUTHLESS world-class ad critic. Most small-business ads are weak, so BE HARSH and grade on a tight curve — default to skepticism, and when unsure score LOW. Anchors: stock-photo / vague hook / dead CTA / generic / stale / cluttered = 8-25; forgettable-but-functional = 30-45; only a genuinely sharp ad (specific hook + real proof + ONE clear CTA + strong visual) earns 60+; reserve 85+ for ads you'd put in a case study. A "fine" ad is still a 35, not a 65. ` +
@@ -85,5 +87,6 @@ export async function describe(imageUrl: string): Promise<AdLook> {
   look.score = Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : 30
   look.verdict = String(look.verdict || look.real_flaws?.[0] || 'weak, generic ad').slice(0, 120)
   if (!Array.isArray(look.real_flaws)) look.real_flaws = []
+  look.is_video = !!(look as any).is_video
   return look
 }

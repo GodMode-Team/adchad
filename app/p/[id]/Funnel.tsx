@@ -216,7 +216,7 @@ export default function Funnel({ data, paid, id, initialStep }: { data: any; pai
                 {roast && (
                   <div style={{ background: 'var(--ink)', color: 'var(--fg)', borderRadius: 14, padding: '16px 16px 18px', transform: 'rotate(-0.5deg)', boxShadow: '5px 5px 0 rgba(0,0,0,.25)' }}>
                     <div style={{ fontFamily: 'var(--f-bungee)', fontSize: 13, color: 'var(--green)', marginBottom: 8 }}>THE VERDICT</div>
-                    <div style={{ fontSize: 16, lineHeight: 1.45, fontWeight: 600 }}>{roast}</div>
+                    <div style={{ fontSize: 16, lineHeight: 1.45, fontWeight: 600, whiteSpace: 'pre-line' }}>{roast}</div>
                   </div>
                 )}
 

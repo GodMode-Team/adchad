@@ -42,6 +42,15 @@ export const X_POST_STYLE =
   `- The ad screenshot is attached and our real $5 sales link is ATTACHED AUTOMATICALLY right under your text. So NEVER write a link, URL, or domain yourself — not "chadfix.com", not "adchad.ai", nothing (you'll invent the wrong one). Your CTA is words ONLY plus a 👇 that points down at the attached link.\n` +
   `- End with ONE confident, DIRECTIVE call-to-action — an action to take, never a vague question. Match this directness (keep it in your own tone): "Here, I'll unfuck it for you. You're welcome 👇" / "Click here if you want me to fix it for you 👇".`
 
+// the team's catch: a video ad's burned-in caption ("The IRS") got roasted as text printed on the guy's hands. The vision
+// rule alone wasn't enough — the misattribution surfaced HERE, in the roast. When vision flags is_video, tell Grok the
+// on-image text is a caption, never the person/their hands/clothing. Injected ONLY for videos (a static ad's text IS
+// deliberate, so it stays fair game). Pairs with vision.ts's is_video flag.
+export const VIDEO_NOTE =
+  `\n\nVIDEO AD — the creative is a VIDEO (a play button / paused thumbnail is visible). Any on-image text above is a ` +
+  `burned-in CAPTION/SUBTITLE, NOT part of the design: never roast it as text printed on the person, their hands, ` +
+  `clothing, a sign or any object, and don't mock the paused-thumbnail framing as a deliberate creative choice.`
+
 const GOOD_AD = 70 // vision score at/above which the ad is genuinely strong → coach it, don't fake-roast it
 
 const SYSTEM_GOODAD = `You are AdChad — a brutally direct, zero-fucks jacked ad expert. THIS ad is actually good, so do NOT roast it (faking a takedown on a solid ad makes you look like a clueless hater). Respect the work, then make it sharper.
@@ -119,10 +128,11 @@ export async function roast(opts: { image: string; handle?: string | null; brand
     `- Visual: ${look.visual ?? '—'}\n` +
     `- Real weaknesses: ${(look.real_flaws ?? []).join('; ') || '—'}`
   const brief = roastBrief(look)
+  const videoNote = look.is_video ? VIDEO_NOTE : '' // only videos get the caption guardrail; static-ad text is fair game
   const ctx =
     `Business: ${opts.brand || 'this business'}.` +
     (opts.handle ? ` Their X handle is @${opts.handle}.` : ` They have no public X handle — open with a savage descriptor instead of an @handle.`) +
-    `\n\n${ad}${META_AD_NOTE}${X_POST_STYLE}\n\n${brief.instruction}`
+    `\n\n${ad}${videoNote}${META_AD_NOTE}${X_POST_STYLE}\n\n${brief.instruction}`
 
   const t1 = Date.now()
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
