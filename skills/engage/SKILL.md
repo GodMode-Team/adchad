@@ -15,6 +15,8 @@ metadata:
 The engage heartbeat (every 15m), or "check our mentions / inbox."
 
 ## Procedure
+0. **Launch campaign** (spec-14, if armed): `pnpm -s tool launch run` → auto-roasts every new image reply on the launch tweet and delivers the free fix in-thread. Deterministic + idempotent (dedups on reply id); a no-op when disarmed or paused. Arm/disarm: `pnpm -s tool launch set --tweet <url|id>` / `launch off`.
+   <!-- ponytail: 15m via this engage beat is enough to start; add scripts/launch-worker.ts (clone fulfill-worker) only if you want ~30s cadence -->
 1. `pnpm -s tool xread --mentions` and `pnpm -s tool email read` → new inbound.
    (If `xread` 403s on the free X tier, log it for `/report` as a plan-upgrade ask — don't keep retrying.)
 2. For each, look up the prospect + history: `pnpm -s tool db prospects`.

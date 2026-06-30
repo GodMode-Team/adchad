@@ -46,3 +46,27 @@ Implementation: `skills/prospect/SKILL.md` step 2 (bare-niche + broaden-once-the
 
 ## Pages (Chunks 4–6) + design system (Chunk 1)
 Presentational → Manual QA (chrome-devtools @390px + desktop), see `manual-qa-log.md` → "Brand redesign". No component-test harness in the repo (vitest = tools/routes only).
+
+## spec-14 Launch campaign — 2026-06-29
+
+**Plan:** ~/.claude/plans/replicated-finding-backus.md (approved). Pipeline run by main-context Claude.
+
+**Step 2 — Failing test (RED):** `tests/tools/launch.test.ts`
+```
+× mapReplies … drops unresolvable authors → expected { items: [] } to deeply equal { items: [ { id: '111', … } ] }
+× launch.run happy path → not implemented
+× launch.run skip self → not implemented
+× launch.run skip dup → not implemented
+× launch.run disarmed → not implemented
+× launch.run paused → not implemented
+FAIL launch.arm/disarm → PostgresError: column "launch_tweet_id" does not exist
+Tests  6 failed | 1 passed | 1 skipped (8)
+```
+
+**Step 3 — Implementation (GREEN):** schema alters (`control.launch_tweet_id`, `orders.source`), `mapReplies`+`replies` in `tools/xread.ts`, `tools/launch.ts` (run/arm/disarm + realDeps), CLI dispatch in `scripts/tool.ts`, engage-cron line, spec fixes.
+```
+pnpm migrate → migrated ✓
+npx vitest run tests/tools/launch.test.ts → Tests  8 passed (8)
+npx tsc --noEmit → exit 0
+npx vitest run dispatch.test.ts xpost-reply.test.ts → 12 passed (no regression)
+```

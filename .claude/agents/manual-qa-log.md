@@ -47,3 +47,19 @@ Driven on the dev server (:3001) via chrome-devtools; full project `tsc=0`; all 
 - **Live (`/live`, mobile):** P&L tiles (REVENUE/SPEND/MARGIN) + SCANNED/ROASTS/SALES counters + accent-bordered timeline + NEW badge + score chips, real `/api/feed`. `live-mobile.png`.
 - **QA finding (FIXED):** on-demand web-upload prospects (`email_source='inbound'`) leaked into the PUBLIC feed as "New target: unknown · score N". Fixed the `feed` op to exclude inbound prospects → verified **0 leaked**, 10 db tests still green.
 
+
+## spec-14 Launch campaign — 2026-06-29 (real CLI + live X API, read/no-post)
+
+Drove the real `pnpm -s tool` CLI against the live DB + live X API. Public-posting e2e (actual roast/fix on a real image reply) is GATED on user go-live + an image reply existing — not run.
+
+| Check | Command | Result |
+|---|---|---|
+| X tier supports conversation_id+media search (key unknown) | `xread --replies 2071805835890810934` | `{"items":[]}` — no 403/error → tier OK; tweet has no image replies yet |
+| Live extraction `res.tweets`/`res.includes.users` + `mapReplies` join | scratch search `has:images dog` | `rawTweetCount:10, rawUserCount:10, resolvedItems:10` — handles resolved correctly |
+| Arm via URL (round-trip) | `launch set --tweet https://x.com/.../2071805835890810934` → read control | `launch_tweet_id:"2071805835890810934"` |
+| FULL armed run vs real empty reply set (whole path, posts nothing) | `launch run` (armed, kill-switch off) | `{"processed":[],"skipped":[],"errors":[]}` |
+| Kill-switch guard | `db pause` → `launch run` | `{"reason":"paused"}` no-op |
+| Disarmed guard | `launch run` (disarmed) | `{"reason":"disarmed"}` no-op |
+| State restored | `db resume` + `launch off` | `{paused:false}`, `launch_tweet_id:null` |
+
+UNVERIFIED (gated): live public roast reply + fulfill-worker fix reply on a real image reply — needs (a) an ad-image reply on the tweet and (b) go-live authorization. Component tools (xroast, fulfillOrder/fulfill-worker) are pre-existing + covered by their own live tests; orchestration that calls them is covered by the 10 launch.test.ts cases (stubbed roast, real comped-order shape asserted).

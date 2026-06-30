@@ -126,3 +126,28 @@ Reviewer: senior code + security pass on `git diff main` (committed chunks 1–3
 - **MINOR-7 — FIXED.** Stripe `success_url` → `/p/<prospect>?paid=1` (and cancel → `/p/<prospect>`) so the Funnel DONE screen is reachable via the real flow.
 - MINORs 2/3/5/6 (Blob-URL PII reconstructability, ratelimit map eviction, paused-after-spend [moot — email removed], hit-before-success) — ACCEPTED for the demo; noted.
 Verified: `tsc=0`, 12 tests green, endpoint re-QA'd (score 68, real roast, no email), `roastquota`→3/40.
+
+## fulfillment worker chunk — 2026-06-29
+Scope: tools/fulfill.ts, scripts/fulfill-worker.ts, tests/tools/fulfill.test.ts, db/schema.sql
+- **MAJOR — unbounded re-spend on retry** (tools/fulfill.ts): fix() (paid gpt-image-2 gen) ran before send(); a failed send left the order unfulfilled → 30s poll re-ran → re-generated every cycle, burning money. **FIXED**: persist generation before send, reuse on retry, book cost once, set delivered_at immediately after send. New test `a failed send does not re-pay for generation` (fixCalls===1) covers it. PASS.
+- MINOR — send→record crash window can double-email on retry. WONTFIX (documented; generation already persisted so retry is free; record-before-send risks silent non-delivery, which is worse).
+- MINOR — cost is a flat 6¢ estimate. Acceptable for MVP; note tagged "(est)" in the ledger.
+Verdict: PASS after MAJOR fix. Tests green (2/2).
+
+## spec-14 Launch campaign — 2026-06-29 (high-effort, 3 finder angles)
+
+| # | Sev | Finding | Resolution |
+|---|-----|---------|------------|
+| 1 | BLOCKER | Inline `fulfill()` races the standalone fulfill-worker (30s poll) on the same comped order → double gpt-image spend + double public fix reply | FIXED: dropped inline fulfill; `run()` only comps the order, the single fulfill-worker drains it (same as paid orders). `tools/launch.ts` |
+| 2 | BLOCKER | Comped `source='launch'` order inflates public "SALES"/"FIXES SOLD" count (`db metrics orders_paid`, no source filter) | FIXED: `orders_paid` + `revenue_cents` now exclude `coalesce(source,'')='launch'`. `tools/db.ts:35-36` + regression test |
+| 3 | MAJOR | Dedup marker written AFTER the public roast → crash window re-roasts; comment claimed otherwise | FIXED: claim-first (marker before roast). `tools/launch.ts` |
+| 4 | MAJOR | Dedup marker (`direction='in'`) rendered in the /live feed as "<brand> replied" (interactionEvent generic inbound branch) | FIXED: dedicated `channel='launch'` marker + explicit `interactionEvent` guard returns null. `tools/db.ts:11` + regression test |
+| 5 | MAJOR | Unscoped dedup query `where ref=… and direction='in'` could collide with stripe/email inbound refs | FIXED: query scoped to `channel='launch'`. `tools/launch.ts` |
+| 6 | MAJOR | `me()` reinvents the TwitterApi client block (4th copy) + a per-beat API round-trip for a static handle | FIXED: `process.env.X_HANDLE || 'adchadofficial'` (matches xpost.ts fallback); dropped TwitterApi import. `tools/launch.ts` |
+| 7 | MINOR | `mapReplies` silently drops all replies if author-expansion empty → campaign no-ops looking healthy | FIXED: `replies()` logs a stderr warning when tweets resolve to 0 handles. `tools/xread.ts` |
+| 8 | MINOR | `launch run` → fulfill's `console.log` breaks the one-JSON-line CLI contract | FIXED as a consequence of #1 (no inline fulfill from the CLI path) |
+| 9 | LOW | `launch_tweet_id` on the `control` singleton = one-campaign-only | WONTFIX: user explicitly chose "drop the id into the control row — no new table" |
+| 10 | LOW | >100 image-replies/beat dropped (no since_id cursor) | WONTFIX (now): documented ponytail ceiling; low realistic volume for a first launch |
+| 11 | LOW | Pre-existing: `fulfill.ts` re-posts the fix if the `delivered_at` update fails after the X post | OUT OF SCOPE: pre-existing in fulfill.ts, not this diff. Flagged for retro |
+
+Evidence: `npx vitest run tests/tools/launch.test.ts` → 10 passed (incl. feed-guard + metrics-exclusion regression tests); `npx tsc --noEmit` exit 0; feed/halls/db tests green (no regression).

@@ -118,4 +118,9 @@ create unique index if not exists orders_stripe_id_uniq on orders (stripe_id);
 -- one intake row per prospect (the form upserts; blocks unbounded spam inserts)
 create unique index if not exists onboarding_prospect_uniq on onboarding (prospect_id);
 
+-- Launch campaign (spec-14): the hand-posted launch tweet's id lives on the control row (empty = campaign off);
+-- comped free-fix orders are tagged source='launch' (amount=0) so they're auditable + excluded from real revenue.
+alter table control add column if not exists launch_tweet_id text;
+alter table orders  add column if not exists source text;  -- null = normal paid order | 'launch' = comped free fix
+
 insert into control (id, paused) values (1, false) on conflict (id) do nothing;
