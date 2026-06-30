@@ -20,7 +20,7 @@ const DEFAULT: LaunchDeps = {
     return { paused: !!c?.paused, launchTweetId: c?.launch_tweet_id ?? null }
   },
   replies: realReplies,
-  roast: (replyId) => xroast({ tweet: replyId }),
+  roast: (replyId) => xroast({ tweet: replyId, freeFix: true }), // launch-thread fix is FREE → roast carries no paid-funnel link
   me: async () => process.env.X_HANDLE || 'adchadofficial', // our own handle — static; xpost.ts uses the same fallback
 }
 

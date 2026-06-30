@@ -19,7 +19,7 @@ export function tweetIdOf(urlOrId: string): string {
   return m ? m[1] : String(urlOrId).replace(/\D/g, '')
 }
 
-export async function xroast(opts: { tweet: string; replyTo?: string }): Promise<{ prospectId: string; roastTweetId: string; salesUrl: string }> {
+export async function xroast(opts: { tweet: string; replyTo?: string; freeFix?: boolean }): Promise<{ prospectId: string; roastTweetId: string; salesUrl: string | null }> {
   const id = tweetIdOf(opts.tweet)
   if (!id) throw new Error('xroast: a tweet URL or id is required')
   // Where the roast reply lands. Defaults to the roasted tweet (launch/manual path); the @adchad-summon path roasts the
@@ -60,8 +60,9 @@ export async function xroast(opts: { tweet: string; replyTo?: string }): Promise
   await sql`insert into scores (ad_id, prospect_id, total) values (${adId}, ${prospectId}, ${r.score})`
   await bookCost(r.cost, `roast prospect ${prospectId}`) // real P&L: vision + grok cost of this roast
 
-  // 4. reply publicly with the roast + the per-prospect sales page (re-sells, then Stripe — never a raw link)
-  const salesUrl = salesLink(prospectId)
+  // 4. reply publicly with the roast. Launch-thread replies get the fix FREE → NO paid-funnel link (the free fix is
+  //    delivered as its own reply right below). @adchad summons are a $5 sell → keep the per-prospect sales page.
+  const salesUrl = opts.freeFix ? null : salesLink(prospectId)
   const posted = await xpost({ text: r.xPost, link: salesUrl, replyToTweetId: replyToId })
 
   // 5. record the roast reply tweet id — the row tools/fulfill.ts reads to reply the fix into the thread
