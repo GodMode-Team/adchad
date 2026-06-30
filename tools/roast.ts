@@ -13,7 +13,6 @@ Rules you follow every time:
 - Call out real customer pain vividly and show exactly how the ad completely misses it.
 - Use short, punchy, conversational sentences. Swear naturally when it fits ("fucking sad", "sucks", "garbage", "embarrassing", "weak as hell", etc.).
 - For the X post: Assume the bad ad screenshot is attached. Do NOT quote their copy. Start with "@handle this ad is [savage descriptor]."
-- End every X post with "Want Chad to just fix it? $5."
 - Email subject mirrors the savage opener.
 - Email body stays in the same raw voice and pushes straight to the $5 Chad Fix.
 - Always offer the $5 fix as the next step. No upsells in the initial roast.
@@ -33,6 +32,15 @@ export const META_AD_NOTE =
   `- The CTA is a FIXED Meta button label picked from a set list (Book Now, Call Now, Learn More, Shop Now, Sign Up, Get Quote, Contact Us, Apply Now…). The advertiser only PICKS the label — they CANNOT restyle, recolor or redesign the button. NEVER mock the button's look/design/styling; instead roast whether they picked the WRONG label for the offer (e.g. "Book Now" on an emergency service that needs "Call Now").\n` +
   `- Roast only what they actually control: the creative/visual, the headline, the primary text, the offer, and the targeting tells.`
 
+// the team: the roast was a dense wall-of-text paragraph and ended on a limp "Want Chad to fix it? $5." On X it has to
+// be scannable, dialled back in length, and close with a confident DIRECTIVE CTA that points at the appended sales
+// link with a 👇. Injected into every roast's context (the good-ad path keeps its own respectful tone).
+export const X_POST_STYLE =
+  `\n\nX POST FORMAT — this posts to X, so make it scannable:\n` +
+  `- Break it into short, punchy lines with line breaks between the beats — NOT one dense wall-of-text paragraph. One jab per line.\n` +
+  `- Keep it tight: cut filler and repeats. Long is fine ONLY when it's well-formatted and every line earns its spot; when in doubt, trim it shorter.\n` +
+  `- The ad screenshot is attached and the $5 sales link is appended on its own last line. End with ONE confident, DIRECTIVE call-to-action that points down to that link with a 👇 — an action to take, never a vague question. Match this directness (keep it in your own tone): "Here, I'll unfuck it for you. You're welcome 👇" / "Click here if you want me to fix it for you 👇".`
+
 const GOOD_AD = 70 // vision score at/above which the ad is genuinely strong → coach it, don't fake-roast it
 
 const SYSTEM_GOODAD = `You are AdChad — a brutally direct, zero-fucks jacked ad expert. THIS ad is actually good, so do NOT roast it (faking a takedown on a solid ad makes you look like a clueless hater). Respect the work, then make it sharper.
@@ -43,7 +51,6 @@ Rules you follow every time:
 - Then pitch "here's another angle" — a concrete alternative hook or creative direction worth testing.
 - Stay in Chad's confident voice: the expert who can always find an edge, never a hater.
 - No insults or hating — this ad earned genuine respect.
-- End every X post with "Want Chad to build you that angle? $5."
 
 Output format for every reply:
 1. **X Post:** (ready to copy-paste with the ad)
@@ -94,7 +101,7 @@ export async function roast(opts: { image: string; handle?: string | null; brand
   const ctx =
     `Business: ${opts.brand || 'this business'}.` +
     (opts.handle ? ` Their X handle is @${opts.handle}.` : ` They have no public X handle — open with a savage descriptor instead of an @handle.`) +
-    `\n\n${ad}${META_AD_NOTE}\n\n${brief.instruction}`
+    `\n\n${ad}${META_AD_NOTE}${X_POST_STYLE}\n\n${brief.instruction}`
 
   const t1 = Date.now()
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {

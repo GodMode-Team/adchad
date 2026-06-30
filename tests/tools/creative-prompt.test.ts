@@ -21,4 +21,11 @@ describe('creative — prompt allows infographics but bakes no headline/CTA', ()
     expect(p).toMatch(/no\b.{0,30}(button|call-to-action)/i)  // …but no drawn CTA button
     expect(p).toContain(fix.creativeDirection)                // the visual concept drives it
   })
+
+  // the team: stop making every creative a before/after — it's a "one trick pony" and overcomplicated.
+  it('does NOT default to before/after and pushes a simple, uncluttered visual', () => {
+    const p = buildPrompt({ headline: 'h', body: 'b', cta: 'Learn More', creativeDirection: 'a clean product hero shot' }, 'Acme')
+    expect(p).toMatch(/not default|overused|don.?t default|avoid.{0,20}before.?after/i) // kill the before/after reflex
+    expect(p).toMatch(/simple|uncluttered|one clear.{0,10}idea|not a busy|not.{0,20}dashboard/i) // and not overcomplicated
+  })
 })
