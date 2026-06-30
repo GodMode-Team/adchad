@@ -50,6 +50,10 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
       if (sub === 'off') return disarm()          // `launch off` — disarm
       return run()                                // `launch run` (default) — process one beat of replies
     }
+    case 'mention': {
+      const { run } = await import('../tools/mention')
+      return run()                                // `mention run` — one beat of @adchad ad-summons (always a $5 sell; no comp)
+    }
     case 'email': {
       const m = await import('../tools/email')
       return sub === 'read' ? m.read() : m.send({ to: S('to'), subject: S('subject'), body: S('body') })
@@ -89,8 +93,8 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
       // skills and pattern-completes `tool prospect`. Redirect instead of dead-ending — a wasted round-trip is ~10-140s here.
       const SKILLS = ['prospect', 'roast', 'engage', 'fulfill', 'report', 'evolve', 'copy', 'synthcheck', 'adchad']
       if (SKILLS.includes(name))
-        throw new Error(`'${name}' is a SKILL you're already running, not a tool — don't call \`tool ${name}\`. Follow the skill's steps using the real tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db launch`)
-      throw new Error(`unknown tool '${name}'. tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db launch`)
+        throw new Error(`'${name}' is a SKILL you're already running, not a tool — don't call \`tool ${name}\`. Follow the skill's steps using the real tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db launch mention`)
+      throw new Error(`unknown tool '${name}'. tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db launch mention`)
     }
   }
 }

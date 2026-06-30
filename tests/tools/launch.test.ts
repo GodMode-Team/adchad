@@ -101,6 +101,24 @@ describe('launch.run — guards: skip our own handle, skip already-processed rep
     expect(res.processed).toEqual([])
     expect(res.skipped.find((s: any) => s.id === replyId)?.reason).toBe('dup')
   })
+
+  it('skips a reply already claimed by the MENTION runner (no cross-source double-roast)', async () => {
+    await migrate()
+    const mref = 'mention-claimed-' + Date.now()
+    // The same launch-thread reply tags @adchad, so the mention runner may have claimed it in a prior beat. launch.run
+    // must see a 'mention' claim and skip — else the reply gets both a free comp AND a $5 roast.
+    await sql`insert into interactions (channel, direction, ref, text) values ('mention', 'in', ${mref}, 'claimed by mention')`
+    let roastCalls = 0
+    const deps = base({
+      replies: async () => ({ items: [{ id: mref, handle: 'somebrand' }] }),
+      roast: async () => { roastCalls++; return { prospectId: 'x' } },
+    })
+    const res = await run(deps)
+    expect(roastCalls).toBe(0)
+    expect(res.processed).toEqual([])
+    expect(res.skipped.find((s: any) => s.id === mref)?.reason).toBe('dup')
+    await sql`delete from interactions where ref=${mref}`
+  })
 })
 
 describe('launch — comped order + dedup marker stay off the public surfaces', () => {

@@ -48,8 +48,10 @@ export async function run(deps: Partial<LaunchDeps> = {}): Promise<RunResult> {
       // Guard 1: never roast our own replies — our fix-creative reply carries an image, which would self-roast forever.
       if ((reply.handle ?? '').toLowerCase() === me) { out.skipped.push({ id: reply.id, reason: 'self' }); continue }
       // Guard 2 (dedup): a 'launch' marker keyed on the INCOMING reply id (internal channel — invisible to the /live
-      // feed). CLAIM IT BEFORE roasting, so a crash/restart between the public roast and here can never double-post.
-      const [seen] = await sql<any[]>`select 1 from interactions where channel='launch' and ref=${reply.id} limit 1`
+      // feed). CLAIM IT BEFORE roasting, so a crash/restart between the public roast and here can never double-post. We
+      // also honor the mention runner's claim (channel='mention') — the same reply tags @adchad, so the @adchad-summon
+      // path may have already roasted it; without this it gets both a free comp and a $5 roast.
+      const [seen] = await sql<any[]>`select 1 from interactions where channel in ('launch','mention') and ref=${reply.id} limit 1`
       if (seen) { out.skipped.push({ id: reply.id, reason: 'dup' }); continue }
       await sql`insert into interactions (channel, direction, ref, text, handled) values ('launch', 'in', ${reply.id}, 'launch reply claimed', true)`
       // ponytail: claim-first = at-most-once roast. A hard failure after the roast posts but before the order commits
