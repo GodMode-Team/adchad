@@ -1,6 +1,6 @@
 # AdChad Taste Pack
 
-The general standard is `TASTE.md` (7 Laws) scored by `TASTE-RUBRIC.md`. This pack tunes it for AdChad. Chad's brand is *deliberately crude* — but crude is not an excuse for lazy. The craft moved from the render to the **writing accuracy** and the **clarity of the money beat.** Ship-bar: ≥8/dimension. Anything Chad-facing that scores below bar on any dimension → iterate the weakest, don't ship.
+This pack is the AdChad taste standard — the 7 Laws of craft, tuned for Chad. Chad's brand is *deliberately crude* — but crude is not an excuse for lazy. The craft moved from the render to the **writing accuracy** and the **clarity of the money beat.** Ship-bar: ≥8/dimension. Anything Chad-facing that scores below bar on any dimension → iterate the weakest, don't ship.
 
 ## How the 7 Laws apply to Chad
 

@@ -1,6 +1,6 @@
 # AdChad — Character & Brand Bible
 
-The single source of truth for who Chad is, how he looks, and how he talks. If a roast, an ad, a page, or a video doesn't match this, it's wrong. Read `taste/TASTE.md` for the quality bar that sits on top of this.
+The single source of truth for who Chad is, how he looks, and how he talks. If a roast, an ad, a page, or a video doesn't match this, it's wrong. Read `taste/ADCHAD-TASTE-PACK.md` for the quality bar that sits on top of this.
 
 ---
 
@@ -106,7 +106,6 @@ Chad is built to be sponsor-self-aware: **"an autonomous Hermes agent, my brain 
 
 - **X profile kit** (pfp + banner + bio): https://adchad-brand.vercel.app
 - **Signature teaser video**: https://teaser-page-virid.vercel.app
-- Production toolchain + raw assets: see the godmode-plugin memory `project-adchad-video-toolchain`.
 
 ---
 
