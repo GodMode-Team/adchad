@@ -63,3 +63,18 @@ Drove the real `pnpm -s tool` CLI against the live DB + live X API. Public-posti
 | State restored | `db resume` + `launch off` | `{paused:false}`, `launch_tweet_id:null` |
 
 UNVERIFIED (gated): live public roast reply + fulfill-worker fix reply on a real image reply — needs (a) an ad-image reply on the tweet and (b) go-live authorization. Component tools (xroast, fulfillOrder/fulfill-worker) are pre-existing + covered by their own live tests; orchestration that calls them is covered by the 10 launch.test.ts cases (stubbed roast, real comped-order shape asserted).
+
+## spec-15 `@adchad` summon — 2026-06-30
+
+Driven against the live X API + the shared Neon DB. Did NOT post any public tweet (overnight, no sanction for unsanctioned public roasts) — the real-artifact checks below are all read-only or guaranteed no-ops.
+
+| Check | Command | Result |
+|---|---|---|
+| Live mention read through new `mentions()` (paid tier OK, no 403) | `xread --mentions` | 15 items, all shaped `{id, handle, text, created_at, adTweetId}` — the upgraded shape resolves against the live API |
+| `adTweetOf` own-media branch (screenshot → roast the mention itself) | same output | media tweets resolve `adTweetId === id` (e.g. `2071822865360429318`) |
+| `adTweetOf` reply branch (no own media → roast the PARENT ad) | same output | reply mentions resolve `adTweetId` = the parent ad id (e.g. mention `2071822416343372076` → ad `2071822350744510680`; `…797185273110856` → `…796738919457023`) |
+| Self-skip validated on real data (essential — timeline is full of our own roast/fix posts) | `mention run` | `{"processed":[],"skipped":[15× "self"],"errors":[]}` — every `handle:'adchadofficial'` item skipped; **no post, no spend, no order comped** |
+| Kill-switch guard (real CLI) | `db pause` → `mention run` → `db resume` | `{...,"reason":"paused"}` (returns before any X call); prod restored to `{paused:false}` |
+| DB-effect paths (claim marker written, NO order comped, cross-source dedup vs launch, off-/live-feed marker) | live-DB unit suite | `mention.test.ts` 17 + `launch.test.ts` 11 pass against the real shared Postgres (house style) |
+
+UNVERIFIED (gated): the live PUBLIC roast/nudge reply on a real third-party `@adchad` mention — proving `xroast({tweet, replyTo})` threads the roast under the mention while @-tagging the AD's owner, appends the $5 `/p/<id>` link, and comps no order. Our only X login is `@adchadofficial`, which the self-skip deliberately filters (no self-roast loop), so a third-party account is required — the exact gap spec-14 declared. The `replyTo` wiring + the no-order guarantee are unit-tested (live DB, stubbed roast) and read-verified; the roast/xpost component tools are pre-existing and live-verified by spec-14.
