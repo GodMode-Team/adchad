@@ -18,11 +18,14 @@ metadata:
 > Never punch **down** at a struggling small business — roast the *ad*, root for the *owner*. Voice, look, and the 6-box viral gate: `../../brand/CHARACTER.md` + `../../brand/taste/ADCHAD-TASTE-PACK.md`. Full guideline check: `../../brand/BATTLE-PLAN-ALIGNMENT.md`.
 
 ## When
-The acquire heartbeat, or "find someone to roast in <niche>."
+The acquire heartbeat, or "prospect for <anything>" — any niche, brand, or pasted ad.
 
 ## Procedure
 
-**Step 0 — pick the mode, hold a ~50/50 split.** Read `pnpm -s tool db prospects` and count recent targets tagged `mode:traction` vs `mode:revenue`. Pick whichever is **behind** (tie/first run → start **traction**, then alternate). Half your roasts should be recognizable brands (distribution) and half reachable SMBs (revenue). If the operator named a specific niche or brand, skip the split and serve that.
+**Step 0 — did the operator name a target?** This decides everything; settle it before any tool call.
+
+- **YES — a niche, brand, or ad ("prospect for bad gym ads", "roast Stripe", a pasted URL).** Serve THAT. **No split, no rotation, no `db prospects` mode-counting.** Strip filler to the bare subject — drop "bad", "ads", "for", and any location: *"bad gym ads"* → niche `gym`, *"med spas in Denver"* → niche `med spa`, *"that Stripe ad"* → brand `Stripe`. A niche / small business → mode **revenue** (B); a recognizable brand → mode **traction** (A). **You can prospect for anything — there is no list of allowed industries.**
+- **NO — bare `/prospect` (the acquire heartbeat).** Now hold the ~50/50 split: read `pnpm -s tool db prospects`, count recent `mode:traction` vs `mode:revenue`, pick whichever is **behind** (tie/first run → start **traction**, then alternate). Half your roasts are recognizable brands (distribution), half reachable SMBs (revenue), and you choose the niche/brand from your rotation.
 
 ### A) TRACTION — a recognizable X brand (punch UP, public, for engagement)
 1. **Pick a recognizable brand** the audience/judges already follow that's running a genuinely lazy ad and that you haven't roasted yet (check `db prospects`). Rotate categories so it never gets samey — DTC, SaaS, food, fashion, fintech; the sponsors (Stripe, NVIDIA) are fair game and on-thesis.
@@ -31,7 +34,7 @@ The acquire heartbeat, or "find someone to roast in <niche>."
 4. **Record + hand off.** `pnpm -s tool db record --json '{"prospect_id":"<id>","channel":"note","text":"traction — <brand>: <flaws>","mode":"traction","segment":"public"}'`. Hand `/roast` the `creative_url` + brand; it publishes to X only (no email — they won't buy; this is distribution).
 
 ### B) REVENUE — a reachable SMB (the Foreplay flow; you can sell the $5)
-1. **Pick a niche.** Check `pnpm -s tool db prospects` + your memory — exploit niches that convert, rotate when one goes dry. Sane rotation: med spa, dentist, HVAC, gym, lawn care.
+1. **Niche.** If the operator named one (Step 0), use it — *any* niche is valid. Otherwise pick from your rotation: check `pnpm -s tool db prospects` + your memory — exploit niches that convert, rotate when one goes dry. Rotation seeds (examples, **not** a whitelist): med spa, dentist, HVAC, gym, lawn care.
 2. `pnpm -s tool foreplay scan --query "<niche>" --n 10` → candidate ads (each has `link_url`, `creative_url`, `copy`, `advertiser`, a prospect id). **Query the bare niche, NEVER a location** — Foreplay searches ad copy/brand text, not geography, so `"med spas in Denver, CO"` returns nothing; use `med spa`. **If `ads` is empty:** broaden once (strip every qualifier → the bare niche) and re-scan; still empty → `pnpm -s tool db record --json '{"channel":"note","text":"no ads found for <niche>"}'`, report it, and **STOP**. An empty scan is a data result, not a bug.
 3. **Shortlist from the scan alone — pick ONE prime suspect.** Rank the worst ads from the (already-slim) scan `copy`/metadata and pick the single worst-looking, reachable-looking one. Do NOT enrich or vision the whole batch — each is a separate ~30s+ model round-trip and the model call is the slow part, not the tool.
 4. **Verify just that one.** `pnpm -s tool enrich --id <prospect_id> --link "<link_url>" --name "<advertiser>"` → contact + `segment` (A active X · B email · unreachable). Then **SEE it** — `pnpm -s tool vision --image "<creative_url>"` returns its actual on-image text, offer, social proof, and real flaws. **Foreplay's `copy` field is often null because the copy lives IN the image** — never trust the text fields alone. Audit with `synthcheck`, grounded ONLY in what vision shows; never claim something is missing if it's visibly there.
