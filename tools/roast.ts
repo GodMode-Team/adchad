@@ -39,7 +39,8 @@ export const X_POST_STYLE =
   `\n\nX POST FORMAT — this posts to X, so make it scannable:\n` +
   `- Break it into short, punchy lines with line breaks between the beats — NOT one dense wall-of-text paragraph. One jab per line.\n` +
   `- Keep it tight: cut filler and repeats. Long is fine ONLY when it's well-formatted and every line earns its spot; when in doubt, trim it shorter.\n` +
-  `- The ad screenshot is attached and the $5 sales link is appended on its own last line. End with ONE confident, DIRECTIVE call-to-action that points down to that link with a 👇 — an action to take, never a vague question. Match this directness (keep it in your own tone): "Here, I'll unfuck it for you. You're welcome 👇" / "Click here if you want me to fix it for you 👇".`
+  `- The ad screenshot is attached and our real $5 sales link is ATTACHED AUTOMATICALLY right under your text. So NEVER write a link, URL, or domain yourself — not "chadfix.com", not "adchad.ai", nothing (you'll invent the wrong one). Your CTA is words ONLY plus a 👇 that points down at the attached link.\n` +
+  `- End with ONE confident, DIRECTIVE call-to-action — an action to take, never a vague question. Match this directness (keep it in your own tone): "Here, I'll unfuck it for you. You're welcome 👇" / "Click here if you want me to fix it for you 👇".`
 
 const GOOD_AD = 70 // vision score at/above which the ad is genuinely strong → coach it, don't fake-roast it
 
@@ -68,6 +69,26 @@ export function roastBrief(look: AdLook): { system: string; instruction: string 
 }
 
 export type Roast = { xPost: string; emailSubject: string; emailBody: string; raw: string; score: number; verdict: string; cost: number }
+
+/** Our REAL sales link — always adchad.ai (project rule), never a vercel.app or a model-hallucinated domain.
+ *  Per-prospect `/p/<id>` when we know the prospect, else the funnel home. One source of truth for both the X
+ *  path (xroast) and the standalone `tool roast` CLI (the Slack/ad-hoc path). */
+export function salesLink(prospectId?: string | null): string {
+  const base = process.env.APP_URL || 'https://adchad.ai'
+  return prospectId ? `${base}/p/${prospectId}` : base
+}
+
+/** The posting layer attaches the real link (xpost on X, the CLI on Slack); the model must NEVER bake a URL into
+ *  the post — but it hallucinates ones like "chadfix.com/5" that aren't even ours. Strip any URL / bare domain it
+ *  emits so the only link in the final post is the real adchad.ai one we attach. */
+export function stripUrls(text: string): string {
+  return text
+    .replace(/https?:\/\/\S+/gi, '') // scheme URLs
+    .replace(/\b(?:www\.)?[a-z0-9-]+\.(?:com|net|org|io|ai|co|app|dev|xyz|link|me)\b(?:\/\S*)?/gi, '') // bare domains (+ path)
+    .replace(/[ \t]+$/gm, '') // trailing spaces the strip left behind
+    .replace(/\n{3,}/g, '\n\n') // collapse the blank line a removed URL left
+    .trim()
+}
 
 // pull a labelled section out of the team's "1. X Post: … 2. Email subject: … 3. Body: …" format
 function section(txt: string, start: RegExp, end: RegExp | null): string {
@@ -133,7 +154,7 @@ export async function roast(opts: { image: string; handle?: string | null; brand
   const cost = costUsdOf(j) + (opts.look ? 0 : look.costUsd ?? 0)
 
   return {
-    xPost: section(raw, /\**\s*\d?\.?\s*\**X Post\**\s*:?/i, /\**\s*\d?\.?\s*\**Email subject/i),
+    xPost: stripUrls(section(raw, /\**\s*\d?\.?\s*\**X Post\**\s*:?/i, /\**\s*\d?\.?\s*\**Email subject/i)),
     emailSubject: section(raw, /\**\s*\d?\.?\s*\**Email subject\**\s*:?/i, /\**\s*\d?\.?\s*\**Body/i),
     emailBody: section(raw, /\**\s*\d?\.?\s*\**Body\**\s*:?/i, null),
     raw,
