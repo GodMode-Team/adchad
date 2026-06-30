@@ -42,6 +42,7 @@
       <div style="display:flex; gap:22px; margin-left:14px;">
         <a href="#how" style="font-family:'Space Mono',monospace; font-size:13px; color:#9fb0a0;">how it works</a>
         <a href="#pricing" style="font-family:'Space Mono',monospace; font-size:13px; color:#9fb0a0;">pricing</a>
+        <a href="#shame" style="font-family:'Space Mono',monospace; font-size:13px; color:#9fb0a0;">hall of shame</a>
         <a href="AdChad Live.dc.html" style="font-family:'Space Mono',monospace; font-size:13px; color:#9fb0a0;">live feed</a>
       </div>
       <a href="#hero" style="margin-left:auto; font-family:'Bungee',sans-serif; font-size:14px; color:#111; background:#3ce84a; border:3px solid #fff; box-shadow:3px 3px 0 #111; padding:8px 16px;" style-hover="background:#ffe600; box-shadow:1px 1px 0 #111; transform:translate(2px,2px);">GET ROASTED</a>
@@ -214,6 +215,94 @@
     </div>
   </div>
 
+  <!-- ===== HALL OF SHAME ===== -->
+  <div id="shame" style="background:#0a0c0a; border-bottom:4px solid #111;">
+    <div style="max-width:1200px; margin:0 auto; padding:62px 22px;">
+      <div style="text-align:center;">
+        <div style="display:inline-block; transform:rotate(-2deg); background:#ff2d6f; color:#fff; font-family:'Bungee',sans-serif; font-size:13px; padding:5px 14px; border:3px solid #111;">💀 HALL OF SHAME</div>
+        <div style="font-family:'Anton',sans-serif; font-size:52px; color:#fff; line-height:.9; margin-top:14px;">THE WORST ADS<br>I'VE EVER <span style="color:#ff2d6f;">SEEN.</span></div>
+        <div style="font-family:'Space Mono',monospace; font-size:13px; color:#5f6b5f; margin-top:10px;">lowest scores on record. roasted in public. no mercy.</div>
+      </div>
+      <div style="display:flex; gap:16px; margin-top:34px; flex-wrap:wrap; align-items:flex-start;">
+        <sc-for list="{{ shame }}" as="t" hint-placeholder-count="3">
+          <div style="flex:1; min-width:300px; max-width:380px; background:#15181a; border:2px solid #28303a; border-radius:18px; overflow:hidden;">
+            <div style="padding:15px 16px 0; display:flex; gap:11px; align-items:flex-start;">
+              <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#3ce84a,#ffe600); flex:none; padding:3px;"><div style="width:100%; height:100%; border-radius:50%; background:#000; display:flex; align-items:center; justify-content:center; font-size:20px;">🔥</div></div>
+              <div style="flex:1; min-width:0;">
+                <div style="display:flex; align-items:center; gap:4px;"><span style="font-family:'DM Sans'; font-weight:700; font-size:14px; color:#e7e9ea;">AdChad</span><span style="color:#1d9bf0; font-size:14px;">✔</span></div>
+                <div style="font-family:'DM Sans'; font-size:13px; color:#71767b;">@adchadofficial</div>
+              </div>
+              <div style="font-family:'Anton',sans-serif; font-size:30px; color:#ff2d6f; line-height:.8; text-align:right;">{{ t.score }}<div style="font-family:'Space Mono'; font-size:8px; color:#71767b; letter-spacing:1px;">/100</div></div>
+            </div>
+            <div style="padding:11px 16px 13px; font-family:'DM Sans'; font-size:15px; color:#e7e9ea; line-height:1.4;">{{ t.text }}</div>
+            <div style="margin:0 16px; border:1px solid #28303a; border-radius:14px; overflow:hidden;">
+              <div style="display:flex; align-items:center; gap:8px; padding:9px 11px;">
+                <div style="width:30px; height:30px; border-radius:50%; background:repeating-linear-gradient(45deg,#e9ebee,#e9ebee 5px,#dfe2e6 5px,#dfe2e6 10px); flex:none;"></div>
+                <div style="line-height:1.15; min-width:0;"><div style="font-weight:700; font-size:12px; color:#e7e9ea; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.biz }}</div><div style="font-size:10px; color:#71767b;">Sponsored · 🌐</div></div>
+              </div>
+              <div style="height:138px; position:relative; background:repeating-linear-gradient(45deg,#1c1f22,#1c1f22 11px,#222629 11px,#222629 22px); display:flex; align-items:center; justify-content:center;">
+                <span style="font-family:'Space Mono',monospace; font-size:10px; color:#5b626a; background:#000a; padding:3px 8px; border-radius:4px;">{{ t.media }}</span>
+                <div style="position:absolute; top:9px; left:9px; transform:rotate(-7deg); background:#ff2d6f; color:#fff; font-family:'Permanent Marker',cursive; font-size:13px; padding:2px 8px;">{{ t.tag }}</div>
+              </div>
+              <div style="background:#1a1d20; padding:9px 11px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="line-height:1.2; min-width:0;"><div style="font-size:9px; color:#71767b; letter-spacing:.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.domain }}</div><div style="font-weight:700; font-size:12px; color:#cdd1d4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.headline }}</div></div>
+                <div style="background:#2a2f33; color:#9aa0a6; font-size:11px; font-weight:600; padding:6px 11px; border-radius:6px; flex:none;">Learn More</div>
+              </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:13px 22px 15px; color:#71767b; font-family:'DM Sans'; font-size:13px;">
+              <span>💬 {{ t.replies }}</span><span>🔁 {{ t.rts }}</span><span>❤️ {{ t.likes }}</span><span>📊 {{ t.views }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HALL OF FAME ===== -->
+  <div id="fame" style="background:#ffe600; border-bottom:4px solid #111;">
+    <div style="max-width:1200px; margin:0 auto; padding:62px 22px;">
+      <div style="text-align:center;">
+        <div style="display:inline-block; transform:rotate(2deg); background:#111; color:#ffe600; font-family:'Bungee',sans-serif; font-size:13px; padding:5px 14px; border:3px solid #fff; box-shadow:3px 3px 0 #111;">🏆 HALL OF FAME</div>
+        <div style="font-family:'Anton',sans-serif; font-size:52px; color:#111; line-height:.9; margin-top:14px;">AND THE ONES I<br><span style="background:#3ce84a; padding:0 10px; border:3px solid #111;">FIXED CLEAN.</span></div>
+        <div style="font-family:'Space Mono',monospace; font-size:13px; color:#7a6c00; margin-top:10px;">same businesses, after the $5 fix. highest scores on record.</div>
+      </div>
+      <div style="display:flex; gap:16px; margin-top:34px; flex-wrap:wrap; align-items:flex-start;">
+        <sc-for list="{{ fame }}" as="t" hint-placeholder-count="3">
+          <div style="flex:1; min-width:300px; max-width:380px; background:#fff; border:3px solid #111; box-shadow:6px 6px 0 #111; border-radius:18px; overflow:hidden;">
+            <div style="padding:15px 16px 0; display:flex; gap:11px; align-items:flex-start;">
+              <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#3ce84a,#ffe600); flex:none; padding:3px;"><div style="width:100%; height:100%; border-radius:50%; background:#000; display:flex; align-items:center; justify-content:center; font-size:20px;">💪</div></div>
+              <div style="flex:1; min-width:0;">
+                <div style="display:flex; align-items:center; gap:4px;"><span style="font-family:'DM Sans'; font-weight:700; font-size:14px; color:#0f1419;">AdChad</span><span style="color:#1d9bf0; font-size:14px;">✔</span></div>
+                <div style="font-family:'DM Sans'; font-size:13px; color:#536471;">@adchadofficial</div>
+              </div>
+              <div style="font-family:'Anton',sans-serif; font-size:30px; color:#1f9c3a; line-height:.8; text-align:right;">{{ t.score }}<div style="font-family:'Space Mono'; font-size:8px; color:#536471; letter-spacing:1px;">/100</div></div>
+            </div>
+            <div style="padding:11px 16px 13px; font-family:'DM Sans'; font-size:15px; color:#0f1419; line-height:1.4;">{{ t.text }}</div>
+            <div style="margin:0 16px; border:2px solid #111; border-radius:14px; overflow:hidden;">
+              <div style="display:flex; align-items:center; gap:8px; padding:9px 11px;">
+                <div style="width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,#ff2d6f,#ffe600); flex:none;"></div>
+                <div style="line-height:1.15; min-width:0;"><div style="font-weight:700; font-size:12px; color:#0f1419; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.biz }}</div><div style="font-size:10px; color:#8a8d91;">Sponsored · 🌐</div></div>
+              </div>
+              <div style="height:138px; position:relative; overflow:hidden; background:{{ t.bg }};">
+                <div style="position:absolute; right:-12px; bottom:-16px; width:84px; height:104px; border-radius:50% 50% 44% 44%; background:linear-gradient(160deg,#f6c89a,#caa074);"></div>
+                <div style="position:absolute; left:14px; top:16px; font-family:'Anton',sans-serif; font-size:26px; line-height:.9; color:#fff; max-width:200px;">{{ t.adline }}</div>
+                <div style="position:absolute; left:14px; bottom:12px; font-family:'Space Mono',monospace; font-size:10px; color:#ffe600;">{{ t.adsub }}</div>
+                <div style="position:absolute; top:9px; right:9px; transform:rotate(7deg); background:#3ce84a; color:#04210d; font-family:'Bungee',sans-serif; font-size:10px; padding:3px 8px; border:2px solid #111;">FIXED ✓</div>
+              </div>
+              <div style="background:#f0f2f5; padding:9px 11px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="line-height:1.2; min-width:0;"><div style="font-size:9px; color:#8a8d91; letter-spacing:.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.domain }}</div><div style="font-weight:700; font-size:12px; color:#18181b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.headline }}</div></div>
+                <div style="background:#111; color:#fff; font-size:11px; font-weight:700; padding:6px 11px; border-radius:6px; flex:none;">Book Now</div>
+              </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:13px 22px 15px; color:#536471; font-family:'DM Sans'; font-size:13px;">
+              <span>💬 {{ t.replies }}</span><span>🔁 {{ t.rts }}</span><span>❤️ {{ t.likes }}</span><span>📊 {{ t.views }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== FINAL CTA ===== -->
   <div style="background:#ff2d6f; border-bottom:4px solid #111; position:relative; overflow:hidden;">
     <div style="max-width:1200px; margin:0 auto; padding:70px 22px; text-align:center; position:relative;">
@@ -290,8 +379,31 @@ class Component extends DCLogic {
     });
   }
 
+  shameData() {
+    return [
+      { score: 9, biz: 'Bella Vista Med Spa', domain: 'BELLAVISTAMEDSPA.COM', headline: 'We Do Botox & More!', media: 'stock photo · woman touching face', tag: 'seen her before', replies: '1.2K', rts: '3.4K', likes: '19K', views: '847K',
+        text: '"We Do Botox & More!" + a "Learn More" button, running 247 days untouched. This isn\u2019t an ad, it\u2019s a hostage. 9/100. \uD83D\uDC80' },
+      { score: 11, biz: 'Apex Comfort HVAC', domain: 'APEXCOMFORTHVAC.COM', headline: 'Quality You Can Trust', media: 'clip-art of a thumbs up', tag: 'comic sans?!', replies: '842', rts: '2.1K', likes: '14K', views: '512K',
+        text: 'Comic Sans. A clip-art thumbs up. The hook is "Quality You Can Trust." Sir, this is an HVAC ad, not a 2004 PowerPoint. 11/100.' },
+      { score: 13, biz: 'Iron Forge Fitness', domain: 'IRONFORGEFIT.COM', headline: 'Sign Up Now!!!', media: 'blurry gym mirror selfie', tag: '3 exclamations 😭', replies: 'up', rts: '1.7K', likes: '11K', views: '388K',
+        text: 'A blurry mirror selfie, three exclamation marks, and "Sign Up Now!!!" as the entire offer. I\u2019ve seen ransom notes with better targeting. 13/100.' },
+    ];
+  }
+  fameData() {
+    return [
+      { score: 97, biz: 'Bella Vista Med Spa', domain: 'BELLAVISTAMEDSPA.COM', headline: 'Look 5 Years Younger by July', adline: 'YOUR JULY GLOW-UP STARTS AT $99.', adsub: 'first 10 bookings only ●', bg: 'radial-gradient(circle at 70% 25%, #ffd36e, transparent 55%), linear-gradient(150deg,#13131a,#3a0f24 55%,#ff2d6f)', replies: '410', rts: '2.9K', likes: '22K', views: '631K',
+        text: 'Same med spa, after the $5 fix. Specific offer, real deadline, a creative that actually stops the scroll. 9 \u2192 97. That\u2019s the whole business. \uD83D\uDCAA' },
+      { score: 94, biz: 'Apex Comfort HVAC', domain: 'APEXCOMFORTHVAC.COM', headline: 'AC Out? Same-Day or It\u2019s Free', adline: 'NO COOL AIR BY 5PM? YOU DON\u2019T PAY.', adsub: 'booking 8 slots today ●', bg: 'linear-gradient(140deg,#06203f,#2a6fdb 130%)', replies: '288', rts: '1.9K', likes: '16K', views: '440K',
+        text: 'Gave the HVAC guy a guarantee instead of a thumbs-up. "Same-day or it\u2019s free" books itself in a heatwave. 11 \u2192 94.' },
+      { score: 92, biz: 'Iron Forge Fitness', domain: 'IRONFORGEFIT.COM', headline: 'First 30 Days $30 — Lifters Only', adline: '30 DAYS. $30. NO TREADMILL TOURISTS.', adsub: '14 spots left this month ●', bg: 'linear-gradient(140deg,#0c2410,#1f9c3a 140%)', replies: '203', rts: '1.4K', likes: '13K', views: '356K',
+        text: 'Swapped "Sign Up Now!!!" for a real trial offer with an attitude that matches the gym. Filled the class in a weekend. 13 \u2192 92.' },
+    ];
+  }
+
   renderVals() {
     return {
+      shame: this.shameData(),
+      fame: this.fameData(),
       url: this.state.url,
       roasted: this.state.roasted,
       scoreStr: String(this.state.score),
