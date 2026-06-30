@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { toImageUrl, parseJsonObject } from '../../tools/vision'
+import { toImageUrl, parseJsonObject, VISION_PROMPT } from '../../tools/vision'
 
 // The Nvidia flail: the operator handed AdChad an ad as a LOCAL file (Slack attachment in the
 // image cache), but vision/roast only spoke image URLs. toImageUrl bridges local file -> data URL
@@ -58,5 +58,15 @@ describe('vision tool — parseJsonObject (robust model-JSON extraction)', () =>
 
   it('returns {} when there is no object at all', () => {
     expect(parseJsonObject('the model refused, no json here')).toEqual({})
+  })
+})
+
+// the team's catch: a video ad's burned-in caption ("The IRS") got read as text PRINTED ON the guy's shirt, so the
+// roast mocked a "2012 template" shirt that doesn't exist. Vision must treat a video caption as a caption, not design.
+describe('vision tool — distinguishes a video caption from printed-on design', () => {
+  it('tells the model burned-in video text is a caption, not printed on clothing/objects', () => {
+    expect(VISION_PROMPT).toMatch(/caption|subtitle/i)
+    expect(VISION_PROMPT).toMatch(/video|play button/i)
+    expect(VISION_PROMPT).toMatch(/clothing|shirt|printed|object/i)
   })
 })

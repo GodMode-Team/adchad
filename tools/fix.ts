@@ -1,4 +1,4 @@
-import { describe } from './vision'
+import { describe, type AdLook } from './vision'
 import { generate } from './creative'
 import { costUsdOf } from './cost'
 
@@ -10,6 +10,25 @@ export type FixResult = { imageUrl: string; imageUrls: string[]; headline: strin
 // Meta's CTA button is a FIXED dropdown — you pick a label, you can't restyle it. The fix's `cta` must be one of these.
 const META_CTAS = 'Book Now, Call Now, Contact Us, Learn More, Sign Up, Shop Now, Get Quote, Apply Now, Get Offer, Subscribe, Download, Send Message, Get Started'
 
+// the team: every fix came out a before/after — "one trick pony" and "a tad overcomplicated." Vary the A/B angles
+// (at most one leans before/after) and steer the single $5 fix's `direction` off the before/after reflex too.
+export const FIX_ANGLES = ['a bold real-life lifestyle photograph', 'a clean high-end studio product shot', 'one bold hero stat or a simple explanatory diagram']
+
+/** The copy-repair prompt (pure, testable). Repairs every roast criticism without reintroducing what it mocked,
+ *  and steers the visual `direction` AWAY from the overused before/after split toward one simple, clean idea. */
+export function buildFixCopyPrompt(look: AdLook, brand: string, roast?: string | null): string {
+  return (
+    `You are a top media buyer fixing a weak Meta ad for ${brand}.\n` +
+    `The current ad shows — headline: "${look.headline ?? '—'}", body: "${look.body ?? '—'}", offer: "${look.offer ?? '—'}", ` +
+    `CTA: "${look.cta ?? 'none'}", social proof: "${look.social_proof ?? 'none'}".\n` +
+    (roast
+      ? `AdChad publicly ROASTED this exact ad:\n"${roast}"\n\nYour fixed ad MUST repair every criticism in that roast — and CRITICALLY must NOT reintroduce anything it mocked. If the roast ridiculed a "pretty headshot and generic stars," the fix CANNOT be a glamour model headshot with a star rating — it must LEAD with a specific, benefit-driven headline and one strong piece of proof. Do NOT reuse the original's weak headline.\n`
+      : `Its real flaws: ${(look.real_flaws ?? []).join('; ') || 'generic, weak hook'}. Repair each — add a clear CTA, add proof/results, surface the offer, kill generic-template vibes, sharpen the hook.\n`) +
+    `"cta" MUST be one of Meta's fixed CTA button labels (${META_CTAS}) — pick the single best fit for the offer; Meta renders the button, so never invent a custom one or critique its look.\n` +
+    `Return ONLY minified JSON {"headline","body","cta","direction"} — "direction" MUST describe ONE simple, clean visual idea that fixes what the roast mocked. Do NOT default to a before/after split — that pattern is overused; use it only if the concept genuinely demands it, otherwise pick a single strong image (a real lifestyle/product shot, one bold stat, a clean diagram). Keep it uncluttered — one clear idea, never a busy multi-panel dashboard.`
+  )
+}
+
 /** Fix an ad: SEE its flaws (vision) → write copy that repairs each → generate the finished, ready-to-run image(s). */
 export async function fix(opts: { image: string; brand?: string | null; roast?: string | null; variants?: number }): Promise<FixResult> {
   if (!opts.image) throw new Error('fix: --image (the ad to fix) is required')
@@ -19,15 +38,7 @@ export async function fix(opts: { image: string; brand?: string | null; roast?: 
   const look = await describe(opts.image)
 
   // 2. write copy that REPAIRS exactly what the roast called out (never reintroduce what it mocked)
-  const prompt =
-    `You are a top media buyer fixing a weak Meta ad for ${brand}.\n` +
-    `The current ad shows — headline: "${look.headline ?? '—'}", body: "${look.body ?? '—'}", offer: "${look.offer ?? '—'}", ` +
-    `CTA: "${look.cta ?? 'none'}", social proof: "${look.social_proof ?? 'none'}".\n` +
-    (opts.roast
-      ? `AdChad publicly ROASTED this exact ad:\n"${opts.roast}"\n\nYour fixed ad MUST repair every criticism in that roast — and CRITICALLY must NOT reintroduce anything it mocked. If the roast ridiculed a "pretty headshot and generic stars," the fix CANNOT be a glamour model headshot with a star rating — it must LEAD with real before/after proof / a transformation, and a specific benefit-driven headline. Do NOT reuse the original's weak headline.\n`
-      : `Its real flaws: ${(look.real_flaws ?? []).join('; ') || 'generic, weak hook'}. Repair each — add a clear CTA, add proof/results, surface the offer, kill generic-template vibes, sharpen the hook.\n`) +
-    `"cta" MUST be one of Meta's fixed CTA button labels (${META_CTAS}) — pick the single best fit for the offer; Meta renders the button, so never invent a custom one or critique its look.\n` +
-    `Return ONLY minified JSON {"headline","body","cta","direction"} — "direction" MUST describe a visual that avoids whatever the roast mocked (e.g. a real before/after transformation, NOT a stock glamour headshot, NOT a star-rating graphic).`
+  const prompt = buildFixCopyPrompt(look, brand, opts.roast)
 
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -46,11 +57,10 @@ export async function fix(opts: { image: string; brand?: string | null; roast?: 
 
   // 3. generate the finished creative(s): 1 for the $5 fix, 3 distinct angles for the $12 A/B pack (same copy)
   const n = Math.min(Math.max(1, opts.variants ?? 1), 3) // ponytail: A/B pack is 3; cap here, widen if a bigger pack ships
-  const ANGLES = ['a bold real-life lifestyle photograph', 'a clean high-end studio product shot', 'a data-driven before/after infographic']
   const baseDir = copy.direction ? String(copy.direction).trim() : ''
   const dirs = n === 1
     ? [baseDir || null]
-    : ANGLES.slice(0, n).map((a) => `${baseDir ? baseDir + '. ' : ''}Render this variant as ${a}.`)
+    : FIX_ANGLES.slice(0, n).map((a) => `${baseDir ? baseDir + '. ' : ''}Render this variant as ${a}.`)
   const gens = await Promise.all(dirs.map((d) => generate({ headline, body, cta, creativeDirection: d }, brand)))
   const imageUrls = gens.map((g) => g.imageUrl)
   // real cost of the whole fix = vision + copy + every image generated
