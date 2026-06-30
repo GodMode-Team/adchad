@@ -60,6 +60,23 @@ describe('retainer — hireChad (one-click off-session) + bookRetainerInvoice + 
     expect(called).toBe(false)
   })
 
+  it('customer already has an active Stripe sub but stripe_sub column is stale/null (webhook lag) → already, never creates a 2nd sub', async () => {
+    // The exact "every click makes a new subscription" bug: a saved customer, the local stripe_sub never persisted
+    // (off-session charge failed once, or invoice.paid webhook hasn't landed). Stripe is the source of truth.
+    await sql`update prospects set stripe_customer='cus_test_1', stripe_livemode=false where id=${pid}` // stripe_sub stays NULL
+    let created = false
+    const r = await hireChad(pid, {
+      createSub: async () => { created = true; return { subId: 'sub_dupe' } },
+      checkout49: async () => ({ url: 'u' }),
+      activeSub: async (cus) => (cus === 'cus_test_1' ? 'sub_already_live' : null),
+    })
+    expect(r).toEqual({ status: 'already' })
+    expect(created).toBe(false) // did NOT create a duplicate subscription
+    const [p] = await sql<any[]>`select stripe_sub, stage from prospects where id=${pid}`
+    expect(p.stripe_sub).toBe('sub_already_live') // backfilled from Stripe so the next click short-circuits at the column
+    expect(p.stage).toBe('member')
+  })
+
   it('cross-mode saved customer is ignored → fallback (test key must not touch a live customer)', async () => {
     // a live-mode customer/sub on the row while running in test mode: must NOT be reused, and must NOT count as "already"
     await sql`update prospects set stripe_customer='cus_live_x', stripe_sub='sub_live_x', stripe_livemode=true where id=${pid}`

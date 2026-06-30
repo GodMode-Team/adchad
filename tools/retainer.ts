@@ -14,10 +14,19 @@ const isLive = () => !!process.env.STRIPE_SECRET_KEY?.startsWith('sk_live')
 type HireDeps = {
   createSub: (customerId: string, prospectId: string) => Promise<{ subId: string }> // throws unless the first charge clears immediately
   checkout49: (prospectId: string, customer: string | null) => Promise<{ url: string }>
+  activeSub?: (customerId: string) => Promise<string | null> // an existing non-terminal subscription on this customer, if any
 }
 export type HireResult = { status: 'subscribed' | 'already' | 'fallback'; url?: string }
 
 const DEFAULT_HIRE: HireDeps = {
+  // Stripe is the source of truth for "already subscribed" — our stripe_sub column can lag (invoice.paid webhook delay)
+  // or get released when an off-session charge fails, so we ask Stripe before ever creating a 2nd sub on the customer.
+  activeSub: async (customerId) => {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+    const subs = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 100 })
+    const active = subs.data.find((s) => ['active', 'trialing', 'past_due', 'unpaid'].includes(s.status))
+    return active?.id ?? null
+  },
   createSub: async (customerId, prospectId) => {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
     const sub = await stripe.subscriptions.create({
@@ -40,6 +49,13 @@ export async function hireChad(prospectId: string, deps: HireDeps = DEFAULT_HIRE
   if (sameMode && p.stripe_sub) return { status: 'already' } // already on retainer — never double-charge
   const customer: string | null = sameMode ? (p?.stripe_customer ?? null) : null
   if (!customer) return { status: 'fallback', url: (await deps.checkout49(prospectId, customer)).url }
+  // Authoritative dedup: even when our stripe_sub column is stale/null, never stack a 2nd subscription on a customer
+  // that already has one in Stripe (the "every click makes a new sub" bug). Backfill the column so the next click is cheap.
+  const existing = deps.activeSub ? await deps.activeSub(customer) : null
+  if (existing) {
+    await sql`update prospects set stripe_sub=${existing}, stripe_livemode=${live}, stage='member' where id=${prospectId}`
+    return { status: 'already' }
+  }
   // Atomic claim: only ONE concurrent call flips stripe_sub null → 'pending', so a double-submit / retry can't create
   // two subscriptions ($98/mo). Lost the race (or already subscribing) → 'already', never start a second charge.
   const claim = await sql<any[]>`update prospects set stripe_sub='pending' where id=${prospectId} and stripe_sub is null returning id`
