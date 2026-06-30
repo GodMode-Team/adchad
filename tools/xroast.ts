@@ -19,9 +19,12 @@ export function tweetIdOf(urlOrId: string): string {
   return m ? m[1] : String(urlOrId).replace(/\D/g, '')
 }
 
-export async function xroast(opts: { tweet: string }): Promise<{ prospectId: string; roastTweetId: string; salesUrl: string }> {
+export async function xroast(opts: { tweet: string; replyTo?: string }): Promise<{ prospectId: string; roastTweetId: string; salesUrl: string }> {
   const id = tweetIdOf(opts.tweet)
   if (!id) throw new Error('xroast: a tweet URL or id is required')
+  // Where the roast reply lands. Defaults to the roasted tweet (launch/manual path); the @adchad-summon path roasts the
+  // AD (the mention's own image, or the tweet it replies to) but replies under the MENTION, so it passes replyTo.
+  const replyToId = opts.replyTo ? tweetIdOf(opts.replyTo) : id
 
   // Public post — never roast while the kill-switch is on.
   const [ctrl] = await sql<any[]>`select paused from control where id=1`
@@ -40,6 +43,11 @@ export async function xroast(opts: { tweet: string }): Promise<{ prospectId: str
   if (!imageUrl) throw new Error(`xroast: tweet ${id} has no image to roast`)
   const author: string | null = t.includes?.users?.[0]?.username ?? null
 
+  // Never roast our OWN tweet (e.g. a 3rd party replies @adchad under one of our roast/fix images) — that's a self-roast
+  // loop, since our replies carry images. The mention runner catches this and skips (no nudge — there's nothing to fix).
+  const me = (process.env.X_HANDLE || 'adchadofficial').toLowerCase()
+  if (author && author.toLowerCase() === me) throw new Error(`xroast: refusing to roast our own tweet (${id}) — not an ad`)
+
   // 2. roast it (vision + Grok). Don't pass ad/prospect ids — we record the score ourselves below.
   const r = await roast({ image: imageUrl, handle: author, brand: author })
 
@@ -54,7 +62,7 @@ export async function xroast(opts: { tweet: string }): Promise<{ prospectId: str
 
   // 4. reply publicly with the roast + the per-prospect sales page (re-sells, then Stripe — never a raw link)
   const salesUrl = salesLink(prospectId)
-  const posted = await xpost({ text: r.xPost, link: salesUrl, replyToTweetId: id })
+  const posted = await xpost({ text: r.xPost, link: salesUrl, replyToTweetId: replyToId })
 
   // 5. record the roast reply tweet id — the row tools/fulfill.ts reads to reply the fix into the thread
   await sql`insert into interactions (prospect_id, ad_id, channel, direction, ref, text)

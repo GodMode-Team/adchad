@@ -7,6 +7,7 @@ type F = Record<string, string | number | boolean> // CLI passes string|boolean;
  *  claims "<who> replied" ~90s before the fix actually posts. */
 export function interactionEvent(i: any): any | null {
   const who = i.prospect_name ?? 'a brand'
+  if (i.channel === 'launch' || i.channel === 'mention') return null // internal dedup markers (launch / @adchad summon) — never public events
   if (i.channel === 'x' && i.direction === 'out') // public roast — text is already public on X
     return { ts: i.created_at, kind: 'roast', icon: '🔥', title: `Roasted ${who}`, detail: i.text ? String(i.text).slice(0, 240) : undefined, link: i.ref ? `https://x.com/i/status/${i.ref}` : undefined, score: i.score != null ? Number(i.score) : undefined }
   if (i.channel === 'note' && i.direction === 'in') // webhook PAID marker → the fix is generating now (NOT a reply)
@@ -32,8 +33,8 @@ export async function run(sub: string | undefined, f: F): Promise<unknown> {
         (select count(*) from prospects where stage='contacted')::int  as contacted,
         (select count(*) from prospects where stage='replied')::int    as replied,
         (select count(*) from prospects where stage='customer')::int   as customers,
-        (select count(*) from orders where status='paid' and coalesce(livemode,true))::int         as orders_paid,
-        (select coalesce(sum(amount),0) from orders where status='paid' and coalesce(livemode,true))::int as revenue_cents`
+        (select count(*) from orders where status='paid' and coalesce(livemode,true) and coalesce(source,'')<>'launch')::int         as orders_paid,
+        (select coalesce(sum(amount),0) from orders where status='paid' and coalesce(livemode,true) and coalesce(source,'')<>'launch')::int as revenue_cents`
       return m
     }
     case 'ledger': {

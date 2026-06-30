@@ -40,8 +40,19 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
       return xroast({ tweet: S('tweet') })
     }
     case 'xread': {
-      const { mentions } = await import('../tools/xread')
-      return mentions(f.since ? S('since') : undefined)
+      const m = await import('../tools/xread')
+      if (f.replies) return m.replies(S('replies'), f.since ? S('since') : undefined) // launch-campaign reply watch
+      return m.mentions(f.since ? S('since') : undefined)
+    }
+    case 'launch': {
+      const { run, arm, disarm } = await import('../tools/launch')
+      if (sub === 'set') return arm(S('tweet'))   // `launch set --tweet <url|id>` — arm the campaign
+      if (sub === 'off') return disarm()          // `launch off` — disarm
+      return run()                                // `launch run` (default) — process one beat of replies
+    }
+    case 'mention': {
+      const { run } = await import('../tools/mention')
+      return run()                                // `mention run` — one beat of @adchad ad-summons (always a $5 sell; no comp)
     }
     case 'email': {
       const m = await import('../tools/email')
@@ -82,8 +93,8 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
       // skills and pattern-completes `tool prospect`. Redirect instead of dead-ending — a wasted round-trip is ~10-140s here.
       const SKILLS = ['prospect', 'roast', 'engage', 'fulfill', 'report', 'evolve', 'copy', 'synthcheck', 'adchad']
       if (SKILLS.includes(name))
-        throw new Error(`'${name}' is a SKILL you're already running, not a tool — don't call \`tool ${name}\`. Follow the skill's steps using the real tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db`)
-      throw new Error(`unknown tool '${name}'. tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db`)
+        throw new Error(`'${name}' is a SKILL you're already running, not a tool — don't call \`tool ${name}\`. Follow the skill's steps using the real tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db launch mention`)
+      throw new Error(`unknown tool '${name}'. tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db launch mention`)
     }
   }
 }
