@@ -37,7 +37,7 @@ export const META_AD_NOTE =
 // link with a 👇. Injected into every roast's context (the good-ad path keeps its own respectful tone).
 export const X_POST_STYLE =
   `\n\nX POST FORMAT — this posts to X, so make it scannable:\n` +
-  `- Break it into short, punchy lines with line breaks between the beats — NOT one dense wall-of-text paragraph. One jab per line.\n` +
+  `- Break it into short, punchy lines with a BLANK LINE (double line break) between each beat — NOT one dense wall-of-text paragraph. One jab per line.\n` +
   `- Keep it tight: cut filler and repeats. Long is fine ONLY when it's well-formatted and every line earns its spot; when in doubt, trim it shorter.\n` +
   `- The ad screenshot is attached and our real $5 sales link is ATTACHED AUTOMATICALLY right under your text. So NEVER write a link, URL, or domain yourself — not "chadfix.com", not "adchad.ai", nothing (you'll invent the wrong one). Your CTA is words ONLY plus a 👇 that points down at the attached link.\n` +
   `- End with ONE confident, DIRECTIVE call-to-action — an action to take, never a vague question. Match this directness (keep it in your own tone): "Here, I'll unfuck it for you. You're welcome 👇" / "Click here if you want me to fix it for you 👇".`
@@ -97,6 +97,13 @@ export function stripUrls(text: string): string {
     .replace(/[ \t]+$/gm, '') // trailing spaces the strip left behind
     .replace(/\n{3,}/g, '\n\n') // collapse the blank line a removed URL left
     .trim()
+}
+
+/** Force a BLANK LINE between every beat of the X post. Grok is inconsistent — sometimes a single \n between beats,
+ *  sometimes \n\n — so the tweet randomly reads single- or double-spaced. Each beat is one line (per X_POST_STYLE);
+ *  rejoin them with \n\n so EVERY roast tweet is consistently double-spaced + scannable. */
+export function spaceBeats(text: string): string {
+  return text.split(/\n+/).map((s) => s.trim()).filter(Boolean).join('\n\n')
 }
 
 // pull a labelled section out of the team's "1. X Post: … 2. Email subject: … 3. Body: …" format
@@ -164,7 +171,7 @@ export async function roast(opts: { image: string; handle?: string | null; brand
   const cost = costUsdOf(j) + (opts.look ? 0 : look.costUsd ?? 0)
 
   return {
-    xPost: stripUrls(section(raw, /\**\s*\d?\.?\s*\**X Post\**\s*:?/i, /\**\s*\d?\.?\s*\**Email subject/i)),
+    xPost: spaceBeats(stripUrls(section(raw, /\**\s*\d?\.?\s*\**X Post\**\s*:?/i, /\**\s*\d?\.?\s*\**Email subject/i))),
     emailSubject: section(raw, /\**\s*\d?\.?\s*\**Email subject\**\s*:?/i, /\**\s*\d?\.?\s*\**Body/i),
     emailBody: section(raw, /\**\s*\d?\.?\s*\**Body\**\s*:?/i, null),
     raw,

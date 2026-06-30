@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { X_POST_STYLE, stripUrls, salesLink } from '../../tools/roast'
+import { X_POST_STYLE, stripUrls, salesLink, spaceBeats } from '../../tools/roast'
 
 // the team's feedback: the X roast read as one dense wall-of-text paragraph and the CTA was a vague
 // "Want Chad to just fix it? $5." X posts must be scannable (short lines / line breaks), dialled back in
@@ -39,6 +39,20 @@ describe('roast — stripUrls keeps fabricated sales links out of the post', () 
   it('leaves a link-free roast untouched (aside from trim)', () => {
     const post = '@brand this ad is weak.\nNo proof, no offer.\nClick if you want me to fix it 👇'
     expect(stripUrls(post)).toBe(post)
+  })
+})
+
+// Grok is inconsistent — sometimes a single \n between beats, sometimes \n\n — so the tweet randomly reads single- or
+// double-spaced. spaceBeats forces a blank line between EVERY beat so every roast (tweet + funnel) is consistently readable.
+describe('roast — spaceBeats forces a blank line between every beat', () => {
+  it('turns single line breaks into a blank line between beats', () => {
+    expect(spaceBeats('beat one\nbeat two\nbeat three')).toBe('beat one\n\nbeat two\n\nbeat three')
+  })
+  it('normalizes already-double and 3+ runs to exactly one blank line each', () => {
+    expect(spaceBeats('a\n\n\nb\nc')).toBe('a\n\nb\n\nc')
+  })
+  it('drops empty / whitespace-only lines and trims each beat', () => {
+    expect(spaceBeats('  a  \n\n   \n b ')).toBe('a\n\nb')
   })
 })
 

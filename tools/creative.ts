@@ -17,9 +17,9 @@ export function buildPrompt(fix: Fix, brand?: string | null): string {
   return (
     `Design ONE scroll-stopping 1:1 Meta ad CREATIVE. Concept: ${concept}.\n` +
     `Keep it SIMPLE and uncluttered — ONE clear visual idea, not a busy multi-panel dashboard crammed with tiny numbers.\n` +
-    `An infographic / data-viz is welcome where it genuinely proves the point, but do NOT default to a before/after split — ` +
-    `that pattern is overused; reach for it only when the concept truly calls for it. Otherwise lead with a single strong ` +
-    `image (a hero product/lifestyle shot, one bold stat, a clean diagram) plus only the structural labels it needs.\n` +
+    `An infographic / data-viz is welcome where it genuinely proves the point, but NEVER produce a before/after split or ` +
+    `any side-by-side "before vs after" comparison — that overused pattern is a BANNED one-trick pony. ALWAYS lead with a ` +
+    `single strong image (a hero product/lifestyle shot, one bold stat, a clean diagram) plus only the structural labels it needs.\n` +
     `Do NOT render the ad's marketing copy: no big headline banner, no paragraph of body copy, and NO ` +
     `call-to-action button — that copy lives in Meta's native fields and a drawn button isn't clickable.\n` +
     `No brand name, no logo, no watermark. Finished and high-end, ready to run.`
