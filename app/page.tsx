@@ -86,7 +86,7 @@ export default async function Home() {
               poster="https://teaser-page-virid.vercel.app/poster.jpg"
               style={{ display: 'block', width: '100%', aspectRatio: '16 / 9', background: '#000', border: `4px solid ${INK}`, borderRadius: 14, boxShadow: `8px 8px 0 ${INK}` }}
             >
-              <source src="https://teaser-page-virid.vercel.app/adchad-2min.mp4" type="video/mp4" />
+              <source src="https://teaser-page-virid.vercel.app/adchad-2min-final.mp4" type="video/mp4" />
             </video>
           </div>
 
