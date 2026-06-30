@@ -117,12 +117,13 @@ describe('fulfill — delivers via a public X reply when there is a roast tweet'
   beforeAll(async () => { orderId = await seed(pid, 5, 'roast_tweet_123') }, 30_000)
   afterAll(async () => { await cleanup(pid, orderId) })
 
-  it('replies the fix into the roast thread, not email', async () => {
+  it('replies the fix into the roast thread as a 2-tweet thread, not email', async () => {
     expect(await fulfillOrder(orderId, stub)).toBe('delivered')
     expect(sendCalls).toBe(0)                                        // no email
-    expect(xreplyCalls.length).toBe(1)                               // one public reply
-    expect(xreplyCalls[0].replyToTweetId).toBe('roast_tweet_123')    // into the roast thread
-    expect(xreplyCalls[0].imageUrls).toEqual(['https://example.com/fixed.png']) // with the new creative
+    expect(xreplyCalls.length).toBe(2)                               // lead (Meta card) + components subtweet
+    expect(xreplyCalls[0].replyToTweetId).toBe('roast_tweet_123')    // lead replies into the roast thread
+    expect(xreplyCalls[0].imageUrls).toEqual(['https://example.com/fixed.png']) // …carrying the Meta mockup
+    expect(xreplyCalls[1].replyToTweetId).toBe('reply99')            // components subtweet threads under the lead
     const [fx] = await sql<any[]>`select delivered_at from fixes where order_id=${orderId}`
     expect(fx.delivered_at).toBeTruthy()
     // the fix tweet URL is stored for the feed link + the thank-you-page embed
@@ -153,7 +154,7 @@ describe('fulfill — kill-switch on → email fallback, no public post', () => 
   })
 })
 
-describe('fulfill — $12 A/B pack generates + delivers 3 variants in one reply', () => {
+describe('fulfill — $12 A/B pack generates + delivers 3 variants in a lead+components thread', () => {
   const pid = 'test-fulfill-ab-' + Date.now()
   let orderId: number
   let fixVariants = 0
@@ -168,11 +169,12 @@ describe('fulfill — $12 A/B pack generates + delivers 3 variants in one reply'
   beforeAll(async () => { orderId = await seed(pid, 12, 'roast_tweet_ab') }, 30_000) // a $12 A/B-pack order
   afterAll(async () => { await cleanup(pid, orderId) })
 
-  it('asks fix for 3 variants, replies all 3 in ONE tweet, books cost once, idempotent', async () => {
+  it('asks fix for 3 variants, leads with 3 mockups + a components subtweet, books cost once, idempotent', async () => {
     expect(await fulfillOrder(orderId, stub)).toBe('delivered')
     expect(fixVariants).toBe(3)                            // tier 12 → 3 variants
-    expect(xreplyCalls.length).toBe(1)                     // a single public reply…
-    expect(xreplyCalls[0].imageUrls).toEqual(imageUrls)    // …carrying all 3 creatives
+    expect(xreplyCalls.length).toBe(2)                     // lead (3 mockups) + components subtweet
+    expect(xreplyCalls[0].imageUrls).toEqual(imageUrls)    // lead carries all 3 mockups
+    expect(xreplyCalls[1].replyToTweetId).toBe('r')        // subtweet threads under the lead
     const [fx] = await sql<any[]>`select image_url, variants, delivered_at from fixes where order_id=${orderId}`
     expect(fx.image_url).toBe(imageUrls[0])                // primary image kept for the /live thumbnail
     expect(fx.variants.images).toEqual(imageUrls)          // all 3 persisted for retry-reuse

@@ -18,10 +18,15 @@ describe('gated tools — only run with explicit opt-in', () => {
   )
 
   it.skipIf(!process.env.ALLOW_LIVE_CREATIVE)(
-    'creative generate → real ad image (skipped: needs ALLOW_LIVE_CREATIVE + OpenRouter credits)',
+    'creative generate → writes mockup + bare PNG (skipped: needs ALLOW_LIVE_CREATIVE to write to public/fixes)',
     async () => {
-      const out = await generate({ headline: 'Your ad is mid. We fixed it.', cta: 'Fix mine' })
-      expect(out.imageUrl).toMatch(/^\/fixes\/.+\.png$/)
+      // Deterministic now — no API spend; gated only so it does not litter public/fixes on every run.
+      const out = await generate({
+        brand: 'Acme', headline: 'Your ad is mid. We fixed it.', body: 'One clear line that actually sells.', cta: 'Learn More',
+        creative: { hero: 'FIXED', accent: 'bold' },
+      })
+      expect(out.imageUrl).toMatch(/^\/fixes\/.+\.png$/)     // the FB mockup
+      expect(out.creativeUrl).toMatch(/^\/fixes\/.+\.png$/)  // the bare uploadable creative
     },
     120_000,
   )

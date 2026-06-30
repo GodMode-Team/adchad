@@ -60,7 +60,26 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
     }
     case 'creative': {
       const { generate } = await import('../tools/creative')
-      return generate({ headline: S('headline'), body: f.body ? S('body') : null, cta: f.cta ? S('cta') : null, creativeDirection: f.direction ? S('direction') : null })
+      // Manual mockup render. e.g. tool creative --brand Aphrodite --headline "..." --hero DOUBLE --hero2 KEBDA --offer "2/145 LE" --accent warm
+      return generate({
+        brand: f.brand ? S('brand') : 'Your Brand',
+        headline: S('headline'),
+        body: f.body ? S('body') : '',
+        cta: f.cta ? S('cta') : 'Learn More',
+        url: f.url ? S('url') : null,
+        desc: f.desc ? S('desc') : null,
+        was: f.was ? S('was') : null,
+        creative: {
+          kicker: f.kicker ? S('kicker') : null,
+          hero: f.hero ? S('hero') : S('headline'),
+          hero2: f.hero2 ? S('hero2') : null,
+          subline: f.subline ? S('subline') : null,
+          offer: f.offer ? S('offer') : null,
+          offerLabel: f['offer-label'] ? S('offer-label') : null,
+          urgency: f.urgency ? S('urgency') : null,
+          accent: (f.accent ? S('accent') : 'bold') as any,
+        },
+      })
     }
     case 'vision': {
       const { describe } = await import('../tools/vision')

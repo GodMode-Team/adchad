@@ -28,14 +28,12 @@ export function fixEmailBody(r: FixResult): string {
   const vs = r.variants ?? []
   if (vs.length > 1) {
     const blocks = vs.map((v, i) =>
-      `── VARIANT ${i + 1} · ${v.angle.toUpperCase()} ANGLE ──\nHEADLINE\n${v.headline}\n\nPRIMARY TEXT\n${v.body}\n\nCTA (Meta button label)\n${v.cta}\n\nCREATIVE\n${v.imageUrl}`,
+      `── VARIANT ${i + 1} · ${v.angle.toUpperCase()} ANGLE ──\nHEADLINE\n${v.headline}\n\nPRIMARY TEXT\n${v.body}\n\nCTA (Meta button label)\n${v.cta}\n\nMOCKUP (preview)\n${v.imageUrl}\nUPLOADABLE CREATIVE (drop into Meta)\n${v.creativeUrl || v.imageUrl}`,
     ).join('\n\n')
-    return `Your A/B pack is ready — ${vs.length} ready-to-run ads, each testing a different angle. Drop each creative in Meta's image slot and put its copy in the native fields (don't paste copy onto the image).\n\n${blocks}\n\n${fixedBlock}— Chad`
+    return `Your A/B pack is ready — ${vs.length} ready-to-run ads, each testing a different angle. Upload each creative into Meta's image slot and put its copy in the native fields (don't paste copy onto the image).\n\n${blocks}\n\n${fixedBlock}— Chad`
   }
-  const imgsBlock = r.imageUrls.length > 1
-    ? `READY-TO-RUN CREATIVES (A/B test these):\n${r.imageUrls.join('\n')}`
-    : `READY-TO-RUN CREATIVE:\n${r.imageUrls[0]}`
-  return `Your fixed ad is ready. The creative goes in Meta's image slot; the copy below goes in the native fields (don't paste it onto the image too).\n\nHEADLINE\n${r.headline}\n\nPRIMARY TEXT\n${r.body}\n\nCTA (pick this label in Meta's button dropdown)\n${r.cta}\n\n${imgsBlock}\n\n${fixedBlock}— Chad`
+  const upload = r.creativeUrls?.[0] || r.imageUrls[0]
+  return `Your fixed ad is ready. The image below is the finished mockup; upload the creative into Meta's image slot and put the copy in the native fields.\n\nHEADLINE\n${r.headline}\n\nPRIMARY TEXT\n${r.body}\n\nCTA (pick this label in Meta's button dropdown)\n${r.cta}\n\nMOCKUP (preview)\n${r.imageUrls[0]}\nUPLOADABLE CREATIVE (drop into Meta)\n${upload}\n\n${fixedBlock}— Chad`
 }
 
 /** Fulfill one paid order: generate the fix (once), deliver it (X reply else email), record it. Idempotent + spend-safe. */
@@ -59,7 +57,8 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
   if (prior?.image_url) {
     // a previous run generated but delivery failed — reuse it, do NOT pay for gpt-image-2 again
     const imgs: string[] = prior.variants?.images?.length ? prior.variants.images : [prior.image_url]
-    r = { imageUrl: prior.image_url, imageUrls: imgs, headline: prior.headline, body: prior.body, cta: prior.cta, variants: prior.variants?.variants ?? undefined, fixed: [], cost: 0 } // cost already booked on first gen
+    const creatives: string[] = prior.variants?.creatives?.length ? prior.variants.creatives : imgs
+    r = { imageUrl: prior.image_url, imageUrls: imgs, creativeUrls: creatives, headline: prior.headline, body: prior.body, cta: prior.cta, variants: prior.variants?.variants ?? undefined, fixed: [], cost: 0 } // cost already booked on first gen
   } else {
     const [ad] = await sql<any[]>`select creative_url from ads where brand_id=${o.prospect_id} and creative_url is not null order by created_at desc limit 1`
     const [roast] = await sql<any[]>`select text from interactions where prospect_id=${o.prospect_id} and channel in ('roast','x') and direction='out' order by created_at desc limit 1`
@@ -68,7 +67,7 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
     r = await deps.fix({ image: ad.creative_url, brand: p?.name || 'your brand', roast: roast?.text ?? null, variants })
     // persist the generation + book the cost ONCE, before delivery — so a retry reuses this and never re-spends
     await sql`insert into fixes (order_id, headline, body, cta, image_url, variants)
-              values (${o.id}, ${r.headline}, ${r.body}, ${r.cta}, ${r.imageUrls[0]}, ${sql.json({ images: r.imageUrls, variants: r.variants ?? null })})
+              values (${o.id}, ${r.headline}, ${r.body}, ${r.cta}, ${r.imageUrls[0]}, ${sql.json({ images: r.imageUrls, creatives: r.creativeUrls ?? [], variants: r.variants ?? null })})
               on conflict (order_id) do update set headline=excluded.headline, body=excluded.body, cta=excluded.cta, image_url=excluded.image_url, variants=excluded.variants`
     await bookCost(r.cost, `creative fix order ${o.id}`) // real cost: vision + copy + N images (revenue is the webhook's)
   }
@@ -76,13 +75,23 @@ export async function fulfillOrder(orderId: number | string, deps: Deps = DEFAUL
   // DELIVER — public X reply into the roast thread, else email. (Persist-before-deliver above keeps retries free.)
   let fixLink: string | null = null // the fix's public X reply URL — surfaced in the feed + embedded on the thank-you page
   if (viaX) {
-    const ctaNote = r.cta ? ` Set your Meta CTA button to "${r.cta}".` : ''
     const multi = r.imageUrls.length > 1
-    const lead = multi ? `${r.headline} — ${r.imageUrls.length} variants to A/B test.` : r.headline
-    const caption = `${lead}${ctaNote} ${multi ? 'your A/B pack' : 'your $5 fix'}, live 👇`
-    const posted = await deps.xreply({ text: caption, imageUrls: r.imageUrls, replyToTweetId: roastTweetId!, handle: p?.x_handle ?? null })
-    fixLink = posted.url
-    console.log(`[fulfill] order ${o.id} → fix replied on X (${r.imageUrls.length} img): ${posted.url}`)
+    const upload = r.creativeUrls?.length ? r.creativeUrls : r.imageUrls // bare 1080² Meta-ready assets; fall back to mockups
+    // LEAD: Chad hands it over with the finished Meta card(s) — visual-first public proof.
+    const lead = multi
+      ? `here's your ad, unfucked — ${r.imageUrls.length} angles to A/B test. 🔧\nthis is how each looks live. pick your winner — copy + uploadable creatives in the reply 👇`
+      : `here's your ad, unfucked. 🔧\nthis is how it looks live. the copy + your ready-to-upload creative are in the reply 👇`
+    const leadPost = await deps.xreply({ text: lead, imageUrls: r.imageUrls, replyToTweetId: roastTweetId!, handle: p?.x_handle ?? null })
+    fixLink = leadPost.url // thread head — surfaced in the feed + thank-you page
+    // SUBTWEET: pasteable components + the BARE uploadable creative(s), threaded under the lead.
+    const comps = multi
+      ? [`📋 ${r.imageUrls.length} angles — paste each into Meta, attach its creative in order:`, ``,
+         ...(r.variants?.length ? r.variants.map((v, i) => `${i + 1}) ${v.angle.toUpperCase()} → ${v.headline}  ·  CTA: ${v.cta}`) : [`📣 ${r.headline}`, `🔘 CTA → ${r.cta}`]),
+         ``, `🎨 ${upload.length} uploadable creatives attached — drop into Meta.`].join('\n')
+      : [`📣 HEADLINE`, r.headline, ``, `✍️ PRIMARY TEXT`, r.body, ``, `🔘 CTA BUTTON → ${r.cta}`, ``,
+         `🎨 CREATIVE attached — drop it straight into Meta, paste the copy into the native fields. done.`].join('\n')
+    await deps.xreply({ text: comps, imageUrls: upload, replyToTweetId: leadPost.tweetId, handle: null })
+    console.log(`[fulfill] order ${o.id} → fix thread on X (lead + components): ${leadPost.url}`)
   } else {
     const subject = (r.variants?.length ?? 0) > 1 ? 'Your A/B ad pack is ready' : 'Your fixed ad is ready'
     await deps.send({ to: o.buyer_email, subject, body: fixEmailBody(r) })

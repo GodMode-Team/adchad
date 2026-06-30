@@ -1,54 +1,41 @@
 import { describe, it, expect } from 'vitest'
-import { buildPrompt, stripComparison } from '../../tools/creative'
+import { renderFbMockPng, renderCreativePng, type FbMockSpec } from '../../tools/render/fb-mock'
 
-// A Meta ad = a CREATIVE image + separate native fields (Primary text / Headline / CTA). Infographics/data-viz
-// make great creatives; the only things we must NOT bake in are the marketing headline-banner and a CTA button
-// (those duplicate the native fields and the drawn button is a dead pixel).
-describe('creative — single-panel, before/after stripped deterministically', () => {
-  const fix = {
-    headline: 'Cut GPU Spend 40% With Fixed AI Scaling',
-    body: 'Locked monthly performance + 3x throughput',
-    cta: 'See Exact Numbers',
-    // the copy model keeps writing a before/after direction for savings offers, ignoring the prose ban
-    creativeDirection: 'a clean before/after of a volatile cost line flattening out, premium dark studio look',
-  }
+// The creative is now rendered DETERMINISTICALLY as a finished Meta-feed mockup — the image model never draws the
+// copy, so the slop class (AI-meat, generic dashboards, mangled text) AND the before/after one-trick-pony are gone
+// by construction (a deterministic graphic can't draw a before/after). These tests prove the renderer produces a
+// real PNG from a structured spec, the bare uploadable asset, and is robust to a minimal spec.
+const PNG_MAGIC = [0x89, 0x50, 0x4e, 0x47]
 
-  it('welcomes data-viz/infographic, bakes no headline/CTA', () => {
-    const p = buildPrompt(fix, 'NVIDIA')
-    expect(p).not.toMatch(/render (this )?text/i)              // no "bake the headline/CTA in" instruction
-    expect(p).not.toContain(fix.headline)                     // marketing headline is NOT fed to the image…
-    expect(p).not.toContain(fix.cta)                          // …nor the CTA label
-    expect(p).toMatch(/infographic|data-viz|chart/i)          // infographics ARE welcome
-    expect(p).toMatch(/no\b.{0,30}(button|call-to-action)/i)  // …but no drawn CTA button
-    expect(p).toMatch(/simple|uncluttered|one clear|single .{0,12}panel/i)
-  })
+describe('creative — deterministic FB-mockup render', () => {
+  it('renders a full spec to a real PNG (the FB mockup / lead-tweet proof)', async () => {
+    const spec: FbMockSpec = {
+      brand: 'Aphrodite', headline: "The Double Kebda Everyone's Posting",
+      body: 'Most liver sandwiches are sad and dry. Ours are not. Two for 145 LE today only.',
+      cta: 'Order Now', was: 'Double Livers + Rolls: 145',
+      creative: { kicker: 'FIRE-GRILLED', hero: 'DOUBLE', hero2: 'KEBDA', subline: 'stacked livers', offer: '2 / 145 LE', offerLabel: 'DINE-IN', urgency: 'TODAY ONLY', accent: 'warm' },
+    }
+    const png = await renderFbMockPng(spec)
+    expect(png.length).toBeGreaterThan(10_000)
+    expect([...png.slice(0, 4)]).toEqual(PNG_MAGIC)
+  }, 30_000)
 
-  // the team (recurring): EVERY creative kept coming out a before/after — "one trick pony" — despite a prose ban in
-  // BOTH the copy prompt and here. Prose bans are ignored (the copy model writes a before/after direction; the image
-  // model draws the concept it's handed). The only fix that holds: strip the comparison framing in CODE.
-  it('NEVER lets a before/after concept reach the image model, even when the direction asks for one', () => {
-    const p = buildPrompt(fix, 'NVIDIA')
-    expect(p).not.toMatch(/before\s*[-/&]?\s*(and\s+|vs\.?\s+)?after|after\s*[-/&]?\s*before|side.?by.?side|split.?screen|\bvs\.?\b/i)
-    expect(p).toMatch(/single (unified )?panel|one (unified )?(frame|panel)/i) // positively framed as one panel
-    expect(p).toMatch(/flattening/i)                                            // the useful part of the direction survives
-  })
+  it('renders the BARE uploadable creative (no FB chrome) — the asset the buyer drops into Meta', async () => {
+    const spec: FbMockSpec = {
+      brand: 'Aphrodite', headline: 'h', body: 'b', cta: 'Order Now',
+      creative: { kicker: 'FRESH', hero: 'DOUBLE', hero2: 'KEBDA', offer: '2 / 145 LE', accent: 'warm' },
+    }
+    const png = await renderCreativePng(spec)
+    expect(png.length).toBeGreaterThan(10_000)
+    expect([...png.slice(0, 4)]).toEqual(PNG_MAGIC)
+  }, 30_000)
 
-  it('stripComparison removes the comparison framing but keeps a clean concept untouched', () => {
-    expect(stripComparison('a clean before/after of a volatile cost line flattening out, premium dark studio look'))
-      .not.toMatch(/before\s*[-/&]?\s*after|side.?by.?side/i)
-    expect(stripComparison('BEFORE vs AFTER: spend cut 72%')).not.toMatch(/before|after|\bvs\b/i)
-    expect(stripComparison('a split-screen pre vs post comparison')).not.toMatch(/split|pre|post|\bvs\b|comparison/i)
-    // a single-panel concept passes through unchanged
-    expect(stripComparison('one bold hero stat on dark premium bg')).toBe('one bold hero stat on dark premium bg')
-  })
-
-  // Don't just fence the model away from bad — aim it AT good. Distilled craft principles from
-  // brand/taste/ADCHAD-TASTE-PACK.md so gpt-image-2 has a positive target, not only "no before/after".
-  it('encodes the positive craft bar (dominant focal element, contrast/hierarchy, negative space, real-not-slop)', () => {
-    const p = buildPrompt({ headline: 'h', creativeDirection: 'a hero product shot' }, 'Acme')
-    expect(p).toMatch(/dominant focal|focal element/i)
-    expect(p).toMatch(/negative space|breathing room/i)
-    expect(p).toMatch(/contrast|hierarchy/i)
-    expect(p).toMatch(/real|credible|ready-to-run/i)
-  })
+  it('survives a minimal spec (no kicker/offer/urgency, unknown accent → palette falls back)', async () => {
+    const spec: FbMockSpec = {
+      brand: 'X', headline: 'A clear, specific outcome', body: 'One short line.', cta: 'Learn More',
+      creative: { hero: 'BIG IDEA', accent: 'nope' as any },
+    }
+    const png = await renderFbMockPng(spec)
+    expect([...png.slice(0, 4)]).toEqual(PNG_MAGIC)
+  }, 30_000)
 })
