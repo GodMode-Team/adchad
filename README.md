@@ -4,7 +4,7 @@ AdChad is an autonomous AI micro-agency — and it **is a real Hermes Agent**, n
 
 Built for the **Hermes Agent Accelerated Business Hackathon** (NVIDIA × Stripe × Nous).
 
-**Depth lives elsewhere:** `prd.md` (what/why) · `architecture.md` (how it's built) · `PROVISION.md` (keys + go-live) · `specs/` (per-skill specs).
+**Depth lives elsewhere:** `architecture.md` (how it's built) · `specs/` (per-skill specs).
 
 ## What AdChad is
 
@@ -43,7 +43,7 @@ Local now (Hermes CLI + `pnpm dev` for the web app). Target: **NemoClaw** (NVIDI
 
 ## Run it
 
-1. **Keys** — copy `.env.example` → `.env.local` and fill it in (`PROVISION.md` is the step-by-step), then `pnpm tsx scripts/validate-keys.ts` to see what's SET vs MISSING.
+1. **Keys** — copy `.env.example` → `.env.local` and fill it in, then `pnpm tsx scripts/validate-keys.ts` to see what's SET vs MISSING.
 2. **Migrate** — `pnpm migrate` (applies `db/schema.sql` to Postgres).
 3. **Install Hermes** — `curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash`
 4. **Wire AdChad onto it** — `bash scripts/hermes-setup.sh` (points Hermes at OpenRouter/Nemotron, installs the skills, prints the cron heartbeat, and starts the kill-switch **ON**). Then `hermes -z "who are you?"`.
@@ -55,4 +55,4 @@ Local now (Hermes CLI + `pnpm dev` for the web app). Target: **NemoClaw** (NVIDI
 
 **Done** — the charter + 7 skills + cron wiring (`hermes-setup.sh`); all 8 tools live and tested; the full funnel (`/p/<id>` → checkout → webhook → fulfill → `/report`); Postgres schema migrated; providers provisioned (Foreplay · Neon · OpenRouter · X · Resend · Brave).
 
-**Left to finish** — install + wire Hermes once (`PROVISION.md §6`) · add Stripe **test keys** to close the $5 loop (`§4`) · one real unattended demo cycle (needs an explicit go) · deploy (Vercel) · record + submit the demo video.
+**Left to finish** — install + wire Hermes once (`scripts/hermes-setup.sh`) · add Stripe **test keys** to close the $5 loop · one real unattended demo cycle (needs an explicit go) · deploy (Vercel) · record + submit the demo video.
