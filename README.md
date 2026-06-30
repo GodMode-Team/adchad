@@ -1,58 +1,53 @@
 # AdChad
 
-AdChad is an autonomous AI micro-agency — and it **is a real Hermes Agent**, not a pipeline with an agent bolted on. We hand the agent a mission, a voice, skills, money, and guardrails, then let it run a ZHC-style ad agency end to end: find weak Meta ads, **publicly roast** them, close the owner on a **$5 fix**, deliver it, report the P&L, and improve itself toward **$1M ARR**.
+> **An autonomous AI that publicly roasts businesses' worst Meta ads on X — then rebuilds them and sells the fix for $5.** Not a pipeline with a bot bolted on: AdChad **is** a real Hermes Agent that prospects, posts, charges, and delivers end to end, with no human in the loop.
 
-Built for the **Hermes Agent Accelerated Business Hackathon** (NVIDIA × Stripe × Nous).
+[![Watch the 2-minute demo](https://teaser-page-virid.vercel.app/poster.jpg)](https://teaser-page-virid.vercel.app/adchad-2min-final.mp4)
 
-**Depth lives elsewhere:** `architecture.md` (how it's built) · `specs/` (per-skill specs).
+▶️ **[Watch the 2-min demo](https://teaser-page-virid.vercel.app/adchad-2min-final.mp4)** · 🎨 [Brand kit](https://adchad-brand.vercel.app)
 
-## What AdChad is
+## What it does
 
-A Hermes Agent = identity + skills + a heartbeat + memory + guardrails. There is no orchestration code — **Hermes is the loop.**
+- **Prospects** weak Meta ads — Foreplay for reachable SMBs, live X brand ads for reach.
+- **Roasts** them publicly on X: savage, specific, funny. The roast *is* the marketing.
+- **Rebuilds** the ad (new hook + copy + a generated creative) and drops a $5 link in-thread.
+- **Charges & delivers** via Stripe → the fixed ad lands in their inbox, unattended.
+- **Runs itself** on a cron heartbeat behind a kill-switch.
 
-- **Charter** (`skills/adchad/SKILL.md`) — mission, voice, offer ladder, operating rules. Loaded every session, so a fresh Hermes session *is* AdChad.
-- **7 skills** (`skills/`) — `prospect` (find + audit + pick a target) · `roast` (savage X post + cold email) · `engage` (work replies/DMs/inbox toward the close) · `fulfill` (deliver paid work) · `report` (weekly P&L) · `evolve` (improve its own skills). Plus shared `synthcheck` + `copy`.
-- **Cron heartbeat** — the autonomous pulse: **acquire** `every 1h` · **engage** `every 15m` · **report** `Mon 9am` · **evolve** `3am`.
-- **Memory** — Hermes memory holds the qualitative playbook; Postgres holds the hard numbers (CRM + P&L ledger).
-- **Guardrails** — a global **kill-switch**, **spend-approval** (it asks before buying or upgrading a plan), and a **brand-safety vote** before any public roast.
+## How it's built — Hermes × NVIDIA × Stripe
 
-**Brain:** NVIDIA **Nemotron** via OpenRouter. The harness is named for *Hermes the harness*, not the model — Hermes-4 on OpenRouter lacks the tool-calling the harness requires, so the agent runs on Nemotron (tool-capable, and the on-theme NVIDIA integration).
-
-## The tools (its hands)
-
-Thin single-purpose CLIs over live APIs — no business logic, just I/O. The agent composes them:
-
-```
-pnpm -s tool <foreplay|enrich|xpost|xread|email|creative|stripe|db> [sub] [--flag value]
-```
-
-`foreplay` scan Meta ads · `enrich` ad → owner contact · `xpost`/`xread` the AdChad X account · `email` send/read (Resend) · `creative` generate an ad image · `stripe` checkout · `db` the Postgres CRM + ledger. Each emits one JSON line; each is tested live (`tests/tools/`).
-
-## The funnel (the money loop)
-
-```
-tweet / cold email  →  /p/<id> sales page ("UNFUCK IT — $5")  →  /api/checkout (fresh Stripe session)
-   →  pay  →  /api/stripe/webhook (records the order + revenue, queues a fulfill)  →  agent /fulfill  →  fixed-ad email
+```mermaid
+flowchart LR
+  ad[Bad Meta ad] --> hermes[Hermes Agent<br/>the autonomous loop]
+  hermes --> nvidia[NVIDIA Nemotron<br/>brain · scores the ad]
+  nvidia --> roast[Public roast on X<br/>the viral hook]
+  roast --> page[adchad.ai/p/id<br/>sales page]
+  page --> stripe[Stripe<br/>$5 fix · $49/mo]
+  stripe --> fix[Rebuilt ad<br/>delivered in-thread]
 ```
 
-Every click mints a fresh Stripe Checkout session (never a raw payment link — those expire and you lose the re-sell). `/report` shows the live funnel + P&L. The web app (`app/`) is deliberately thin — sales page, checkout, webhook, report — because the agent runs itself; there's no dashboard.
+- **Hermes Agent** (Nous) is the harness — identity + skills + a cron heartbeat + memory + guardrails. There's no orchestration code; **Hermes is the loop.**
+- **NVIDIA Nemotron** is the tool-calling brain (via OpenRouter): it drives the agent and scores every ad (the *Chad Radar*). Roast voice = Grok, vision = Gemini, creative = gpt-image-2.
+- **Stripe** is the money rail: every `/p/<id>` mints a fresh Checkout session; the webhook records the order and queues fulfillment.
 
-## Runtime
+## The offer
 
-Local now (Hermes CLI + `pnpm dev` for the web app). Target: **NemoClaw** (NVIDIA's OpenShell sandbox) later.
+| Tier | What | Role |
+|---|---|---|
+| **Free roast** | A public X teardown of a bad ad | The hook |
+| **$5 — the unfuck** | One rebuilt ad: new hook, copy + creative | The wedge |
+| **$49/mo — retainer** | Weekly reviews, fresh creatives, competitor intel | The ARR |
 
 ## Run it
 
-1. **Keys** — copy `.env.example` → `.env.local` and fill it in, then `pnpm tsx scripts/validate-keys.ts` to see what's SET vs MISSING.
-2. **Migrate** — `pnpm migrate` (applies `db/schema.sql` to Postgres).
-3. **Install Hermes** — `curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash`
-4. **Wire AdChad onto it** — `bash scripts/hermes-setup.sh` (points Hermes at OpenRouter/Nemotron, installs the skills, prints the cron heartbeat, and starts the kill-switch **ON**). Then `hermes -z "who are you?"`.
-5. **Web app** — `pnpm dev` (`/` brand · `/p/<id>` sales page · `/report` live numbers).
-6. **Test** — `pnpm test` (live suite, **zero mocks** — hits real Foreplay / model / X / Resend / Stripe-test).
-7. **Go live / stop** — `pnpm -s tool db resume` (publish for real) · `pnpm -s tool db pause` (halt all publish + spend).
+```bash
+cp .env.example .env.local              # fill in keys, then:
+pnpm tsx scripts/validate-keys.ts       # see what's SET vs MISSING
+pnpm migrate                            # apply db/schema.sql to Postgres
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash   # install Hermes
+bash scripts/hermes-setup.sh            # wire AdChad on (model + skills, kill-switch ON)
+pnpm dev                                # web app: /  ·  /p/<id>  ·  /report
+pnpm -s tool db resume                  # GO LIVE   (db pause = halt all publish + spend)
+```
 
-## Status
-
-**Done** — the charter + 7 skills + cron wiring (`hermes-setup.sh`); all 8 tools live and tested; the full funnel (`/p/<id>` → checkout → webhook → fulfill → `/report`); Postgres schema migrated; providers provisioned (Foreplay · Neon · OpenRouter · X · Resend · Brave).
-
-**Left to finish** — install + wire Hermes once (`scripts/hermes-setup.sh`) · add Stripe **test keys** to close the $5 loop · one real unattended demo cycle (needs an explicit go) · deploy (Vercel) · record + submit the demo video.
+The web app (`app/`) is deliberately thin — sales page, checkout, webhook, live P&L — because the agent runs itself. Deeper docs: `architecture.md` · `specs/`.
