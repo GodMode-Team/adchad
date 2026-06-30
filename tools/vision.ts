@@ -57,6 +57,7 @@ export const VISION_PROMPT =
   `Return ONLY minified JSON: ` +
   `{"headline","body","offer","cta","social_proof","visual","real_flaws","is_video","score","verdict"}. ` +
   `is_video = true if a play button or video thumbnail is visible (the creative is a video, not a static image), else false. ` +
+  `headline = the main marketing/hook line written IN the creative; the advertiser's Page/brand name beside the "Sponsored" label is NOT the headline — if there is no distinct headline line, use null. ` +
   `social_proof = any visible star ratings, reviews, testimonials, or credibility claims (else null). ` +
   `real_flaws = an array of the 2-3 biggest GENUINE weaknesses of THIS specific ad (only true ones). ` +
   `score = an INTEGER 0-100 for THIS ad's creative quality, judged by a RUTHLESS world-class ad critic. Most small-business ads are weak, so BE HARSH and grade on a tight curve — default to skepticism, and when unsure score LOW. Anchors: stock-photo / vague hook / dead CTA / generic / stale / cluttered = 8-25; forgettable-but-functional = 30-45; only a genuinely sharp ad (specific hook + real proof + ONE clear CTA + strong visual) earns 60+; reserve 85+ for ads you'd put in a case study. A "fine" ad is still a 35, not a 65. ` +
