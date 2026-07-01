@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { run, nextNiche, NICHES, type Target } from '../../tools/prospect'
+import { run, seed, nextNiche, NICHES, type Target } from '../../tools/prospect'
 
 // Deterministic prospecting replaces the flaky agent /prospect → /roast heartbeat. run() is driven by injected deps
 // (like launch/mention) so the control flow — pick → refill-if-dry → roast-once → free-vs-$5 — is unit-testable
@@ -7,7 +7,7 @@ import { run, nextNiche, NICHES, type Target } from '../../tools/prospect'
 const T: Target = { prospectId: 'p1', brand: 'Acme', adId: 'a1', creativeUrl: 'http://img/1.png' }
 
 const base = () => ({
-  control: async () => ({ paused: false, launch_tweet_id: null }),
+  control: async () => ({ paused: false, launch_tweet_id: null as string | null }),
   pick: async () => T,
   scan: async (_n: string) => 5,
   countProspects: async () => 0,
@@ -61,5 +61,59 @@ describe('prospect — deterministic roast beat', () => {
     let freeWhenDisarmed: boolean | undefined
     await run({ ...base(), control: async () => ({ paused: false, launch_tweet_id: null }), roastAndPost: async (_t, f) => { freeWhenDisarmed = f; return { tweetId: 't' } } })
     expect(freeWhenDisarmed).toBe(false)
+  })
+})
+
+// seed() — the one-off launch-thread seeder: run the SAME beat N times, but reply each roast INTO the linked thread and
+// ALWAYS comp the free fix (the worker nests it under the roast). Replicable so a downstream failure can be re-run.
+describe('prospect seed — reply the roast+fix into a thread', () => {
+  const capture = () => {
+    const calls: { replyTo?: string; freeFix: boolean; prospectId: string }[] = []
+    let n = 0
+    const deps = {
+      ...base(),
+      pick: async () => ({ ...T, prospectId: `p${n++}` }),
+      roastAndPost: async (t: Target, freeFix: boolean, replyTo?: string) => { calls.push({ replyTo, freeFix, prospectId: t.prospectId }); return { tweetId: `tw-${t.prospectId}` } },
+    }
+    return { calls, deps }
+  }
+
+  it('posts `count` roasts, each replying to the thread with a FORCED free fix (even when disarmed)', async () => {
+    const { calls, deps } = capture() // base() control is disarmed (launch_tweet_id: null)
+    const r = await seed({ count: 3, thread: 'https://x.com/adchadofficial/status/2072062934851719214', deps })
+    expect(r.posted).toBe(3)
+    expect(calls).toHaveLength(3)
+    expect(calls.every((c) => c.replyTo === '2072062934851719214')).toBe(true) // URL parsed to bare id, threaded
+    expect(calls.every((c) => c.freeFix === true)).toBe(true)                  // forced free — worker delivers the fix
+    expect(r.roasted).toEqual(['p0', 'p1', 'p2'])
+  })
+
+  it('defaults the thread to the armed launch tweet when --thread is omitted', async () => {
+    const { calls, deps } = capture()
+    deps.control = async () => ({ paused: false, launch_tweet_id: '999' })
+    const r = await seed({ count: 1, deps })
+    expect(r.thread).toBe('999')
+    expect(calls[0].replyTo).toBe('999')
+  })
+
+  it('stops immediately when the kill-switch is on', async () => {
+    const { calls, deps } = capture()
+    deps.control = async () => ({ paused: true, launch_tweet_id: '999' })
+    const r = await seed({ count: 5, thread: '123', deps })
+    expect(calls).toHaveLength(0)
+    expect(r.posted).toBe(0)
+  })
+
+  it('throws when no thread is given and nothing is armed', async () => {
+    const { deps } = capture()
+    deps.control = async () => ({ paused: false, launch_tweet_id: null })
+    await expect(seed({ count: 1, deps })).rejects.toThrow(/thread/)
+  })
+
+  it('throws on a thread arg with no parseable tweet id (never falls back to standalone posts)', async () => {
+    const { calls, deps } = capture()
+    // a PROFILE url (no /status/<id>) parses to '' → must reject, not post 10 standalone timeline roasts
+    await expect(seed({ count: 10, thread: 'https://x.com/adchadofficial', deps })).rejects.toThrow(/tweet id/)
+    expect(calls).toHaveLength(0)
   })
 })

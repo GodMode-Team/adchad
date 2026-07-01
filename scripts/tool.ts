@@ -55,8 +55,11 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
       return run()                                // `mention run` — one beat of @adchad ad-summons (always a $5 sell; no comp)
     }
     case 'prospect': {
-      const { run } = await import('../tools/prospect')
-      return run()                                // `prospect run` — deterministic beat: roast one un-roasted Foreplay ad (free fix while launch armed, else $5)
+      const m = await import('../tools/prospect')
+      // `prospect seed --count 10 --thread <url|id>` — one-off: seed N roast→fix pairs INTO the launch thread (replies,
+      // forced free fix). `prospect run` (default) — deterministic beat: roast one un-roasted ad standalone (free while armed, else $5).
+      if (sub === 'seed') return m.seed({ count: f.count ? N('count', 10) : undefined, thread: f.thread ? S('thread') : undefined })
+      return m.run()
     }
     case 'email': {
       const m = await import('../tools/email')
