@@ -1,7 +1,7 @@
 import { describe, type AdLook } from './vision'
 import { generate } from './creative'
 import { costUsdOf } from './cost'
-import type { FbMockSpec } from './render/fb-mock'
+import { CREATIVE_LAYOUTS, CREATIVE_ACCENTS, type FbMockSpec, type Layout, type Accent } from './render/fb-mock'
 
 // Fix copy is written by a strong model on a grounded rubric; the creative is rendered DETERMINISTICALLY as a
 // finished Meta-feed mockup (tools/render/fb-mock) — the model never draws the text, so it can't be slop.
@@ -10,20 +10,33 @@ const MODEL = process.env.MODEL_COPY || 'x-ai/grok-4.3'
 type CreativeSpec = FbMockSpec['creative']
 export type FixVariant = { angle: string; headline: string; body: string; cta: string; imageUrl: string; creativeUrl: string }
 export type FixResult = { imageUrl: string; imageUrls: string[]; creativeUrls: string[]; headline: string; body: string; cta: string; variants?: FixVariant[]; fixed: string[]; cost: number }
-export type FixAngle = { key: string; brief: string }
+export type FixAngle = { key: string; brief: string; design?: string }
 
 // Meta's CTA button is a FIXED dropdown — you pick a label, you can't restyle it. The fix's `cta` must be one of these.
 const META_CTAS = 'Book Now, Call Now, Contact Us, Learn More, Sign Up, Shop Now, Get Quote, Apply Now, Get Offer, Subscribe, Download, Send Message, Get Started'
-const ACCENTS = 'warm (food/restaurant/cozy), cool (saas/tech/finance/B2B), fresh (health/wellness/beauty/clean), lime (bold/energetic/youth), bold (default — dark, premium, high-contrast)'
+// The copy model is the ART DIRECTOR: it picks a LAYOUT + PALETTE + which business elements to feature, so every
+// business gets a genuinely different creative. The renderer only draws crisp text from that spec — never slop.
+const LAYOUTS =
+  'center (a punchy 1-2 word promise, balanced & bold), ' +
+  'editorial (left-aligned benefit statement, magazine feel — great with badges/proof), ' +
+  'stat (the hook IS a number/result: "3.2x", "4.9★", "$0", "24/7" — rendered huge), ' +
+  'split (bold two-part message in a color block — food, retail, energetic), ' +
+  'pricetag (a specific price/offer is the star — retail & deals), ' +
+  "quote (a real testimonial in the customer's voice — proof angle), " +
+  'badge (authority/credential-led: "#1 in {city}", licensed, award)'
+const ACCENTS =
+  'DARK: bold (charcoal+lime, premium), ink (near-black+coral), warm (food/cozy), cool (tech/B2B/night), fresh (wellness), lime (energetic). ' +
+  'LIGHT: clean (white, medical/modern), sunny (bright food/kids), mint (health/eco), sky (trust/finance/dental), paper (cream, craft/legal), coral (beauty/warm). ' +
+  'NOT every ad is dark — reach for a LIGHT palette for clean/medical/beauty/premium/modern brands'
 
 // MESSAGE angles for the $12 A/B pack — different REASONS to click, not three looks of one message. From the
 // marketingskills ad-creative angle framework; each pack variant is written from one angle (its own copy + image).
 export const FIX_ANGLES: FixAngle[] = [
-  { key: 'pain', brief: 'PAIN — hammer the specific pain or cost the prospect feels right now; make the cost of inaction sting.' },
-  { key: 'outcome', brief: 'OUTCOME — paint the concrete after-state they want, vividly and specifically (the dream result).' },
-  { key: 'proof', brief: 'SOCIAL PROOF — lead with a credible result, number, or who-already-trusts-you; proof-first.' },
-  { key: 'curiosity', brief: 'CURIOSITY — open an intriguing gap or counter-intuitive insight that demands the click.' },
-  { key: 'contrarian', brief: 'CONTRARIAN — call out why the common approach fails and position this as the smarter fix.' },
+  { key: 'pain', brief: 'PAIN — hammer the specific pain or cost the prospect feels right now; make the cost of inaction sting.', design: 'lean toward layout "editorial", a dark palette' },
+  { key: 'outcome', brief: 'OUTCOME — paint the concrete after-state they want, vividly and specifically (the dream result).', design: 'lean toward layout "center" or "split", a bold palette' },
+  { key: 'proof', brief: 'SOCIAL PROOF — lead with a credible result, number, or who-already-trusts-you; proof-first.', design: 'lean toward layout "quote" or "stat"' },
+  { key: 'curiosity', brief: 'CURIOSITY — open an intriguing gap or counter-intuitive insight that demands the click.', design: 'lean toward layout "split" or "center", a striking palette' },
+  { key: 'contrarian', brief: 'CONTRARIAN — call out why the common approach fails and position this as the smarter fix.', design: 'lean toward layout "badge" or "editorial"' },
 ]
 
 /** The copy-repair prompt (pure, testable). Repairs every roast criticism without reintroducing what it mocked, and
@@ -36,7 +49,7 @@ export function buildFixCopyPrompt(look: AdLook, brand: string, roast?: string |
     (roast
       ? `AdChad publicly ROASTED this exact ad:\n"${roast}"\n\nYour fixed ad MUST repair every criticism in that roast — and CRITICALLY must NOT reintroduce anything it mocked. If the roast ridiculed a "pretty headshot and generic stars," the fix CANNOT be a glamour model headshot with a star rating — it must LEAD with a specific, benefit-driven headline and one strong piece of proof. Do NOT reuse the original's weak headline.\n`
       : `Its real flaws: ${(look.real_flaws ?? []).join('; ') || 'generic, weak hook'}. Repair each — add a clear CTA, add proof/results, surface the offer, kill generic-template vibes, sharpen the hook.\n`) +
-    (angle ? `WRITE THIS VARIANT FROM ONE ANGLE — ${angle.brief}\n` : '') +
+    (angle ? `WRITE THIS VARIANT FROM ONE ANGLE — ${angle.brief}${angle.design ? ` For A/B-pack visual variety, ${angle.design} (unless a different layout clearly fits this business better).` : ''}\n` : '') +
     `What a GREAT ad looks like — hit every one (distilled from brand/taste/ADCHAD-TASTE-PACK.md + the marketingskills ad-creative/copywriting skills):\n` +
     `• ONE big idea: a single specific promise or outcome, never a feature list. Reach for a proven headline shape — "{outcome} without {pain}", "Never {bad thing} again", "The {category} for {audience}", or a sharp pain-point question.\n` +
     `• Specific beats vague — numbers and real outcomes ("Cut your IRS bill from $47k to $9k"), never "save on taxes" or "more accessible". Lead with the prospect's real pain or desire.\n` +
@@ -44,18 +57,25 @@ export function buildFixCopyPrompt(look: AdLook, brand: string, roast?: string |
     `• Plain & active: simple words ("use" not "utilize"), active voice, confident (cut "almost/very/really"), NO exclamation points, NO em-dashes. Ban empty filler — "Best/Leading/Top", "streamline/optimize/innovative/seamless/elevate/unlock/empower/accessible/solutions". If a line could run unchanged for any competitor, rewrite it sharper.\n` +
     `• Fit Meta's fields: front-load the hook in the FIRST ~125 characters of "body"; keep "headline" ≤40 characters and punchy. "body" is 2-4 short lines (hook → why → one proof → offer → light urgency), not one line and not a wall.\n` +
     `"cta" MUST be one of Meta's fixed CTA button labels (${META_CTAS}) — pick the single best fit for the offer; Meta renders the button, so never invent a custom one or critique its look.\n` +
-    `The CREATIVE is rendered DETERMINISTICALLY from a STRUCTURED spec (you do NOT write a prose image brief). Give ONE clean focal idea — NEVER a before/after split or any side-by-side comparison (a BANNED one-trick pony), and never a busy multi-panel dashboard. Keep it simple and uncluttered.\n` +
-    `Return ONLY minified JSON: {"headline","body","cta","creative":{"kicker","hero","hero2","subline","offer","offerLabel","urgency","accent"}}.\n` +
-    `creative.kicker = a short ALL-CAPS eyebrow (context/credibility, ≤6 words, else ""). creative.hero = the giant focal line: 1-2 SHORT words OR a number. creative.hero2 = optional 2nd big line (else ""). creative.subline = a short descriptor (else ""). creative.offer = a short offer value e.g. "$50 OFF" / "2 / 145 LE" (else ""). creative.offerLabel = a short qualifier e.g. "NEW CLIENTS" (else ""). creative.urgency = a short ribbon e.g. "TODAY ONLY" (else ""). creative.accent = the palette that fits the vertical: ${ACCENTS}.\n` +
-    `BAD → GOOD: BAD headline "Double Livers + Rolls: 145" is a menu line, no hook. GOOD headline "The Double Kebda Everyone's Posting" with creative {kicker:"FIRE-GRILLED · FRESH DAILY", hero:"DOUBLE", hero2:"KEBDA", subline:"charred livers · soft rolls", offer:"2 / 145 LE", offerLabel:"DINE-IN OR DELIVERY", urgency:"TODAY ONLY", accent:"warm"}.\n` +
-    `SELF-CRITIQUE before answering (silently): could a competitor run this exact headline? does it echo the original's weak line? is it a menu/category dump? does the reader have to infer the value? does it read like AI? If YES to any — rewrite until every answer is NO.`
+    `The CREATIVE is rendered DETERMINISTICALLY — you are the ART DIRECTOR. You choose the LAYOUT + PALETTE + which business ELEMENTS to feature (you never write a prose image brief; the renderer draws crisp text from your spec, never distorted). Design THIS business's ad: if your creative could belong to any other business, or is just another dark centered card, REDESIGN it. NEVER a before/after or side-by-side (banned one-trick), never a busy multi-panel dashboard.\n` +
+    `creative.layout — the composition that fits this ONE idea: ${LAYOUTS}.\n` +
+    `creative.accent — the palette: ${ACCENTS}.\n` +
+    `Return ONLY minified JSON: {"headline","body","cta","creative":{"layout","accent","kicker","hero","hero2","subline","offer","offerLabel","urgency","proof","badges"}}. Fill only the elements that fit the layout + this business; leave the rest "" (or [] for badges).\n` +
+    `creative.hero = the giant focal line: 1-2 SHORT words, a number/price, or (layout "quote" only) the testimonial sentence. hero2 = optional 2nd big line. kicker = short ALL-CAPS eyebrow (≤6 words). subline = one short descriptor. offer = a short value e.g. "$9 / UNIT" / "$50 OFF". offerLabel = a short qualifier e.g. "NEW CLIENTS". urgency = a short ribbon e.g. "TODAY ONLY". proof = a real proof stat e.g. "4.9★ · 600+ reviews" (or a "quote" layout's attribution). badges = up to 3 SHORT trust chips e.g. ["LICENSED","24/7","20 YRS"]. Never fabricate a stat.\n` +
+    `DESIGN BY VERTICAL — three DIFFERENT businesses, three DIFFERENT designs:\n` +
+    `• Emergency plumber -> {layout:"editorial", accent:"ink", kicker:"LICENSED · INSURED", hero:"24/7", hero2:"EMERGENCY", subline:"Burst pipe? A real plumber at your door in 60 minutes.", offer:"$0", offerLabel:"CALL-OUT FEE", badges:["24/7","LICENSED","5★ 600+"]}\n` +
+    `• Medspa Botox deal -> {layout:"pricetag", accent:"clean", kicker:"MEDICAL-GRADE", hero:"BOTOX", offer:"$9 / UNIT", offerLabel:"NEW CLIENTS", subline:"Board-certified injectors. Natural results.", badges:["FDA-APPROVED","10 YRS"]}\n` +
+    `• Coach testimonial -> {layout:"quote", accent:"paper", hero:"I booked 8 clients in my first two weeks without posting every day.", proof:"Sarah M., wellness coach"}\n` +
+    `SELF-CRITIQUE before answering (silently): could a competitor run this exact headline? does it echo the original's weak line? is it a menu/category dump? does the reader have to infer the value? does it read like AI? AND on design — is the creative just another dark centered card, or do the layout + palette genuinely fit THIS business? If YES to any copy problem or to the sameness — rewrite the copy sharper and pick a different layout/palette until every answer is NO.`
   )
 }
 
 const s = (v: any) => (v == null || v === '' ? null : String(v).trim())
 function normalizeCreative(c: any, headline: string): CreativeSpec {
-  const accent = ['warm', 'cool', 'fresh', 'lime', 'bold'].includes(c?.accent) ? c.accent : 'bold'
-  return { kicker: s(c?.kicker), hero: s(c?.hero) || headline, hero2: s(c?.hero2), subline: s(c?.subline), offer: s(c?.offer), offerLabel: s(c?.offerLabel), urgency: s(c?.urgency), accent }
+  const layout = (CREATIVE_LAYOUTS as string[]).includes(c?.layout) ? (c.layout as Layout) : undefined // undefined → renderer's safe 'center'
+  const accent = (CREATIVE_ACCENTS as string[]).includes(c?.accent) ? (c.accent as Accent) : 'bold'
+  const badges = Array.isArray(c?.badges) ? (c.badges.map((b: any) => s(b)).filter(Boolean).slice(0, 3) as string[]) : null
+  return { layout, accent, kicker: s(c?.kicker), hero: s(c?.hero) || headline, hero2: s(c?.hero2), subline: s(c?.subline), offer: s(c?.offer), offerLabel: s(c?.offerLabel), urgency: s(c?.urgency), proof: s(c?.proof), badges: badges && badges.length ? badges : null }
 }
 
 /** Write the fixed copy + structured creative spec for ONE variant (optionally from a specific message angle). */
