@@ -6,6 +6,9 @@ import { bookCost } from './cost'
 
 // Roast an X tweet's ad PUBLICLY: read the tweet's image, roast it, reply in-thread with the roast + the $5
 // sales link, and persist the prospect + the roast reply's tweet id — so the paid fix can reply into the thread.
+// freeFix defaults to "armed" when the caller doesn't say: while the launch campaign is armed, ANY public roast
+// (launch-thread reply, or an autonomous /prospect roast via the bare CLI) gives away the fix for engagement —
+// a caller that must never comp (the @adchad-summon path, tools/mention.ts) has to opt out explicitly.
 function client() {
   return new TwitterApi({
     appKey: process.env.X_API_KEY!, appSecret: process.env.X_API_SECRET!,
@@ -19,6 +22,26 @@ export function tweetIdOf(urlOrId: string): string {
   return m ? m[1] : String(urlOrId).replace(/\D/g, '')
 }
 
+/** explicit always wins; unspecified falls back to whether the launch campaign is armed. */
+export function resolveFreeFix(explicit: boolean | undefined, armed: boolean): boolean {
+  return explicit ?? armed
+}
+
+/** is the launch campaign armed (a tweet is pinned as the launch thread)? Takes the already-fetched control row —
+ *  xroast() needs `paused` from the same row anyway, so this avoids a second round-trip for `launch_tweet_id`. */
+export function isLaunchArmed(ctrl: { launch_tweet_id?: string | null } | null | undefined): boolean {
+  return !!ctrl?.launch_tweet_id
+}
+
+/** Comp a tier-5 $0 order (source='launch' — excluded from revenue metrics) so the existing fulfill-worker
+ *  delivers the real fix creative. Idempotent under concurrency via a real DB constraint (db/schema.sql's
+ *  orders_launch_comp_uniq partial unique index) — a retried/duplicate call for the same prospect never double-comps. */
+export async function compFreeFixOrder(prospectId: string): Promise<void> {
+  await sql`insert into orders (prospect_id, tier, status, amount, livemode, source)
+            values (${prospectId}, 5, 'paid', 0, true, 'launch')
+            on conflict (prospect_id) where source='launch' do nothing`
+}
+
 export async function xroast(opts: { tweet: string; replyTo?: string; freeFix?: boolean }): Promise<{ prospectId: string; roastTweetId: string; salesUrl: string | null }> {
   const id = tweetIdOf(opts.tweet)
   if (!id) throw new Error('xroast: a tweet URL or id is required')
@@ -26,8 +49,9 @@ export async function xroast(opts: { tweet: string; replyTo?: string; freeFix?: 
   // AD (the mention's own image, or the tweet it replies to) but replies under the MENTION, so it passes replyTo.
   const replyToId = opts.replyTo ? tweetIdOf(opts.replyTo) : id
 
-  // Public post — never roast while the kill-switch is on.
-  const [ctrl] = await sql<any[]>`select paused from control where id=1`
+  // Public post — never roast while the kill-switch is on. Fetch launch_tweet_id in the same round-trip (both live on
+  // the single `control` row) — freeFix's armed-check below reuses it instead of querying again.
+  const [ctrl] = await sql<any[]>`select paused, launch_tweet_id from control where id=1`
   if (ctrl?.paused) throw new Error('xroast: kill-switch is ON — refusing to post publicly. `db resume` first.')
 
   const x = client()
@@ -60,14 +84,19 @@ export async function xroast(opts: { tweet: string; replyTo?: string; freeFix?: 
   await sql`insert into scores (ad_id, prospect_id, total) values (${adId}, ${prospectId}, ${r.score})`
   await bookCost(r.cost, `roast prospect ${prospectId}`) // real P&L: vision + grok cost of this roast
 
-  // 4. reply publicly with the roast. Launch-thread replies get the fix FREE → NO paid-funnel link (the free fix is
-  //    delivered as its own reply right below). @adchad summons are a $5 sell → keep the per-prospect sales page.
-  const salesUrl = opts.freeFix ? null : salesLink(prospectId)
+  // 4. reply publicly with the roast. A free-fixed roast (launch-thread reply, or armed-window prospecting) gets
+  //    NO paid-funnel link — the free fix is delivered as its own reply right below. @adchad summons are always a
+  //    $5 sell (tools/mention.ts passes freeFix:false explicitly) → keep the per-prospect sales page.
+  const freeFix = resolveFreeFix(opts.freeFix, isLaunchArmed(ctrl))
+  const salesUrl = freeFix ? null : salesLink(prospectId)
   const posted = await xpost({ text: r.xPost, link: salesUrl, replyToTweetId: replyToId })
 
   // 5. record the roast reply tweet id — the row tools/fulfill.ts reads to reply the fix into the thread
   await sql`insert into interactions (prospect_id, ad_id, channel, direction, ref, text)
             values (${prospectId}, ${adId}, ${'x'}, ${'out'}, ${posted.tweetId}, ${r.xPost})`
+
+  // 6. comp the free fix (after the interactions row above exists, so fulfill.ts can always find the thread)
+  if (freeFix) await compFreeFixOrder(prospectId)
 
   return { prospectId, roastTweetId: posted.tweetId, salesUrl }
 }

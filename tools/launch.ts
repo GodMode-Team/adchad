@@ -3,14 +3,16 @@ import { replies as realReplies } from './xread'
 import { xroast, tweetIdOf } from './xroast'
 
 // Launch campaign (spec-14): watch replies to the hand-posted launch tweet, roast every image reply PUBLICLY, then
-// deliver the normally-$5 fix FOR FREE by comping a tier-5 / amount=0 / source='launch' order. We DON'T fulfill inline —
-// we just comp the order; the existing single fulfill-worker (scripts/fulfill-worker.ts) drains it exactly like a paid
-// order, so there's one fulfiller (no double-post race) and one code path. Goal is engagement, not money — no caps; the
-// kill-switch (control.paused) is the only valve. xroast already refuses to post while paused (belt + suspenders).
+// deliver the normally-$5 fix FOR FREE. The comp (a tier-5/amount=0/source='launch' order) now happens INSIDE
+// xroast() itself, since freeFix:true triggers it there — this is the same comp autonomous prospecting roasts get
+// by default while the campaign is armed (tools/xroast.ts's resolveFreeFix). We DON'T fulfill inline — the existing
+// single fulfill-worker (scripts/fulfill-worker.ts) drains the comped order exactly like a paid one, so there's one
+// fulfiller (no double-post race) and one code path. Goal is engagement, not money — no caps; the kill-switch
+// (control.paused) is the only valve. xroast already refuses to post while paused (belt + suspenders).
 export type LaunchDeps = {
   control: () => Promise<{ paused: boolean; launchTweetId: string | null }>
   replies: (tweetId: string) => Promise<{ items: { id: string; handle: string | null; created_at?: string }[] }>
-  roast: (replyId: string) => Promise<{ prospectId: string }>
+  roast: (replyId: string) => Promise<unknown>
   me: () => Promise<string>
 }
 
@@ -57,10 +59,7 @@ export async function run(deps: Partial<LaunchDeps> = {}): Promise<RunResult> {
       // ponytail: claim-first = at-most-once roast. A hard failure after the roast posts but before the order commits
       // leaves the reply roasted-without-fix (surfaced in errors[] for manual comp) — preferred over a double public roast.
 
-      const { prospectId } = await d.roast(reply.id) // xroast: vision→score→roast→public reply→persist prospect+ad+roast-row
-      // Comp the free fix: a tier-5 paid order at amount=0, tagged source='launch' (excluded from the public sales count).
-      await sql`insert into orders (prospect_id, tier, status, amount, livemode, source)
-                values (${prospectId}, 5, 'paid', 0, true, 'launch')`
+      await d.roast(reply.id) // xroast: vision→score→roast→public reply→persist prospect+ad+roast-row→comp the free-fix order
       out.processed.push(reply.id)
     } catch (e) {
       out.errors.push({ id: reply.id, error: (e as Error).message })

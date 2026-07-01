@@ -7,7 +7,7 @@
 - `enrich --link URL --name N` → `{website,email,email_source,x_handle,segment}` (scrape + MX + Brave).
 - `xpost --text T [--image URL] [--handle H] [--reply ID]` → `{tweetId,url}` (X API v2; @-tag only if handle; replies into a thread when `replyToTweetId`/`--reply` is set).
 - `xread [--mentions] [--since ID]` → `{items:[{id,from,text,...}]}` (mentions/replies/DMs).
-- `xroast --tweet URL|ID` → `{prospectId,roastTweetId,salesUrl}` (roast a tweet: audits the ad image, posts the savage roast as a **public reply** to it, persists the prospect + roast-reply id, returns the `/p/<id>` sales link).
+- `xroast --tweet URL|ID` → `{prospectId,roastTweetId,salesUrl}` (roast a tweet: audits the ad image, posts the savage roast as a **public reply** to it, persists the prospect + roast-reply id, returns the `/p/<id>` sales link — `salesUrl` is `null` and the fix is FREE instead whenever the launch campaign is armed, spec-14).
 - `email send --to A --subject S --body B` / `email read` → `{id}` / `{items:[...]}` (Resend + inbox).
 - `stripe checkout --prospect P --tier 5|12|49` / `stripe webhook` → `{url}` / fulfillment trigger.
 - `creative --headline H --body B --cta C` → `{imageUrl}` (Nano Banana → `public/fixes`).

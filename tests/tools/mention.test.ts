@@ -1,7 +1,7 @@
 import { describe, it, expect, afterAll } from 'vitest'
 import { migrate, sql } from '../../lib/db'
 import { adTweetOf, mapMentions } from '../../tools/xread'
-import { run } from '../../tools/mention'
+import { run, mentionRoastArgs } from '../../tools/mention'
 import { interactionEvent } from '../../tools/db'
 
 // Live DB, no mocks (house style). The external calls (mentions/roast/nudge/me) are injected so the orchestration tests
@@ -26,6 +26,12 @@ describe('adTweetOf — which tweet id holds the ad (own media → replied_to/qu
   })
   it("prefers the mention's own media over a referenced ad (own screenshot wins)", () => {
     expect(adTweetOf({ id: 'M6', attachments: { media_keys: ['mk_6'] }, referenced_tweets: [{ type: 'replied_to', id: 'P6' }] })).toBe('M6')
+  })
+})
+
+describe('mentionRoastArgs — ALWAYS freeFix:false (xroast now defaults free-while-armed; mention must opt out explicitly)', () => {
+  it('is false regardless of args — this is the only exercised path for DEFAULT.roast, which every other test here stubs out', () => {
+    expect(mentionRoastArgs('t1', 'r1')).toEqual({ tweet: 't1', replyTo: 'r1', freeFix: false })
   })
 })
 

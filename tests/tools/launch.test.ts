@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { migrate, sql } from '../../lib/db'
 import { mapReplies } from '../../tools/xread'
 import { run, arm, disarm } from '../../tools/launch'
+import { compFreeFixOrder } from '../../tools/xroast'
 import { run as dbRun, interactionEvent } from '../../tools/db'
 
 // Live DB, no mocks (house style). The external calls (replies/roast/me) are injected so the orchestration tests
@@ -49,12 +50,15 @@ describe('launch.run — happy path: roast → comped $0 order left for the work
     await migrate()
     const deps = base({
       replies: async () => ({ items: [{ id: replyId, handle: 'somebrand', created_at: 'now' }] }),
-      // the roast stub stands in for xroast: it persists the prospect + ad (so the order FK holds) and returns the id
+      // the roast stub stands in for xroast: it persists the prospect + ad (so the order FK holds), comps the
+      // free-fix order (xroast itself owns this now, since it also runs for the prospecting default-armed
+      // path — launch.run() no longer inserts it directly), and returns the id
       roast: async (rid: string) => {
         roastCalls++
         await sql`insert into prospects (id, name, x_handle, segment, stage) values (${pid}, 'Some Brand', 'somebrand', 'public', 'roasted') on conflict (id) do nothing`
         await sql`insert into ads (id, brand_id, creative_url) values (${pid + '-ad'}, ${pid}, 'https://example.com/orig.png') on conflict (id) do nothing`
         await sql`insert into interactions (prospect_id, channel, direction, ref, text) values (${pid}, 'x', 'out', ${'roast-of-' + rid}, 'roast text')`
+        await compFreeFixOrder(pid)
         return { prospectId: pid }
       },
     })

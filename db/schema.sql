@@ -122,5 +122,7 @@ create unique index if not exists onboarding_prospect_uniq on onboarding (prospe
 -- comped free-fix orders are tagged source='launch' (amount=0) so they're auditable + excluded from real revenue.
 alter table control add column if not exists launch_tweet_id text;
 alter table orders  add column if not exists source text;  -- null = normal paid order | 'launch' = comped free fix
+-- idempotency: one comped launch order per prospect (a retried/duplicate free-fix roast can't double-comp).
+create unique index if not exists orders_launch_comp_uniq on orders (prospect_id) where source='launch';
 
 insert into control (id, paused) values (1, false) on conflict (id) do nothing;

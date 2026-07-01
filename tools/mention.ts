@@ -7,6 +7,9 @@ import { xroast } from './xroast'
 // tools/launch.ts: a thin loop over a tweet source with claim-first dedup, a self-skip, and the kill-switch (control.paused)
 // as the only valve. The ad to roast is the mention's own image (a screenshot) or the tweet it replies to/quotes (a live X
 // ad) — adTweetOf decides which; xroast fetches+roasts it and replies under the MENTION. No ad found → one nudge.
+// NOTE: xroast() now defaults to a FREE fix whenever the caller doesn't say and the launch campaign is armed (so
+// autonomous /prospect roasts get it too) — mentionRoastArgs passes freeFix:false explicitly so a summon during an
+// armed launch window still sells the $5 fix, never comps.
 export type MentionDeps = {
   control: () => Promise<{ paused: boolean }>
   mentions: () => Promise<{ items: Mention[] }>
@@ -18,13 +21,18 @@ export type MentionDeps = {
 export const NUDGE_TEXT =
   "Can't roast thin air. Drop the ad's screenshot, or reply to me right under the ad itself, and I'll unfuck it. 👇"
 
+/** Always paid, never comped — see the NOTE above. */
+export function mentionRoastArgs(tweet: string, replyTo: string): { tweet: string; replyTo: string; freeFix: false } {
+  return { tweet, replyTo, freeFix: false }
+}
+
 const DEFAULT: MentionDeps = {
   control: async () => {
     const [c] = await sql<any[]>`select paused from control where id=1`
     return { paused: !!c?.paused }
   },
   mentions: realMentions,
-  roast: ({ tweet, replyTo }) => xroast({ tweet, replyTo }),
+  roast: ({ tweet, replyTo }) => xroast(mentionRoastArgs(tweet, replyTo)),
   nudge: async (replyToId) => {
     const { xpost } = await import('./xpost')
     await xpost({ text: NUDGE_TEXT, replyToTweetId: replyToId })
