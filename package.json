@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@resvg/resvg-wasm": "^2.6.2",
+    "@slack/bolt": "^4.7.3",
     "@vercel/blob": "^2.5.0",
     "next": "^15.3.0",
     "openai": "^4.77.0",
