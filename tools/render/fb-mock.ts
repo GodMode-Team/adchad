@@ -48,8 +48,8 @@ export const PALETTES: Record<Accent, Pal> = {
   coral: { grad: 'radial-gradient(circle at 50% 16%, #fff1ec, #ffd9cf 72%, #ffc7b8)', fg: '#3a1108', hero: '#3a1108', hero2: '#ff5a3c', muted: '#8a5044', rule: '#ff5a3c', chipBg: '#ff5a3c', chipText: '#fff', ribbon: '#3a1108', block: '#ff5a3c', blockText: '#fff', dark: false },
 }
 
-export type Layout = 'center' | 'editorial' | 'stat' | 'split' | 'pricetag' | 'quote' | 'badge'
-const LAYOUT_KEYS: Layout[] = ['center', 'editorial', 'stat', 'split', 'pricetag', 'quote', 'badge']
+export type Layout = 'center' | 'editorial' | 'stat' | 'split' | 'pricetag' | 'quote' | 'badge' | 'scene'
+const LAYOUT_KEYS: Layout[] = ['center', 'editorial', 'stat', 'split', 'pricetag', 'quote', 'badge', 'scene']
 
 export type FbMockSpec = {
   brand: string
@@ -72,6 +72,8 @@ export type FbMockSpec = {
     urgency?: string | null
     proof?: string | null // a proof line/stat, e.g. "4.9★ · 600+ reviews"
     badges?: string[] | null // 1-3 short trust/credential chips, e.g. ["LICENSED","24/7","20 YRS"]
+    scenePrompt?: string | null // (layout "scene") the image brief the copy model writes; the pipeline generates it
+    imageUrl?: string | null // (layout "scene") the generated photographic background (data-uri), injected by the pipeline
   }
 }
 
@@ -86,6 +88,7 @@ function fit(maxW: number, maxSize: number, minSize: number, ...lines: (string |
 
 // tiny hyperscript so this stays a .ts file (no JSX/tsx)
 const h = (type: string, style: Record<string, any>, children?: any) => ({ type, props: children === undefined ? { style } : { style, children } })
+const imgNode = (src: string, style: Record<string, any>) => ({ type: 'img', props: { src, style } })
 
 // ───────────────────────── shared element blocks ─────────────────────────
 function ribbonEl(pal: Pal, urgency: string) {
@@ -214,15 +217,36 @@ function layoutBadge(c: FbMockSpec['creative'], pal: Pal) {
   return fill('column', 'center', 'center', '44px 44px', kids)
 }
 
+// Photographic scene: an AI-generated, text-free background image with the crisp copy overlaid in a scrimmed
+// bottom caption zone (the "put the product in an epic real-world scene" concept). imageUrl is injected by the pipeline.
+function layoutScene(c: FbMockSpec['creative'], pal: Pal) {
+  const kids: any[] = []
+  if (c.imageUrl) kids.push(imgNode(c.imageUrl, { position: 'absolute', top: 0, left: 0, width: 640, height: 640, objectFit: 'cover' }))
+  kids.push(h('div', { position: 'absolute', top: 0, left: 0, width: 640, height: 640, backgroundImage: 'linear-gradient(to top, rgba(0,0,0,0.92) 3%, rgba(0,0,0,0.55) 33%, rgba(0,0,0,0.04) 62%)' }, ''))
+  const hero = upper(stripEmoji(c.hero)); const hero2 = c.hero2 ? upper(stripEmoji(c.hero2)) : null
+  const t: any[] = []
+  if (c.kicker) t.push(h('div', { color: pal.hero2, fontFamily: 'Barlow', fontWeight: 900, fontSize: 18, letterSpacing: 5, textTransform: 'uppercase', marginBottom: 10, textShadow: '0 2px 10px rgba(0,0,0,0.85)' }, upper(stripEmoji(c.kicker))))
+  const hl = [h('div', { color: '#fff' }, hero)]; if (hero2) hl.push(h('div', { color: pal.hero2 }, hero2))
+  t.push(h('div', { display: 'flex', flexDirection: 'column', fontFamily: 'Anton', fontSize: fit(556, 92, 46, hero, hero2), lineHeight: 0.9, letterSpacing: -1, textTransform: 'uppercase', color: '#fff', textShadow: '0 4px 18px rgba(0,0,0,0.75)' }, hl))
+  if (c.subline) t.push(h('div', { color: '#ececec', fontFamily: 'Barlow', fontWeight: 600, fontSize: 22, marginTop: 12, textShadow: '0 2px 10px rgba(0,0,0,0.9)' }, stripEmoji(c.subline)))
+  const row: any[] = []
+  if (c.offer) row.push(chipEl(pal, c.offer, c.offerLabel))
+  else if (c.proof) row.push(h('div', { display: 'flex', color: '#fff', fontFamily: 'Barlow', fontWeight: 800, fontSize: 20, textShadow: '0 2px 10px rgba(0,0,0,0.9)' }, stripEmoji(c.proof)))
+  if (row.length) t.push(h('div', { display: 'flex', alignItems: 'center', marginTop: 20 }, row))
+  kids.push(h('div', { position: 'absolute', left: 0, bottom: 0, width: 640, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '0 46px 46px', textAlign: 'left' }, t))
+  return h('div', { position: 'absolute', top: 0, left: 0, width: 640, height: 640, display: 'flex' }, kids)
+}
+
 const LAYOUTS: Record<Layout, (c: FbMockSpec['creative'], pal: Pal) => any> = {
-  center: layoutCenter, editorial: layoutEditorial, stat: layoutStat, split: layoutSplit, pricetag: layoutPricetag, quote: layoutQuote, badge: layoutBadge,
+  center: layoutCenter, editorial: layoutEditorial, stat: layoutStat, split: layoutSplit, pricetag: layoutPricetag, quote: layoutQuote, badge: layoutBadge, scene: layoutScene,
 }
 
 /** The inner ad CREATIVE (deterministic designed graphic). 640×640 logical → rasterized to 1080². */
 function creativeNode(spec: FbMockSpec) {
   const c = spec.creative
   const pal = PALETTES[c.accent && PALETTES[c.accent] ? c.accent : 'bold']
-  const layout: Layout = c.layout && LAYOUTS[c.layout] ? c.layout : 'center'
+  let layout: Layout = c.layout && LAYOUTS[c.layout] ? c.layout : 'center'
+  if (layout === 'scene' && !c.imageUrl) layout = 'editorial' // scene needs its generated image; degrade gracefully
   let content: any
   try { content = LAYOUTS[layout](c, pal) } catch { content = layoutCenter(c, pal) } // safe fallback — never fail a render
   const kids: any[] = [content]

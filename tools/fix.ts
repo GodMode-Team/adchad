@@ -1,5 +1,6 @@
 import { describe, type AdLook } from './vision'
 import { generate } from './creative'
+import { generateScene } from './render/scene'
 import { costUsdOf } from './cost'
 import { CREATIVE_LAYOUTS, CREATIVE_ACCENTS, type FbMockSpec, type Layout, type Accent } from './render/fb-mock'
 
@@ -23,7 +24,8 @@ const LAYOUTS =
   'split (bold two-part message in a color block — food, retail, energetic), ' +
   'pricetag (a specific price/offer is the star — retail & deals), ' +
   "quote (a real testimonial in the customer's voice — proof angle), " +
-  'badge (authority/credential-led: "#1 in {city}", licensed, award)'
+  'badge (authority/credential-led: "#1 in {city}", licensed, award), ' +
+  'scene (a GENERATED photograph — the product/subject in a real, epic scene; you write creative.scenePrompt and the renderer overlays the copy)'
 const ACCENTS =
   'DARK: bold (charcoal+lime, premium), ink (near-black+coral), warm (food/cozy), cool (tech/B2B/night), fresh (wellness), lime (energetic). ' +
   'LIGHT: clean (white, medical/modern), sunny (bright food/kids), mint (health/eco), sky (trust/finance/dental), paper (cream, craft/legal), coral (beauty/warm). ' +
@@ -57,15 +59,17 @@ export function buildFixCopyPrompt(look: AdLook, brand: string, roast?: string |
     `• Plain & active: simple words ("use" not "utilize"), active voice, confident (cut "almost/very/really"), NO exclamation points, NO em-dashes. Ban empty filler — "Best/Leading/Top", "streamline/optimize/innovative/seamless/elevate/unlock/empower/accessible/solutions". If a line could run unchanged for any competitor, rewrite it sharper.\n` +
     `• Fit Meta's fields: front-load the hook in the FIRST ~125 characters of "body"; keep "headline" ≤40 characters and punchy. "body" is 2-4 short lines (hook → why → one proof → offer → light urgency), not one line and not a wall.\n` +
     `"cta" MUST be one of Meta's fixed CTA button labels (${META_CTAS}) — pick the single best fit for the offer; Meta renders the button, so never invent a custom one or critique its look.\n` +
-    `The CREATIVE is rendered DETERMINISTICALLY — you are the ART DIRECTOR. You choose the LAYOUT + PALETTE + which business ELEMENTS to feature (you never write a prose image brief; the renderer draws crisp text from your spec, never distorted). Design THIS business's ad: if your creative could belong to any other business, or is just another dark centered card, REDESIGN it. NEVER a before/after or side-by-side (banned one-trick), never a busy multi-panel dashboard.\n` +
-    `creative.layout — the composition that fits this ONE idea: ${LAYOUTS}.\n` +
-    `creative.accent — the palette: ${ACCENTS}.\n` +
-    `Return ONLY minified JSON: {"headline","body","cta","creative":{"layout","accent","kicker","hero","hero2","subline","offer","offerLabel","urgency","proof","badges"}}. Fill only the elements that fit the layout + this business; leave the rest "" (or [] for badges).\n` +
-    `creative.hero = the giant focal line: 1-2 SHORT words, a number/price, or (layout "quote" only) the testimonial sentence. hero2 = optional 2nd big line. kicker = short ALL-CAPS eyebrow (≤6 words). subline = one short descriptor. offer = a short value e.g. "$9 / UNIT" / "$50 OFF". offerLabel = a short qualifier e.g. "NEW CLIENTS". urgency = a short ribbon e.g. "TODAY ONLY". proof = a real proof stat e.g. "4.9★ · 600+ reviews" (or a "quote" layout's attribution). badges = up to 3 SHORT trust chips e.g. ["LICENSED","24/7","20 YRS"]. Never fabricate a stat.\n` +
-    `DESIGN BY VERTICAL — three DIFFERENT businesses, three DIFFERENT designs:\n` +
+    `The CREATIVE is rendered DETERMINISTICALLY — you are the ART DIRECTOR. FIRST decide the best CONCEPT for THIS ad, then build it. Two kinds: (a) a bold TYPOGRAPHIC design (you pick layout + palette + elements), or (b) a GENERATED PHOTO SCENE — when a real photograph sells it far better (a product shown in use, a mouthwatering dish, a place, a transformation, an aspirational moment): set layout "scene" and write creative.scenePrompt; the renderer overlays your crisp copy on the photo, so it is epic AND the words never distort. Think like a creative director sizing up THIS product, not a template-picker. If your creative could belong to any other business, or is just another dark centered card, REDESIGN it. NEVER a before/after or side-by-side (banned), never a busy multi-panel dashboard.\n` +
+    `creative.layout — the composition/concept that fits this ONE idea: ${LAYOUTS}.\n` +
+    `creative.accent — the palette (also sets the accent color on a scene's copy): ${ACCENTS}.\n` +
+    `Return ONLY minified JSON: {"headline","body","cta","creative":{"layout","accent","scenePrompt","kicker","hero","hero2","subline","offer","offerLabel","urgency","proof","badges"}}. Fill only the elements that fit the concept + this business; leave the rest "" (or [] for badges).\n` +
+    `creative.scenePrompt = (ONLY when layout is "scene") a vivid, specific PHOTO brief — subject + setting + lighting + mood, photorealistic commercial photography, the product/subject rendered concretely in an aspirational real-world moment, with a calm darker lower area for the caption. NO text in the image. Else "".\n` +
+    `creative.hero = the giant focal line: 1-2 SHORT words, a number/price, or (layout "quote") the testimonial sentence. hero2 = optional 2nd big line. kicker = short ALL-CAPS eyebrow (≤6 words). subline = one short descriptor. offer = a short value e.g. "$9 / UNIT". offerLabel = a short qualifier e.g. "NEW CLIENTS". urgency = a short ribbon e.g. "TODAY ONLY". proof = ONE clean, well-formed proof stat, a COMPLETE phrase e.g. "4.9★ · 600+ reviews" or "Trusted by 1,200+ teams" (never a fragment like "4.9 hundreds", never fabricated). badges = up to 3 SHORT trust chips e.g. ["LICENSED","24/7","20 YRS"].\n` +
+    `DESIGN BY VERTICAL — four DIFFERENT businesses, four DIFFERENT concepts:\n` +
     `• Emergency plumber -> {layout:"editorial", accent:"ink", kicker:"LICENSED · INSURED", hero:"24/7", hero2:"EMERGENCY", subline:"Burst pipe? A real plumber at your door in 60 minutes.", offer:"$0", offerLabel:"CALL-OUT FEE", badges:["24/7","LICENSED","5★ 600+"]}\n` +
     `• Medspa Botox deal -> {layout:"pricetag", accent:"clean", kicker:"MEDICAL-GRADE", hero:"BOTOX", offer:"$9 / UNIT", offerLabel:"NEW CLIENTS", subline:"Board-certified injectors. Natural results.", badges:["FDA-APPROVED","10 YRS"]}\n` +
     `• Coach testimonial -> {layout:"quote", accent:"paper", hero:"I booked 8 clients in my first two weeks without posting every day.", proof:"Sarah M., wellness coach"}\n` +
+    `• Sneaker brand (plain white-background product shot) -> {layout:"scene", accent:"ink", scenePrompt:"Premium white running sneakers on the feet of a runner mid-stride on a rain-slick neon-lit city rooftop at night, dramatic rim light, splashing water, photorealistic commercial photo, calmer dark lower third for a caption", kicker:"BUILT FOR THE CHASE", hero:"OWN", hero2:"THE NIGHT", offer:"20% OFF", offerLabel:"FIRST PAIR"}\n` +
     `SELF-CRITIQUE before answering (silently): could a competitor run this exact headline? does it echo the original's weak line? is it a menu/category dump? does the reader have to infer the value? does it read like AI? AND on design — is the creative just another dark centered card, or do the layout + palette genuinely fit THIS business? If YES to any copy problem or to the sameness — rewrite the copy sharper and pick a different layout/palette until every answer is NO.`
   )
 }
@@ -75,7 +79,7 @@ function normalizeCreative(c: any, headline: string): CreativeSpec {
   const layout = (CREATIVE_LAYOUTS as string[]).includes(c?.layout) ? (c.layout as Layout) : undefined // undefined → renderer's safe 'center'
   const accent = (CREATIVE_ACCENTS as string[]).includes(c?.accent) ? (c.accent as Accent) : 'bold'
   const badges = Array.isArray(c?.badges) ? (c.badges.map((b: any) => s(b)).filter(Boolean).slice(0, 3) as string[]) : null
-  return { layout, accent, kicker: s(c?.kicker), hero: s(c?.hero) || headline, hero2: s(c?.hero2), subline: s(c?.subline), offer: s(c?.offer), offerLabel: s(c?.offerLabel), urgency: s(c?.urgency), proof: s(c?.proof), badges: badges && badges.length ? badges : null }
+  return { layout, accent, scenePrompt: s(c?.scenePrompt), kicker: s(c?.kicker), hero: s(c?.hero) || headline, hero2: s(c?.hero2), subline: s(c?.subline), offer: s(c?.offer), offerLabel: s(c?.offerLabel), urgency: s(c?.urgency), proof: s(c?.proof), badges: badges && badges.length ? badges : null }
 }
 
 /** Write the fixed copy + structured creative spec for ONE variant (optionally from a specific message angle). */
@@ -117,9 +121,18 @@ export async function fix(opts: { image: string; brand?: string | null; roast?: 
   const angles: (FixAngle | null)[] = n === 1 ? [null] : FIX_ANGLES.slice(0, n)
   const built = await Promise.all(angles.map(async (angle) => {
     const c = await writeCopy(look, brand, opts.roast, angle)
-    const spec: FbMockSpec = { brand, headline: c.headline, body: c.body, cta: c.cta, was, creative: c.creative }
+    let creative = c.creative
+    let sceneCost = 0
+    // Photographic concept → generate the (text-free) scene, then overlay crisp copy. Fail-safe: fall back to a
+    // typographic layout so the fix never fails on a flaky image call.
+    if (creative.layout === 'scene' && creative.scenePrompt) {
+      const scene = await generateScene(creative.scenePrompt)
+      if (scene) { creative = { ...creative, imageUrl: scene.dataUri }; sceneCost = scene.costUsd }
+      else creative = { ...creative, layout: 'editorial' }
+    }
+    const spec: FbMockSpec = { brand, headline: c.headline, body: c.body, cta: c.cta, was, creative }
     const g = await generate(spec) // renders BOTH the FB mockup + the bare uploadable creative
-    return { variant: { angle: angle?.key ?? 'primary', headline: c.headline, body: c.body, cta: c.cta, imageUrl: g.imageUrl, creativeUrl: g.creativeUrl }, cost: c.costUsd + g.costUsd }
+    return { variant: { angle: angle?.key ?? 'primary', headline: c.headline, body: c.body, cta: c.cta, imageUrl: g.imageUrl, creativeUrl: g.creativeUrl }, cost: c.costUsd + g.costUsd + sceneCost }
   }))
 
   const variants: FixVariant[] = built.map((b) => b.variant)
