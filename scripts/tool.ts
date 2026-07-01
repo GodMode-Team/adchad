@@ -97,7 +97,9 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
       // returns text a human/agent pastes (e.g. into Slack), so attach our REAL adchad.ai link here too — never
       // ship a roast without it (roast() already stripped any URL the model hallucinated, e.g. "chadfix.com/5").
       const url = salesLink(pid)
-      return { ...r, xPost: `${r.xPost}\n${url}`, salesUrl: url }
+      // Drop `raw` (the ~900-char full-model dump — nothing consumes it, and its size + redundancy derailed the
+      // Slack agent into a repetition loop). Keep exactly what skills/roast reads: xPost + email fields + score/verdict.
+      return { xPost: `${r.xPost}\n${url}`, emailSubject: r.emailSubject, emailBody: r.emailBody, score: r.score, verdict: r.verdict, cost: r.cost, salesUrl: url }
     }
     case 'fix': {
       const { fix } = await import('../tools/fix')
