@@ -54,6 +54,10 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
       const { run } = await import('../tools/mention')
       return run()                                // `mention run` — one beat of @adchad ad-summons (always a $5 sell; no comp)
     }
+    case 'prospect': {
+      const { run } = await import('../tools/prospect')
+      return run()                                // `prospect run` — deterministic beat: roast one un-roasted Foreplay ad (free fix while launch armed, else $5)
+    }
     case 'email': {
       const m = await import('../tools/email')
       return sub === 'read' ? m.read() : m.send({ to: S('to'), subject: S('subject'), body: S('body') })
@@ -110,10 +114,10 @@ async function dispatch(name: string, sub: string | undefined, f: Record<string,
     default: {
       // ponytail: skill names share no namespace with this CLI, but the model sees `pnpm -s tool <x>` all over the
       // skills and pattern-completes `tool prospect`. Redirect instead of dead-ending — a wasted round-trip is ~10-140s here.
-      const SKILLS = ['prospect', 'roast', 'engage', 'fulfill', 'report', 'evolve', 'copy', 'synthcheck', 'adchad']
+      const SKILLS = ['roast', 'engage', 'fulfill', 'report', 'evolve', 'copy', 'synthcheck', 'adchad'] // 'prospect' is now a real deterministic tool (case above), not an agent-only skill
       if (SKILLS.includes(name))
-        throw new Error(`'${name}' is a SKILL you're already running, not a tool — don't call \`tool ${name}\`. Follow the skill's steps using the real tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db launch mention`)
-      throw new Error(`unknown tool '${name}'. tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db launch mention`)
+        throw new Error(`'${name}' is a SKILL you're already running, not a tool — don't call \`tool ${name}\`. Follow the skill's steps using the real tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db launch mention prospect`)
+      throw new Error(`unknown tool '${name}'. tools: foreplay enrich vision roast xroast fix xpost xread email creative stripe db launch mention prospect`)
     }
   }
 }
